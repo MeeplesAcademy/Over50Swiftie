@@ -111,11 +111,19 @@ a { color: inherit; }
    RESULTS SECTION
    ============================================================ */
 .results-heading { font-family:'Cinzel',serif; font-size:1.4rem; font-weight:900; margin:2.5rem 0 1rem; text-align:center; letter-spacing:0.03em; }
-.result-section { border-radius:12px; overflow:hidden; margin-bottom:1.5rem; border:2px solid var(--border2); }
-.result-section > summary { list-style:none; cursor:pointer; padding:1rem 1.25rem; font-family:'Cinzel',serif; font-weight:700; font-size:1.15rem; letter-spacing:0.02em; display:flex; align-items:center; justify-content:space-between; -webkit-tap-highlight-color:transparent; }
-.result-section > summary::-webkit-details-marker { display:none; }
-.result-body { background:var(--bg2); padding:1.25rem; }
-.result-body p.hint { font-size:14px; color:var(--text2); margin-bottom:1rem; line-height:1.6; }
+.results-tab-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:1.5rem; }
+.results-tab { cursor:pointer; border-radius:10px; overflow:hidden; border:1.5px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
+.results-tab:hover { transform:translateY(-1px); }
+.results-tab.active { border-width:3px; }
+.results-tab-swatch { height:64px; }
+.results-tab-info { padding:9px 10px 10px; }
+.results-tab-name { font-size:19px; font-weight:700; font-family:'Cinzel',serif; line-height:1.2; }
+.results-tab-sub { font-size:12px; margin-top:5px; font-weight:600; opacity:0.9; }
+
+.results-panel { border:2px solid var(--border2); border-radius:12px; overflow:hidden; background:var(--bg2); margin-bottom:2.5rem; }
+.results-panel-header { padding:0.9rem 1.25rem; font-size:1.1rem; font-weight:700; font-family:'Cinzel',serif; letter-spacing:0.02em; }
+.results-panel-body { padding:1.25rem; }
+.results-panel-body p.hint { font-size:14px; color:var(--text2); margin-bottom:1rem; line-height:1.6; }
 
 .fav-row { display:flex; align-items:center; gap:12px; padding:8px 10px; border-radius:8px; margin-bottom:6px; }
 .fav-rank { font-family:'Cinzel',serif; font-weight:700; font-size:1rem; width:24px; text-align:center; flex-shrink:0; }
@@ -200,47 +208,8 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:13px; color:var(
 
   <div class="results-heading">Your Results</div>
 
-  <details class="result-section" id="favSection" open>
-    <summary style="background:var(--gold-light); color:var(--gold-text);">
-      <span>My Favorite Albums</span>
-      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </summary>
-    <div class="result-body">
-      <p class="hint">All 12 albums, sorted by your live average score, highest to lowest. Ties keep spreadsheet (release) order.</p>
-      <div id="favList"></div>
-    </div>
-  </details>
-
-  <details class="result-section" id="erasSection">
-    <summary id="erasSummary">
-      <span>My Eras Album</span>
-      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </summary>
-    <div class="result-body">
-      <p class="hint">One song checked per album, plus one bonus pick from anywhere &mdash; 13 tracks total.</p>
-      <div class="eras-counter" id="erasCounter"></div>
-      <div class="eras-list" id="erasList"></div>
-    </div>
-  </details>
-
-  <details class="result-section" id="perfectSection">
-    <summary style="background:var(--green5); color:var(--green5-text);">
-      <span>My Perfect Album</span>
-      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </summary>
-    <div class="result-body">
-      <p class="hint">Every song you scored a 5 shows up on the left. Check 13 of them to fill your Perfect Album on the right.</p>
-      <div class="perfect-counter" id="perfectCounter"></div>
-      <div class="perfect-columns">
-        <div class="perfect-pool-col">
-          <div class="perfect-pool" id="perfectPool"></div>
-        </div>
-        <div class="perfect-slots-col">
-          <div id="perfectSlots"></div>
-        </div>
-      </div>
-    </div>
-  </details>
+  <div class="results-tab-row" id="resultsTabRow"></div>
+  <div class="results-panel" id="resultsPanel"></div>
 
 </div>
 
@@ -356,6 +325,7 @@ function scoreColor(v) {
 const STORAGE_KEY = "ts_album_scoring_v1";
 let state = { scores: {}, eras: [], perfect: [] };
 let activeAlbum = 0;
+let activeResultTab = "favorites";
 let dirty = false;
 
 function songId(ai, si) { return ai + "-" + si; }
@@ -486,8 +456,8 @@ function renderPanel() {
       markDirty();
       renderAlbumGrid();
       renderPanel();
-      renderFavorites();
-      renderPerfect();
+      renderResultsTabs();
+      renderResultsPanel();
     });
   });
   const infoIcon = panel.querySelector("#erasInfoIcon");
@@ -507,78 +477,120 @@ function renderPanel() {
       if (cb.checked) { if (!state.eras.includes(id)) state.eras.push(id); }
       else { state.eras = state.eras.filter(x => x !== id); }
       markDirty();
-      renderEras();
+      renderResultsTabs();
+      renderResultsPanel();
     });
   });
 }
 
 /* ============================================================
-   RENDER: MY FAVORITE ALBUMS
+   RENDER: RESULTS TAB ROW (Favorites / Eras / Perfect)
    ============================================================ */
-function renderFavorites() {
-  const list = document.getElementById("favList");
+function erasGradient() {
+  return ALBUMS.map(a => (ALBUM_THEMES[a.name] || { base: "#888" }).base).join(", ");
+}
+function favoritesGradient() {
+  return rankedAlbums().map(r => (ALBUM_THEMES[r.name] || { base: "#888" }).base).join(", ");
+}
+function rankedAlbums() {
   const ranked = ALBUMS.map((a, ai) => ({ ai, name: a.name, avg: albumAverage(ai) }));
-  ranked.sort((a, b) => {
-    const av = a.avg === null ? -1 : a.avg;
-    const bv = b.avg === null ? -1 : b.avg;
-    return bv - av;
-  });
-  list.innerHTML = ranked.map((r, rank) => {
-    const theme = ALBUM_THEMES[r.name] || { base: "#888", light: "#eee", text: "#333" };
-    return '<div class="fav-row" style="background:' + theme.light + ';">' +
-      '<span class="fav-rank" style="color:' + theme.text + ';">' + (rank + 1) + '</span>' +
-      '<span class="fav-swatch" style="background:' + theme.base + ';"></span>' +
-      '<span class="fav-name" style="color:' + theme.text + ';">' + r.name + '</span>' +
-      '<span class="fav-score" style="color:' + theme.text + ';">' + (r.avg === null ? "\u2013" : r.avg.toFixed(2)) + '</span>' +
+  ranked.sort((a, b) => (b.avg === null ? -1 : b.avg) - (a.avg === null ? -1 : a.avg));
+  return ranked;
+}
+function renderResultsTabs() {
+  const row = document.getElementById("resultsTabRow");
+  const topAlbum = rankedAlbums().find(r => r.avg !== null);
+  const tabs = [
+    { id: "favorites", label: "My Favorite Albums", bg: "linear-gradient(90deg, " + favoritesGradient() + ")", text: "#fff",
+      sub: topAlbum ? "Top: " + topAlbum.name : "Score songs to rank albums" },
+    { id: "eras", label: "My Eras Album", bg: "linear-gradient(90deg, " + erasGradient() + ")", text: "#fff",
+      sub: state.eras.length + " / 13 selected" },
+    { id: "perfect", label: "My Perfect Album", bg: "var(--green5)", text: "var(--green5-text)",
+      sub: state.perfect.length + " / 13 selected" }
+  ];
+  row.innerHTML = tabs.map(t => {
+    const isActive = t.id === activeResultTab;
+    return '<div class="results-tab' + (isActive ? " active" : "") + '" data-tab="' + t.id + '" style="border-color:' + ((t.id === "eras" || t.id === "favorites") ? "var(--border2)" : t.bg) + ';">' +
+      '<div class="results-tab-swatch" style="background:' + t.bg + ';"></div>' +
+      '<div class="results-tab-info" style="background:' + (isActive ? t.bg : "var(--bg2)") + '; color:' + (isActive ? t.text : "var(--text)") + ';">' +
+        '<div class="results-tab-name">' + t.label + '</div>' +
+        '<div class="results-tab-sub">' + t.sub + '</div>' +
+      '</div>' +
     '</div>';
   }).join("");
+  row.querySelectorAll("[data-tab]").forEach(el => {
+    el.addEventListener("click", () => {
+      activeResultTab = el.dataset.tab;
+      renderResultsTabs();
+      renderResultsPanel();
+    });
+  });
 }
 
 /* ============================================================
-   RENDER: MY ERAS ALBUM
+   RENDER: SHARED RESULTS PANEL
+   Shows whichever of Favorites / Eras / Perfect is active,
+   the same way the album panel shows whichever album is active.
    ============================================================ */
-function renderEras() {
-  const counterEl = document.getElementById("erasCounter");
-  const listEl = document.getElementById("erasList");
-  const count = state.eras.length;
-  counterEl.textContent = count + " / 13 selected";
-  counterEl.className = "eras-counter" + (count > 13 ? " over" : "");
+function renderResultsPanel() {
+  const panel = document.getElementById("resultsPanel");
 
-  if (count === 0) {
-    listEl.innerHTML = '<p class="hint">Check a song\'s checkbox in the album panel above to add it here.</p>';
-  } else {
-    listEl.innerHTML = state.eras.map(id => {
-      const [ai, si] = id.split("-").map(Number);
-      const album = ALBUMS[ai];
-      const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
+  if (activeResultTab === "favorites") {
+    const ranked = rankedAlbums();
+    const rows = ranked.map((r, rank) => {
+      const theme = ALBUM_THEMES[r.name] || { base: "#888", light: "#eee", text: "#333" };
       return '<div class="fav-row" style="background:' + theme.light + ';">' +
+        '<span class="fav-rank" style="color:' + theme.text + ';">' + (rank + 1) + '</span>' +
         '<span class="fav-swatch" style="background:' + theme.base + ';"></span>' +
-        '<span class="fav-name" style="color:' + theme.text + ';">' + album.songs[si] + '</span>' +
-        '<span class="fav-score" style="color:' + theme.text + ';">' + album.name + '</span>' +
+        '<span class="fav-name" style="color:' + theme.text + ';">' + r.name + '</span>' +
+        '<span class="fav-score" style="color:' + theme.text + ';">' + (r.avg === null ? "\u2013" : r.avg.toFixed(2)) + '</span>' +
       '</div>';
     }).join("");
+    panel.innerHTML =
+      '<div class="results-panel-header" style="background:linear-gradient(90deg, ' + favoritesGradient() + '); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.45);">My Favorite Albums</div>' +
+      '<div class="results-panel-body">' +
+        '<p class="hint">All 12 albums, sorted by your live average score, highest to lowest. Ties keep spreadsheet (release) order.</p>' +
+        rows +
+      '</div>';
+    return;
   }
 
-  if (count > 13) {
-    listEl.innerHTML += '<p class="hint" style="color:#a32d2d; margin-top:0.75rem;">That\'s more than 13 &mdash; uncheck a few to narrow it down.</p>';
+  if (activeResultTab === "eras") {
+    const count = state.eras.length;
+    let rows;
+    if (count === 0) {
+      rows = '<p class="hint">Check a song\'s checkbox in the album panel above to add it here.</p>';
+    } else {
+      const sortedEras = [...state.eras].sort((idA, idB) => {
+        const [aiA, siA] = idA.split("-").map(Number);
+        const [aiB, siB] = idB.split("-").map(Number);
+        return aiA - aiB || siA - siB;
+      });
+      rows = sortedEras.map(id => {
+        const [ai, si] = id.split("-").map(Number);
+        const album = ALBUMS[ai];
+        const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
+        return '<div class="fav-row" style="background:' + theme.light + ';">' +
+          '<span class="fav-swatch" style="background:' + theme.base + ';"></span>' +
+          '<span class="fav-name" style="color:' + theme.text + ';">' + album.songs[si] + '</span>' +
+          '<span class="fav-score" style="color:' + theme.text + ';">' + album.name + '</span>' +
+        '</div>';
+      }).join("");
+      if (count > 13) {
+        rows += '<p class="hint" style="color:#a32d2d; margin-top:0.75rem;">That\'s more than 13 &mdash; uncheck a few to narrow it down.</p>';
+      }
+    }
+    panel.innerHTML =
+      '<div class="results-panel-header" style="background:linear-gradient(90deg, ' + erasGradient() + '); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.45);">My Eras Album</div>' +
+      '<div class="results-panel-body">' +
+        '<p class="hint">One song checked per album, plus one bonus pick from anywhere &mdash; 13 tracks total.</p>' +
+        '<div class="eras-counter' + (count > 13 ? " over" : "") + '">' + count + ' / 13 selected</div>' +
+        rows +
+      '</div>';
+    return;
   }
 
-  // Update tab header with a blended "rainbow" gradient of all 12 theme colors
-  const grad = ALBUMS.map(a => (ALBUM_THEMES[a.name] || { base: "#888" }).base).join(", ");
-  const summary = document.getElementById("erasSummary");
-  summary.style.background = "linear-gradient(90deg, " + grad + ")";
-  summary.style.color = "#fff";
-  summary.style.textShadow = "0 1px 2px rgba(0,0,0,0.45)";
-}
-
-/* ============================================================
-   RENDER: MY PERFECT ALBUM
-   ============================================================ */
-function renderPerfect() {
-  const poolEl = document.getElementById("perfectPool");
-  const slotsEl = document.getElementById("perfectSlots");
-  const counterEl = document.getElementById("perfectCounter");
-
+  // activeResultTab === "perfect"
   const fives = [];
   ALBUMS.forEach((album, ai) => {
     album.songs.forEach((title, si) => {
@@ -586,14 +598,13 @@ function renderPerfect() {
       if (Number(state.scores[id]) === 5) fives.push({ id, title, album: album.name, ai });
     });
   });
-
-  // Drop any perfect-checked ids that no longer qualify (score changed away from 5)
   state.perfect = state.perfect.filter(id => fives.some(f => f.id === id));
 
+  let poolHtml;
   if (fives.length === 0) {
-    poolEl.innerHTML = '<p class="hint">Score some songs a 5 to see them here.</p>';
+    poolHtml = '<p class="hint">Score some songs a 5 to see them here.</p>';
   } else {
-    poolEl.innerHTML = fives.map(f => {
+    poolHtml = fives.map(f => {
       const theme = ALBUM_THEMES[f.album] || { base: "#888", light: "#eee", text: "#333" };
       const checked = state.perfect.includes(f.id);
       return '<div class="song-row">' +
@@ -602,21 +613,9 @@ function renderPerfect() {
         '<span class="fav-score" style="color:' + theme.text + '; font-size:12px;">' + f.album + '</span>' +
       '</div>';
     }).join("");
-    poolEl.querySelectorAll("[data-perfect-id]").forEach(cb => {
-      cb.addEventListener("change", () => {
-        const id = cb.dataset.perfectId;
-        if (cb.checked) { if (!state.perfect.includes(id)) state.perfect.push(id); }
-        else { state.perfect = state.perfect.filter(x => x !== id); }
-        markDirty();
-        renderPerfect();
-      });
-    });
   }
 
   const count = state.perfect.length;
-  counterEl.textContent = count + " / 13 selected";
-  counterEl.className = "perfect-counter" + (count > 13 ? " over" : "");
-
   let slotsHtml = "";
   for (let i = 0; i < 13; i++) {
     const id = state.perfect[i];
@@ -627,10 +626,31 @@ function renderPerfect() {
       slotsHtml += '<div class="perfect-slot empty"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>empty slot</span></div>';
     }
   }
-  slotsEl.innerHTML = slotsHtml;
   if (count > 13) {
-    slotsEl.innerHTML += '<p class="hint" style="color:#a32d2d; margin-top:0.5rem;">More than 13 checked &mdash; only the first 13 slots are shown as filled above; uncheck a few.</p>';
+    slotsHtml += '<p class="hint" style="color:#a32d2d; margin-top:0.5rem;">More than 13 checked &mdash; only the first 13 slots are shown as filled above; uncheck a few.</p>';
   }
+
+  panel.innerHTML =
+    '<div class="results-panel-header" style="background:var(--green5); color:var(--green5-text);">My Perfect Album</div>' +
+    '<div class="results-panel-body">' +
+      '<p class="hint">Every song you scored a 5 shows up on the left. Check 13 of them to fill your Perfect Album on the right.</p>' +
+      '<div class="perfect-counter' + (count > 13 ? " over" : "") + '">' + count + ' / 13 selected</div>' +
+      '<div class="perfect-columns">' +
+        '<div class="perfect-pool-col"><div class="perfect-pool">' + poolHtml + '</div></div>' +
+        '<div class="perfect-slots-col"><div>' + slotsHtml + '</div></div>' +
+      '</div>' +
+    '</div>';
+
+  panel.querySelectorAll("[data-perfect-id]").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const id = cb.dataset.perfectId;
+      if (cb.checked) { if (!state.perfect.includes(id)) state.perfect.push(id); }
+      else { state.perfect = state.perfect.filter(x => x !== id); }
+      markDirty();
+      renderResultsTabs();
+      renderResultsPanel();
+    });
+  });
 }
 
 /* ============================================================
@@ -670,9 +690,8 @@ function importData(file) {
       dirty = false;
       renderAlbumGrid();
       renderPanel();
-      renderFavorites();
-      renderEras();
-      renderPerfect();
+      renderResultsTabs();
+      renderResultsPanel();
       setStatus("Loaded scores from file");
     } catch (e) {
       alert("That file couldn't be read as a scores file. Make sure it's a JSON file downloaded from this page's \"Save scores to file\" button.");
@@ -746,9 +765,8 @@ document.getElementById("btnReset").addEventListener("click", () => {
     dirty = false;
     renderAlbumGrid();
     renderPanel();
-    renderFavorites();
-    renderEras();
-    renderPerfect();
+    renderResultsTabs();
+    renderResultsPanel();
     setStatus("Everything reset");
   }
 });
@@ -756,9 +774,8 @@ document.getElementById("btnReset").addEventListener("click", () => {
 loadState();
 renderAlbumGrid();
 renderPanel();
-renderFavorites();
-renderEras();
-renderPerfect();
+renderResultsTabs();
+renderResultsPanel();
 </script>
 </body>
 </html>
