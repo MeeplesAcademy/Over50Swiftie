@@ -49,10 +49,10 @@ a { color: inherit; }
    INSTRUCTIONS (collapsible)
    ============================================================ */
 .instructions { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; overflow:hidden; margin-bottom:1.5rem; }
-.instructions > summary { list-style:none; cursor:pointer; padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; font-weight:600; font-size:1.05rem; -webkit-tap-highlight-color:transparent; }
+.instructions > summary { list-style:none; cursor:pointer; padding:1.1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; font-family:'Cinzel',serif; font-weight:900; font-size:2rem; letter-spacing:0.02em; -webkit-tap-highlight-color:transparent; }
 .instructions > summary::-webkit-details-marker { display:none; }
 .instructions > summary:hover { background:var(--bg3); }
-.instructions .chevron { width:20px; height:20px; color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
+.instructions .chevron { width:28px; height:28px; color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
 .instructions[open] > summary .chevron { transform:rotate(180deg); }
 .instructions-body { padding:0 1.25rem 1.25rem; border-top:1px solid var(--border); }
 .instructions-body p { font-size:15px; line-height:1.7; color:var(--text2); margin-top:0.9rem; }
@@ -77,7 +77,7 @@ a { color: inherit; }
 .album-tile { cursor:pointer; border-radius:10px; overflow:hidden; border:1.5px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
 .album-tile:hover { transform:translateY(-1px); }
 .album-tile.active { border-width:3px; }
-.album-cover { height:64px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; }
+.album-cover { aspect-ratio:1/1; height:auto; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; }
 .album-tile-info { padding:9px 10px 10px; }
 .album-tile-name { font-size:19px; font-weight:700; line-height:1.2; font-family:'Cinzel',serif; }
 .album-tile-score { font-size:12px; opacity:0.9; margin-top:5px; font-weight:600; }
@@ -92,6 +92,7 @@ a { color: inherit; }
    SHARED SCORING PANEL
    ============================================================ */
 .panel { border:2px solid var(--border2); border-radius:12px; overflow:hidden; background:var(--bg2); margin-bottom:2.5rem; }
+.panel-placeholder { padding:2.5rem 1.25rem; text-align:center; color:var(--muted); font-size:15px; }
 .panel-header { padding:0.9rem 1.25rem; display:flex; align-items:center; justify-content:space-between; font-size:1.1rem; font-weight:700; font-family:'Cinzel',serif; letter-spacing:0.02em; }
 .panel-body { display:flex; gap:1.5rem; padding:1.25rem; flex-wrap:wrap; }
 .panel-cover { width:120px; height:120px; flex-shrink:0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.6rem; }
@@ -110,7 +111,7 @@ a { color: inherit; }
 /* ============================================================
    RESULTS SECTION
    ============================================================ */
-.results-heading { font-family:'Cinzel',serif; font-size:1.4rem; font-weight:900; margin:2.5rem 0 1rem; text-align:center; letter-spacing:0.03em; }
+.results-heading { font-family:'Cinzel',serif; font-size:2.8rem; font-weight:900; margin:2.5rem 0 1rem; text-align:center; letter-spacing:0.03em; }
 .results-tab-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:1.5rem; }
 .results-tab { cursor:pointer; border-radius:10px; overflow:hidden; border:1.5px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
 .results-tab:hover { transform:translateY(-1px); }
@@ -128,8 +129,9 @@ a { color: inherit; }
 .fav-row { display:flex; align-items:center; gap:12px; padding:8px 10px; border-radius:8px; margin-bottom:6px; }
 .fav-rank { font-family:'Cinzel',serif; font-weight:700; font-size:1rem; width:24px; text-align:center; flex-shrink:0; }
 .fav-swatch { width:14px; height:14px; border-radius:4px; flex-shrink:0; }
+.fav-thumb { width:32px; height:32px; border-radius:6px; overflow:hidden; flex-shrink:0; }
 .fav-name { flex:1; font-size:14px; font-weight:600; }
-.fav-score { font-size:13px; font-weight:700; }
+.fav-score { font-size:20px; font-weight:700; font-family:'Cinzel',serif; }
 
 .eras-list, .perfect-pool { display:flex; flex-direction:column; gap:2px; }
 .eras-counter, .perfect-counter { font-size:14px; font-weight:600; margin-bottom:0.75rem; }
@@ -324,7 +326,7 @@ function scoreColor(v) {
    ============================================================ */
 const STORAGE_KEY = "ts_album_scoring_v1";
 let state = { scores: {}, eras: [], perfect: [] };
-let activeAlbum = 0;
+let activeAlbum = null;
 let activeResultTab = "favorites";
 let dirty = false;
 
@@ -396,7 +398,7 @@ function renderAlbumGrid() {
         '<div class="album-tile-score">Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</div>' +
         '<div class="album-tile-status ' + (complete ? "complete" : "incomplete") + '">' + (complete ? "Song Scoring Complete" : "Missing Song Scores") + '</div>' +
       '</div>';
-    tile.addEventListener("click", () => { activeAlbum = ai; renderAlbumGrid(); renderPanel(); });
+    tile.addEventListener("click", () => { activeAlbum = (activeAlbum === ai) ? null : ai; renderAlbumGrid(); renderPanel(); });
     grid.appendChild(tile);
   });
   wireCoverFallbacks(grid);
@@ -406,10 +408,17 @@ function renderAlbumGrid() {
    RENDER: SHARED SCORING PANEL
    ============================================================ */
 function renderPanel() {
+  const panel = document.getElementById("albumPanel");
+
+  if (activeAlbum === null) {
+    panel.style.borderColor = "var(--border2)";
+    panel.innerHTML = '<div class="panel-placeholder">Click an album tab above to start scoring its songs.</div>';
+    return;
+  }
+
   const album = ALBUMS[activeAlbum];
   const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
   const avg = albumAverage(activeAlbum);
-  const panel = document.getElementById("albumPanel");
   panel.style.borderColor = theme.base;
 
   let songsHtml = "";
@@ -431,7 +440,7 @@ function renderPanel() {
   });
 
   panel.innerHTML =
-    '<div class="panel-header" style="background:' + theme.base + '; color:#fff;">' +
+    '<div class="panel-header" id="panelHeaderClose" title="Click to close" style="background:' + theme.base + '; color:#fff; cursor:pointer;">' +
       '<span>' + album.name + '</span><span>Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</span>' +
     '</div>' +
     '<div class="panel-body">' +
@@ -446,6 +455,12 @@ function renderPanel() {
         songsHtml +
       '</div>' +
     '</div>';
+
+  document.getElementById("panelHeaderClose").addEventListener("click", () => {
+    activeAlbum = null;
+    renderAlbumGrid();
+    renderPanel();
+  });
 
   wireCoverFallbacks(panel);
   panel.querySelectorAll("[data-score-id]").forEach(sel => {
@@ -539,9 +554,10 @@ function renderResultsPanel() {
     const ranked = rankedAlbums();
     const rows = ranked.map((r, rank) => {
       const theme = ALBUM_THEMES[r.name] || { base: "#888", light: "#eee", text: "#333" };
+      const album = ALBUMS[r.ai];
       return '<div class="fav-row" style="background:' + theme.light + ';">' +
         '<span class="fav-rank" style="color:' + theme.text + ';">' + (rank + 1) + '</span>' +
-        '<span class="fav-swatch" style="background:' + theme.base + ';"></span>' +
+        '<span class="fav-thumb">' + coverImgTag(r.ai, album, theme, "fav-thumb") + '</span>' +
         '<span class="fav-name" style="color:' + theme.text + ';">' + r.name + '</span>' +
         '<span class="fav-score" style="color:' + theme.text + ';">' + (r.avg === null ? "\u2013" : r.avg.toFixed(2)) + '</span>' +
       '</div>';
@@ -552,6 +568,7 @@ function renderResultsPanel() {
         '<p class="hint">All 12 albums, sorted by your live average score, highest to lowest. Ties keep spreadsheet (release) order.</p>' +
         rows +
       '</div>';
+    wireCoverFallbacks(panel);
     return;
   }
 
