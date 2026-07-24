@@ -129,8 +129,8 @@ a { color: inherit; }
 .fav-row { display:flex; align-items:center; gap:12px; padding:8px 10px; border-radius:8px; margin-bottom:6px; }
 .fav-rank { font-family:'Cinzel',serif; font-weight:700; font-size:1rem; width:24px; text-align:center; flex-shrink:0; }
 .fav-swatch { width:14px; height:14px; border-radius:4px; flex-shrink:0; }
-.fav-thumb { width:32px; height:32px; border-radius:6px; overflow:hidden; flex-shrink:0; }
-.fav-name { flex:1; font-size:14px; font-weight:600; }
+.fav-thumb { width:40px; height:40px; border-radius:6px; overflow:hidden; flex-shrink:0; }
+.fav-name { flex:1; font-size:20px; font-weight:600; }
 .fav-score { font-size:20px; font-weight:700; font-family:'Cinzel',serif; }
 
 .eras-list, .perfect-pool { display:flex; flex-direction:column; gap:2px; }
@@ -261,7 +261,7 @@ const ALBUM_THEMES = {
   "Evermore":                         { base: "#7a5a3a", light: "#ecdfc9", text: "#4a3418" },
   "Midnights":                        { base: "#2f3a63", light: "#dbe0f0", text: "#1c2440" },
   "The Tortured Poets Department":    { base: "#5a5a52", light: "#e6e5df", text: "#333330" },
-  "The Life Of A Showgirl":           { base: "#d4a017", light: "#faedc7", text: "#6b4e0a" }
+  "The Life Of A Showgirl":           { base: "#D73F00", light: "#fbe0d1", text: "#7a2400" }
 };
 
 /* ============================================================
@@ -638,7 +638,8 @@ function renderResultsPanel() {
     const id = state.perfect[i];
     if (id) {
       const f = fives.find(x => x.id === id);
-      slotsHtml += '<div class="perfect-slot"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>' + (f ? f.title + " \u2014 " + f.album : "") + '</span></div>';
+      const theme = f ? (ALBUM_THEMES[f.album] || { light: "var(--bg3)", text: "var(--text)" }) : { light: "var(--bg3)", text: "var(--text)" };
+      slotsHtml += '<div class="perfect-slot" style="background:' + theme.light + '; color:' + theme.text + ';"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>' + (f ? f.title + " \u2014 " + f.album : "") + '</span></div>';
     } else {
       slotsHtml += '<div class="perfect-slot empty"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>empty slot</span></div>';
     }
