@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taylor Swift Song &amp; Album Scoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   BASE / THEME
+   Light page theme (opposite of the dark dungeon-guide pages).
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #faf8f4;
+  --bg2:       #ffffff;
+  --bg3:       #f2efe8;
+  --border:    rgba(20,20,20,0.10);
+  --border2:   rgba(20,20,20,0.18);
+  --text:      #2a2a26;
+  --text2:     #5c5a52;
+  --muted:     #8a8880;
+  --gold:      #b8893a;
+  --gold-light:#f7ecd3;
+  --gold-text: #6b4f14;
+  --green5:    #83E28E;
+  --green5-text:#1f5a26;
+  --shadow:    0 1px 3px rgba(0,0,0,0.06);
+}
+html, body { background: var(--bg); color: var(--text); font-family:'Barlow',sans-serif; }
+body { min-height:100vh; padding-bottom: 4rem; }
+a { color: inherit; }
+
+/* ============================================================
+   PAGE HEADER
+   ============================================================ */
+.page-header { text-align:center; padding:2.5rem 1.5rem 1.5rem; border-bottom:1px solid var(--border); background:var(--bg2); }
+.page-title { font-family:'Cinzel',serif; font-size:clamp(1.6rem,4vw,2.8rem); font-weight:900; letter-spacing:0.03em; color:var(--text); line-height:1.15; }
+.page-sub { font-size:clamp(1rem,2.2vw,1.25rem); font-weight:600; color:var(--text2); letter-spacing:0.03em; text-transform:uppercase; margin-top:0.5rem; }
+.page-note { font-size:15px; color:var(--text2); margin-top:1rem; line-height:1.7; max-width:640px; margin-left:auto; margin-right:auto; }
+
+/* ============================================================
+   SHARED LAYOUT WRAP
+   ============================================================ */
+.wrap { max-width:1200px; margin:0 auto; padding:2rem 1.5rem 3rem; }
+
+/* ============================================================
+   INSTRUCTIONS (collapsible)
+   ============================================================ */
+.instructions { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; overflow:hidden; margin-bottom:1.5rem; }
+.instructions > summary { list-style:none; cursor:pointer; padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; font-weight:600; font-size:1.05rem; -webkit-tap-highlight-color:transparent; }
+.instructions > summary::-webkit-details-marker { display:none; }
+.instructions > summary:hover { background:var(--bg3); }
+.instructions .chevron { width:20px; height:20px; color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
+.instructions[open] > summary .chevron { transform:rotate(180deg); }
+.instructions-body { padding:0 1.25rem 1.25rem; border-top:1px solid var(--border); }
+.instructions-body p { font-size:15px; line-height:1.7; color:var(--text2); margin-top:0.9rem; }
+.instructions-body p strong { color:var(--text); }
+
+/* ============================================================
+   TOOLBAR (save / export / import / print)
+   ============================================================ */
+.toolbar { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; margin-bottom:1.5rem; }
+.btn { font-family:'Barlow',sans-serif; font-size:14px; font-weight:600; letter-spacing:0.02em; padding:9px 16px; border-radius:8px; border:1.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; transition:background 0.15s, border-color 0.15s; }
+.btn:hover { background:var(--bg3); border-color:var(--muted); }
+.btn-primary { background:var(--text); color:#fff; border-color:var(--text); }
+.btn-primary:hover { background:#000; }
+.file-label { display:inline-flex; }
+.file-label input { display:none; }
+.toolbar-status { font-size:13px; color:var(--muted); margin-left:auto; }
+
+/* ============================================================
+   ALBUM TAB GRID (always visible)
+   ============================================================ */
+.album-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; margin-bottom:1.5rem; }
+.album-tile { cursor:pointer; border-radius:10px; overflow:hidden; border:1.5px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
+.album-tile:hover { transform:translateY(-1px); }
+.album-tile.active { border-width:3px; }
+.album-cover { height:64px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; }
+.album-tile-info { padding:9px 10px 10px; }
+.album-tile-name { font-size:19px; font-weight:700; line-height:1.2; font-family:'Cinzel',serif; }
+.album-tile-score { font-size:12px; opacity:0.9; margin-top:5px; font-weight:600; }
+/* PLACEHOLDER STATUS COLORS -- replace once you've picked your palette */
+.album-tile-status { font-size:11px; margin-top:3px; font-weight:600; }
+.album-tile-status.incomplete { color:#a35c1d; }
+.album-tile-status.complete { color:#2e7d32; }
+.album-tile-info.active .album-tile-status.incomplete { color:#ffd9a8; }
+.album-tile-info.active .album-tile-status.complete { color:#c7f0c2; }
+
+/* ============================================================
+   SHARED SCORING PANEL
+   ============================================================ */
+.panel { border:2px solid var(--border2); border-radius:12px; overflow:hidden; background:var(--bg2); margin-bottom:2.5rem; }
+.panel-header { padding:0.9rem 1.25rem; display:flex; align-items:center; justify-content:space-between; font-size:1.1rem; font-weight:700; font-family:'Cinzel',serif; letter-spacing:0.02em; }
+.panel-body { display:flex; gap:1.5rem; padding:1.25rem; flex-wrap:wrap; }
+.panel-cover { width:120px; height:120px; flex-shrink:0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.6rem; }
+.panel-songs { flex:1; min-width:260px; display:flex; flex-direction:column; gap:2px; }
+.songs-col-header { display:flex; align-items:center; gap:10px; padding:0 4px 6px; }
+.info-icon-wrap { position:relative; width:16px; flex-shrink:0; }
+.info-icon { display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:var(--muted); color:#fff; font-size:11px; font-weight:700; cursor:pointer; user-select:none; }
+.info-tooltip { display:none; position:absolute; top:22px; left:0; z-index:5; width:220px; background:var(--text); color:#fff; font-size:12px; font-weight:500; line-height:1.5; padding:8px 10px; border-radius:8px; }
+.info-icon-wrap:hover .info-tooltip, .info-icon-wrap.show .info-tooltip { display:block; }
+.song-row { display:flex; align-items:center; gap:10px; padding:6px 4px; border-bottom:1px solid var(--border); }
+.song-row input[type="checkbox"] { flex-shrink:0; width:16px; height:16px; cursor:pointer; }
+.song-title { flex:1; font-size:14px; padding:4px 9px; border-radius:6px; background:var(--bg3); color:var(--text); }
+.song-title.scored-0 { text-decoration:line-through; opacity:0.7; }
+.song-select { font-family:'Barlow',sans-serif; font-size:13px; font-weight:600; padding:4px 6px; border-radius:6px; border:1.5px solid var(--border2); background:var(--bg3); color:var(--text); min-width:52px; text-align:center; cursor:pointer; }
+
+/* ============================================================
+   RESULTS SECTION
+   ============================================================ */
+.results-heading { font-family:'Cinzel',serif; font-size:1.4rem; font-weight:900; margin:2.5rem 0 1rem; text-align:center; letter-spacing:0.03em; }
+.result-section { border-radius:12px; overflow:hidden; margin-bottom:1.5rem; border:2px solid var(--border2); }
+.result-section > summary { list-style:none; cursor:pointer; padding:1rem 1.25rem; font-family:'Cinzel',serif; font-weight:700; font-size:1.15rem; letter-spacing:0.02em; display:flex; align-items:center; justify-content:space-between; -webkit-tap-highlight-color:transparent; }
+.result-section > summary::-webkit-details-marker { display:none; }
+.result-body { background:var(--bg2); padding:1.25rem; }
+.result-body p.hint { font-size:14px; color:var(--text2); margin-bottom:1rem; line-height:1.6; }
+
+.fav-row { display:flex; align-items:center; gap:12px; padding:8px 10px; border-radius:8px; margin-bottom:6px; }
+.fav-rank { font-family:'Cinzel',serif; font-weight:700; font-size:1rem; width:24px; text-align:center; flex-shrink:0; }
+.fav-swatch { width:14px; height:14px; border-radius:4px; flex-shrink:0; }
+.fav-name { flex:1; font-size:14px; font-weight:600; }
+.fav-score { font-size:13px; font-weight:700; }
+
+.eras-list, .perfect-pool { display:flex; flex-direction:column; gap:2px; }
+.eras-counter, .perfect-counter { font-size:14px; font-weight:600; margin-bottom:0.75rem; }
+.eras-counter.over, .perfect-counter.over { color:#a32d2d; }
+.perfect-columns { display:flex; gap:1.5rem; flex-wrap:wrap; }
+.perfect-pool-col { flex:1; min-width:260px; }
+.perfect-slots-col { flex:1; min-width:220px; }
+.perfect-slot { display:flex; align-items:center; gap:8px; padding:6px 9px; border-radius:6px; background:var(--bg3); margin-bottom:4px; font-size:13px; }
+.perfect-slot-num { font-weight:700; width:18px; flex-shrink:0; }
+.perfect-slot.empty { color:var(--muted); font-style:italic; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:13px; color:var(--muted); line-height:1.8; }
+
+/* ============================================================
+   PRINT / PDF SNAPSHOT
+   Everything is hidden on print except #printSnapshot,
+   which JS populates right before printing.
+   ============================================================ */
+#printSnapshot { display:none; }
+@media print {
+  body * { visibility: hidden; }
+  #printSnapshot, #printSnapshot * { visibility: visible; }
+  #printSnapshot { display:block; position:absolute; top:0; left:0; width:100%; padding:1rem; }
+  .print-section { margin-bottom: 1.5rem; page-break-inside: avoid; }
+  .print-h1 { font-size: 22px; font-weight:700; margin-bottom: 4px; }
+  .print-h2 { font-size: 16px; font-weight:700; margin: 14px 0 6px; border-bottom: 1px solid #ccc; padding-bottom:3px; }
+  .print-row { font-size: 13px; padding: 2px 0; }
+}
+
+@media (max-width: 640px) {
+  .wrap { padding:1.5rem 1rem 2rem; }
+  .panel-body { padding:1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-title">Taylor Swift Song &amp; Album Scoring</div>
+  <div class="page-sub">Score every song &middot; rank every album &middot; build your dream playlists</div>
+  <div class="page-note">Score each song 0&ndash;5. Album averages update live, checkboxes below feed your Eras Album and Perfect Album lists at the bottom of the page.</div>
+</div>
+
+<div class="wrap">
+
+  <details class="instructions">
+    <summary>
+      <span>How this works</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="instructions-body">
+      <p><strong>1. Score songs.</strong> Click an album tile below to open its song list in the panel underneath the grid. Give each song a score from 0&ndash;5. The song and its score change color as you go &mdash; that's your running conditional formatting.</p>
+      <p><strong>2. Watch albums rank themselves.</strong> Each tile shows a live average of that album's scored songs. The "My Favorite Albums" section below sorts all 12 highest to lowest, automatically.</p>
+      <p><strong>3. Build your Eras Album.</strong> Check the box next to one song per album (plus one bonus pick from anywhere) to assemble a 13-track "Eras" playlist in the results section.</p>
+      <p><strong>4. Build your Perfect Album.</strong> Every song you score a 5 shows up in the Perfect Album pool. Check 13 of them to fill your Perfect Album's 13 track slots.</p>
+      <p><strong>5. Save your progress.</strong> Your scores auto-save in this browser as you go. Use <em>Save scores to file</em> to download a backup you can re-upload later (even on a different device or browser), and <em>Save PDF snapshot</em> to keep a dated printable copy of your results.</p>
+    </div>
+  </details>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="btnExport"><i></i>Save scores to file</button>
+    <label class="btn file-label" id="btnImport">Load scores from file
+      <input type="file" id="importFile" accept="application/json">
+    </label>
+    <button class="btn" id="btnPrint">Save PDF snapshot</button>
+    <button class="btn" id="btnReset">Reset all</button>
+    <span class="toolbar-status" id="toolbarStatus"></span>
+  </div>
+
+  <div class="album-grid" id="albumGrid"></div>
+
+  <div class="panel" id="albumPanel"></div>
+
+  <div class="results-heading">Your Results</div>
+
+  <details class="result-section" id="favSection" open>
+    <summary style="background:var(--gold-light); color:var(--gold-text);">
+      <span>My Favorite Albums</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="result-body">
+      <p class="hint">All 12 albums, sorted by your live average score, highest to lowest. Ties keep spreadsheet (release) order.</p>
+      <div id="favList"></div>
+    </div>
+  </details>
+
+  <details class="result-section" id="erasSection">
+    <summary id="erasSummary">
+      <span>My Eras Album</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="result-body">
+      <p class="hint">One song checked per album, plus one bonus pick from anywhere &mdash; 13 tracks total.</p>
+      <div class="eras-counter" id="erasCounter"></div>
+      <div class="eras-list" id="erasList"></div>
+    </div>
+  </details>
+
+  <details class="result-section" id="perfectSection">
+    <summary style="background:var(--green5); color:var(--green5-text);">
+      <span>My Perfect Album</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="result-body">
+      <p class="hint">Every song you scored a 5 shows up on the left. Check 13 of them to fill your Perfect Album on the right.</p>
+      <div class="perfect-counter" id="perfectCounter"></div>
+      <div class="perfect-columns">
+        <div class="perfect-pool-col">
+          <div class="perfect-pool" id="perfectPool"></div>
+        </div>
+        <div class="perfect-slots-col">
+          <div id="perfectSlots"></div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+</div>
+
+<footer>
+  Built for scoring 12 albums (and counting). Your scores never leave your browser unless you choose to export them.
+</footer>
+
+<div id="printSnapshot"></div>
+
+<script>
+/* ============================================================
+   ALBUM DATA
+   Pulled directly from the "SONG SCORING" tab of the spreadsheet,
+   in release order. To add a future album, add one more object
+   to this array (and a matching entry in ALBUM_THEMES below).
+   ============================================================ */
+const ALBUMS = [
+  { num: 1, name: "Taylor Swift", songs: ["Tim McGraw", "Picture to Burn", "Teardrops on My Guitar", "A Place in This World", "Cold as You", "The Outside", "Tied Together with a Smile", "Stay Beautiful", "Should've Said No", "Mary's Song (Oh My My My)", "Our Song", "I'm Only Me When I'm with You", "Invisible", "A Perfectly Good Heart"] },
+  { num: 2, name: "Fearless (TV)", songs: ["Fearless", "Fifteen", "Love Story", "Hey Stephen", "White Horse", "You Belong with Me", "Breathe (feat. Colbie Caillat)", "Tell Me Why", "You're Not Sorry", "The Way I Loved You", "Forever & Always", "The Best Day", "Change", "Jump Then Fall", "Untouchable", "Forever & Always (Piano Version)", "Come In with the Rain", "Superstar", "The Other Side of the Door", "Today Was a Fairytale", "You All Over Me (feat. Maren Morris)", "Mr. Perfectly Fine", "We Were Happy", "That's When (feat. Keith Urban)", "Don't You", "Bye Bye Baby"] },
+  { num: 3, name: "Speak Now (TV)", songs: ["Mine", "Sparks Fly", "Back to December", "Speak Now", "Dear John", "Mean", "The Story of Us", "Never Grow Up", "Enchanted", "Better than Revenge", "Innocent", "Haunted", "Last Kiss", "Long Live", "Ours", "Superman", "Electric Touch (feat. Fall Out Boy) (From the Vault)", "When Emma Falls in Love (From the Vault)", "I Can See You (From the Vault)", "Castles Crumbling (feat. Hayley Williams) (From the Vault)", "Foolish One (From the Vault)", "Timeless (From the Vault)"] },
+  { num: 4, name: "Red (TV)", songs: ["State of Grace", "Red", "Treacherous", "I Knew You Were Trouble", "All Too Well", "22", "I Almost Do", "We Are Never Ever Getting Back Together", "Stay Stay Stay", "The Last Time (feat. Gary Lightbody of Snow Patrol)", "Holy Ground", "Sad Beautiful Tragic", "The Lucky One", "Everything Has Changed (feat. Ed Sheeran)", "Starlight", "Begin Again", "The Moment I Knew", "Come Back... Be Here", "Girl at Home", "State of Grace (acoustic version)", "Ronan", "Better Man (From the Vault)", "Nothing New (feat. Phoebe Bridgers) (From the Vault)", "Babe (From the Vault)", "Message in a Bottle (From the Vault)", "I Bet You Think About Me (feat. Chris Stapleton) (From the Vault)", "Forever Winter (From the Vault)", "Run (feat. Ed Sheeran) (From the Vault)", "The Very First Night (From the Vault)", "All Too Well (10 Minute Version) (From the Vault)"] },
+  { num: 5, name: "1989 (TV)", songs: ["Welcome to New York", "Blank Space", "Style", "Out of the Woods", "All You Had to Do Was Stay", "Shake It Off", "I Wish You Would", "Bad Blood", "Wildest Dreams", "How You Get the Girl", "This Love", "I Know Places", "Clean", "Wonderland", "You Are in Love", "New Romantics", "'Slut!' (From the Vault)", "Say Don't Go (From the Vault)", "Now That We Don't Talk (From the Vault)", "Suburban Legends (From the Vault)", "Is It Over Now? (From the Vault)", "Sweeter than Fiction", "Bad Blood (feat. Kendrick Lamar)"] },
+  { num: 6, name: "reputation", songs: ["\u2026Ready for It?", "End Game (feat. Ed Sheeran and Future)", "I Did Something Bad", "Don't Blame Me", "Delicate", "Look What You Made Me Do", "So It Goes...", "Gorgeous", "Getaway Car", "King of My Heart", "Dancing with Our Hands Tied", "Dress", "This Is Why We Can't Have Nice Things", "Call It What You Want", "New Year's Day"] },
+  { num: 7, name: "Lover", songs: ["I Forgot That You Existed", "Cruel Summer", "Lover", "The Man", "The Archer", "I Think He Knows", "Miss Americana & the Heartbreak Prince", "Paper Rings", "Cornelia Street", "Death by a Thousand Cuts", "London Boy", "Soon You'll Get Better (feat. the Chicks)", "False God", "You Need to Calm Down", "Afterglow", "Me! (feat. Brendon Urie of Panic! at the Disco)", "It's Nice to Have a Friend", "Daylight", "I Forgot That You Existed (Piano/Vocal)", "Lover (Piano/Vocal)"] },
+  { num: 8, name: "folklore", songs: ["The 1", "Cardigan", "The Last Great American Dynasty", "Exile (feat. Bon Iver)", "My Tears Ricochet", "Mirrorball", "Seven", "August", "This Is Me Trying", "Illicit Affairs", "Invisible String", "Mad Woman", "Epiphany", "Betty", "Peace", "Hoax", "The Lakes"] },
+  { num: 9, name: "Evermore", songs: ["Willow", "Champagne Problems", "Gold Rush", "'Tis the Damn Season", "Tolerate It", "No Body, No Crime (feat. Haim)", "Happiness", "Dorothea", "Coney Island (feat. the National)", "Ivy", "Cowboy like Me", "Long Story Short", "Marjorie", "Closure", "Evermore (feat. Bon Iver)", "Right Where You Left Me", "It's Time to Go"] },
+  { num: 10, name: "Midnights", songs: ["Lavender Haze", "Maroon", "Anti-Hero", "Snow on the Beach (feat. Lana Del Rey)", "You're on Your Own, Kid", "Midnight Rain", "Question...?", "Vigilante Shit", "Bejeweled", "Labyrinth", "Karma", "Sweet Nothing", "Mastermind", "The Great War", "Bigger Than the Whole Sky", "Paris", "High Infidelity", "Glitch", "Would've, Could've, Should've", "Dear Reader", "Hits Different", "Snow on the Beach (feat. More Lana Del Rey)", "Karma (feat. Ice Spice)", "You're Losing Me (From the Vault)", "You're On Your Own Kid (strings remix)", "Sweet Nothing (Piano remix)"] },
+  { num: 11, name: "The Tortured Poets Department", songs: ["Fortnight (feat. Post Malone)", "The Tortured Poets Department", "My Boy Only Breaks His Favorite Toys", "Down Bad", "So Long, London", "But Daddy I Love Him", "Fresh Out the Slammer", "Florida!!! (feat. Florence and the Machine)", "Guilty as Sin?", "Who's Afraid of Little Old Me?", "I Can Fix Him (No Really I Can)", "Loml", "I Can Do It with a Broken Heart", "The Smallest Man Who Ever Lived", "The Alchemy", "Clara Bow", "The Black Dog", "Imgonnagetyouback", "The Albatross", "Chloe or Sam or Sophia or Marcus", "How Did It End?", "So High School", "I Hate It Here", "Thank You Aimee", "I Look in People's Windows", "The Prophecy", "Cassandra", "Peter", "The Bolter", "Robin", "The Manuscript"] },
+  { num: 12, name: "The Life Of A Showgirl", songs: ["The Fate of Ophelia", "Elizabeth Taylor", "Opalite", "Father Figure", "Eldest Daughter", "Ruin the Friendship", "Actually Romantic", "Wi$h Li$t", "Wood", "CANCELLED!", "Honey", "The Life of a Showgirl (feat. Sabrina Carpenter)"] }
+];
+
+/* ============================================================
+   ALBUM THEME COLORS  <-- REPLACE THESE WITH YOUR OWN HEX CODES
+   base = tab/header color, light = cover/background tint,
+   text = dark readable text color for use on the light tint.
+   Keyed by album name so you can swap them freely.
+   ============================================================ */
+const ALBUM_THEMES = {
+  "Taylor Swift":                     { base: "#3f6b4a", light: "#e3ecdf", text: "#274430" },
+  "Fearless (TV)":                    { base: "#c9a24a", light: "#f7ecd3", text: "#6b4f14" },
+  "Speak Now (TV)":                   { base: "#7a3f8f", light: "#ecdcf2", text: "#4a2258" },
+  "Red (TV)":                         { base: "#8f2a2a", light: "#f5dcdc", text: "#5c1a1a" },
+  "1989 (TV)":                        { base: "#4a90c9", light: "#dceefa", text: "#1e4d70" },
+  "reputation":                       { base: "#2b2b2b", light: "#dcdcdc", text: "#1a1a1a" },
+  "Lover":                            { base: "#e78bb0", light: "#fce6ef", text: "#8a3a5a" },
+  "folklore":                         { base: "#8a8a80", light: "#e8e7e2", text: "#4d4d46" },
+  "Evermore":                         { base: "#7a5a3a", light: "#ecdfc9", text: "#4a3418" },
+  "Midnights":                        { base: "#2f3a63", light: "#dbe0f0", text: "#1c2440" },
+  "The Tortured Poets Department":    { base: "#5a5a52", light: "#e6e5df", text: "#333330" },
+  "The Life Of A Showgirl":           { base: "#d4a017", light: "#faedc7", text: "#6b4e0a" }
+};
+
+/* ============================================================
+   COVER ART
+   Drop cover images in a folder next to this HTML file (adjust
+   COVER_FOLDER below to match your actual folder name/path).
+   Filenames just need to START with the two-digit album number,
+   e.g. "01-Debut.webp", "02-Fearless.webp" -- anything after the
+   dash is up to you. If a file is missing or fails to load, the
+   tile falls back to the plain "TS#" placeholder automatically.
+   ============================================================ */
+const COVER_FOLDER = "Images/";
+const COVER_FILES = {
+  1: "01-Debut.webp",
+  2: "02-Fearless.webp",
+  3: "03-Speak_Now.webp",
+  4: "04-Red.webp",
+  5: "05-1989.webp",
+  6: "06-Reputation.webp",
+  7: "07-Lover.webp",
+  8: "08-folklore.webp",
+  9: "09-Evermore.webp",
+  10: "10-Midnights.webp",
+  11: "11-The_Tortured_Poets_Department.webp",
+  12: "12-The_Life_of_a_Showgirl.webp"
+};
+function coverImgTag(ai, album, theme, sizeClass) {
+  const file = COVER_FILES[album.num];
+  if (!file) return coverFallbackHtml(album, theme);
+  return '<img src="' + COVER_FOLDER + file + '" alt="' + album.name + ' cover art" data-cover-album="' + album.num + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
+}
+function coverFallbackHtml(album, theme) {
+  return '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:' + theme.light + ';color:' + theme.text + ';font-family:\'Cinzel\',serif;font-weight:700;">TS' + album.num + '</div>';
+}
+function wireCoverFallbacks(container) {
+  container.querySelectorAll("img[data-cover-album]").forEach(img => {
+    img.addEventListener("error", () => {
+      const num = Number(img.dataset.coverAlbum);
+      const album = ALBUMS.find(a => a.num === num);
+      const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
+      img.outerHTML = coverFallbackHtml(album, theme);
+    }, { once: true });
+  });
+}
+const SCORE_VALUES = [0, 1, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+function scoreColor(v) {
+  if (v === null || v === undefined || v === "") return { bg: "var(--bg3)", text: "var(--text)" };
+  const n = Number(v);
+  if (n <= 1)  return { bg: "#D9D9D9", text: "#555555" };
+  if (n <= 2.5) return { bg: "#FBE2D5", text: "#8a4a1f" };
+  if (n <= 3.5) return { bg: "#F2CEEF", text: "#7a3a75" };
+  if (n === 4)  return { bg: "#94DCF8", text: "#0c4a63" };
+  if (n === 4.5) return { bg: "#B5E6A2", text: "#2e5a1a" };
+  return { bg: "#83E28E", text: "#1f5a26" };
+}
+
+/* ============================================================
+   STATE
+   scores:   { "albumIndex-songIndex": number }
+   eras:     Set of "albumIndex-songIndex" strings (checked for Eras Album)
+   perfect:  Set of "albumIndex-songIndex" strings (checked for Perfect Album)
+   ============================================================ */
+const STORAGE_KEY = "ts_album_scoring_v1";
+let state = { scores: {}, eras: [], perfect: [] };
+let activeAlbum = 0;
+let dirty = false;
+
+function songId(ai, si) { return ai + "-" + si; }
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state.scores = parsed.scores || {};
+      state.eras = parsed.eras || [];
+      state.perfect = parsed.perfect || [];
+    }
+  } catch (e) { console.warn("Could not load saved scores:", e); }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    setStatus("Saved to this browser " + new Date().toLocaleTimeString());
+  } catch (e) { console.warn("Could not save scores:", e); }
+}
+
+function setStatus(msg) {
+  document.getElementById("toolbarStatus").textContent = msg;
+}
+
+function markDirty() {
+  dirty = true;
+  saveState();
+}
+
+/* ============================================================
+   ALBUM AVERAGE
+   ============================================================ */
+function albumAverage(ai) {
+  const album = ALBUMS[ai];
+  let sum = 0, count = 0;
+  album.songs.forEach((_, si) => {
+    const v = state.scores[songId(ai, si)];
+    if (v !== undefined && v !== null && v !== "") { sum += Number(v); count++; }
+  });
+  return count > 0 ? sum / count : null;
+}
+
+/* ============================================================
+   RENDER: ALBUM GRID
+   ============================================================ */
+function renderAlbumGrid() {
+  const grid = document.getElementById("albumGrid");
+  grid.innerHTML = "";
+  ALBUMS.forEach((album, ai) => {
+    const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
+    const avg = albumAverage(ai);
+    const isActive = ai === activeAlbum;
+    const tile = document.createElement("div");
+    tile.className = "album-tile" + (isActive ? " active" : "");
+    const scoredCount = album.songs.filter((_, si) => {
+      const v = state.scores[songId(ai, si)];
+      return v !== undefined && v !== null && v !== "";
+    }).length;
+    const complete = scoredCount === album.songs.length;
+    tile.style.borderColor = theme.base;
+    tile.innerHTML =
+      '<div class="album-cover" style="background:' + theme.light + ';color:' + theme.text + ';padding:0;overflow:hidden;">' + coverImgTag(ai, album, theme, "tile-cover") + '</div>' +
+      '<div class="album-tile-info' + (isActive ? " active" : "") + '" style="background:' + (isActive ? theme.base : "var(--bg2)") + '; color:' + (isActive ? "#fff" : theme.text) + ';">' +
+        '<div class="album-tile-name">' + album.name + '</div>' +
+        '<div class="album-tile-score">Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</div>' +
+        '<div class="album-tile-status ' + (complete ? "complete" : "incomplete") + '">' + (complete ? "Song Scoring Complete" : "Missing Song Scores") + '</div>' +
+      '</div>';
+    tile.addEventListener("click", () => { activeAlbum = ai; renderAlbumGrid(); renderPanel(); });
+    grid.appendChild(tile);
+  });
+  wireCoverFallbacks(grid);
+}
+
+/* ============================================================
+   RENDER: SHARED SCORING PANEL
+   ============================================================ */
+function renderPanel() {
+  const album = ALBUMS[activeAlbum];
+  const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
+  const avg = albumAverage(activeAlbum);
+  const panel = document.getElementById("albumPanel");
+  panel.style.borderColor = theme.base;
+
+  let songsHtml = "";
+  album.songs.forEach((title, si) => {
+    const id = songId(activeAlbum, si);
+    const v = state.scores[id];
+    const c = scoreColor(v);
+    const erasChecked = state.eras.includes(id);
+    const scored0 = v === 0 || v === "0";
+    songsHtml +=
+      '<div class="song-row">' +
+        '<input type="checkbox" title="Add to Eras Album" data-eras-id="' + id + '" ' + (erasChecked ? "checked" : "") + '>' +
+        '<span class="song-title' + (scored0 ? " scored-0" : "") + '" style="background:' + c.bg + '; color:' + c.text + ';">' + title + '</span>' +
+        '<select class="song-select" data-score-id="' + id + '" style="background:' + c.bg + '; color:' + c.text + ';">' +
+          '<option value=""' + (v === undefined || v === null || v === "" ? " selected" : "") + '>\u2013</option>' +
+          SCORE_VALUES.map(sv => '<option value="' + sv + '"' + (Number(v) === sv ? " selected" : "") + '>' + sv + '</option>').join("") +
+        '</select>' +
+      '</div>';
+  });
+
+  panel.innerHTML =
+    '<div class="panel-header" style="background:' + theme.base + '; color:#fff;">' +
+      '<span>' + album.name + '</span><span>Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</span>' +
+    '</div>' +
+    '<div class="panel-body">' +
+      '<div class="panel-cover" style="background:' + theme.light + '; color:' + theme.text + '; padding:0; overflow:hidden;">' + coverImgTag(activeAlbum, album, theme, "panel-cover") + '</div>' +
+      '<div class="panel-songs">' +
+        '<div class="songs-col-header">' +
+          '<div class="info-icon-wrap" id="erasInfoIcon">' +
+            '<div class="info-icon" tabindex="0" role="button" aria-label="What is this checkbox for?">?</div>' +
+            '<div class="info-tooltip">Check one song per album to add it to your Eras Album. You can also add one bonus pick from anywhere.</div>' +
+          '</div>' +
+        '</div>' +
+        songsHtml +
+      '</div>' +
+    '</div>';
+
+  wireCoverFallbacks(panel);
+  panel.querySelectorAll("[data-score-id]").forEach(sel => {
+    sel.addEventListener("change", () => {
+      const id = sel.dataset.scoreId;
+      if (sel.value === "") delete state.scores[id];
+      else state.scores[id] = Number(sel.value);
+      markDirty();
+      renderAlbumGrid();
+      renderPanel();
+      renderFavorites();
+      renderPerfect();
+    });
+  });
+  const infoIcon = panel.querySelector("#erasInfoIcon");
+  if (infoIcon) {
+    const toggle = (e) => { e.stopPropagation(); infoIcon.classList.toggle("show"); };
+    infoIcon.querySelector(".info-icon").addEventListener("click", toggle);
+    infoIcon.querySelector(".info-icon").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(e); }
+    });
+    document.addEventListener("click", (e) => {
+      if (!infoIcon.contains(e.target)) infoIcon.classList.remove("show");
+    }, { once: true });
+  }
+  panel.querySelectorAll("[data-eras-id]").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const id = cb.dataset.erasId;
+      if (cb.checked) { if (!state.eras.includes(id)) state.eras.push(id); }
+      else { state.eras = state.eras.filter(x => x !== id); }
+      markDirty();
+      renderEras();
+    });
+  });
+}
+
+/* ============================================================
+   RENDER: MY FAVORITE ALBUMS
+   ============================================================ */
+function renderFavorites() {
+  const list = document.getElementById("favList");
+  const ranked = ALBUMS.map((a, ai) => ({ ai, name: a.name, avg: albumAverage(ai) }));
+  ranked.sort((a, b) => {
+    const av = a.avg === null ? -1 : a.avg;
+    const bv = b.avg === null ? -1 : b.avg;
+    return bv - av;
+  });
+  list.innerHTML = ranked.map((r, rank) => {
+    const theme = ALBUM_THEMES[r.name] || { base: "#888", light: "#eee", text: "#333" };
+    return '<div class="fav-row" style="background:' + theme.light + ';">' +
+      '<span class="fav-rank" style="color:' + theme.text + ';">' + (rank + 1) + '</span>' +
+      '<span class="fav-swatch" style="background:' + theme.base + ';"></span>' +
+      '<span class="fav-name" style="color:' + theme.text + ';">' + r.name + '</span>' +
+      '<span class="fav-score" style="color:' + theme.text + ';">' + (r.avg === null ? "\u2013" : r.avg.toFixed(2)) + '</span>' +
+    '</div>';
+  }).join("");
+}
+
+/* ============================================================
+   RENDER: MY ERAS ALBUM
+   ============================================================ */
+function renderEras() {
+  const counterEl = document.getElementById("erasCounter");
+  const listEl = document.getElementById("erasList");
+  const count = state.eras.length;
+  counterEl.textContent = count + " / 13 selected";
+  counterEl.className = "eras-counter" + (count > 13 ? " over" : "");
+
+  if (count === 0) {
+    listEl.innerHTML = '<p class="hint">Check a song\'s checkbox in the album panel above to add it here.</p>';
+  } else {
+    listEl.innerHTML = state.eras.map(id => {
+      const [ai, si] = id.split("-").map(Number);
+      const album = ALBUMS[ai];
+      const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
+      return '<div class="fav-row" style="background:' + theme.light + ';">' +
+        '<span class="fav-swatch" style="background:' + theme.base + ';"></span>' +
+        '<span class="fav-name" style="color:' + theme.text + ';">' + album.songs[si] + '</span>' +
+        '<span class="fav-score" style="color:' + theme.text + ';">' + album.name + '</span>' +
+      '</div>';
+    }).join("");
+  }
+
+  if (count > 13) {
+    listEl.innerHTML += '<p class="hint" style="color:#a32d2d; margin-top:0.75rem;">That\'s more than 13 &mdash; uncheck a few to narrow it down.</p>';
+  }
+
+  // Update tab header with a blended "rainbow" gradient of all 12 theme colors
+  const grad = ALBUMS.map(a => (ALBUM_THEMES[a.name] || { base: "#888" }).base).join(", ");
+  const summary = document.getElementById("erasSummary");
+  summary.style.background = "linear-gradient(90deg, " + grad + ")";
+  summary.style.color = "#fff";
+  summary.style.textShadow = "0 1px 2px rgba(0,0,0,0.45)";
+}
+
+/* ============================================================
+   RENDER: MY PERFECT ALBUM
+   ============================================================ */
+function renderPerfect() {
+  const poolEl = document.getElementById("perfectPool");
+  const slotsEl = document.getElementById("perfectSlots");
+  const counterEl = document.getElementById("perfectCounter");
+
+  const fives = [];
+  ALBUMS.forEach((album, ai) => {
+    album.songs.forEach((title, si) => {
+      const id = songId(ai, si);
+      if (Number(state.scores[id]) === 5) fives.push({ id, title, album: album.name, ai });
+    });
+  });
+
+  // Drop any perfect-checked ids that no longer qualify (score changed away from 5)
+  state.perfect = state.perfect.filter(id => fives.some(f => f.id === id));
+
+  if (fives.length === 0) {
+    poolEl.innerHTML = '<p class="hint">Score some songs a 5 to see them here.</p>';
+  } else {
+    poolEl.innerHTML = fives.map(f => {
+      const theme = ALBUM_THEMES[f.album] || { base: "#888", light: "#eee", text: "#333" };
+      const checked = state.perfect.includes(f.id);
+      return '<div class="song-row">' +
+        '<input type="checkbox" data-perfect-id="' + f.id + '" ' + (checked ? "checked" : "") + '>' +
+        '<span class="song-title" style="background:' + theme.light + '; color:' + theme.text + ';">' + f.title + '</span>' +
+        '<span class="fav-score" style="color:' + theme.text + '; font-size:12px;">' + f.album + '</span>' +
+      '</div>';
+    }).join("");
+    poolEl.querySelectorAll("[data-perfect-id]").forEach(cb => {
+      cb.addEventListener("change", () => {
+        const id = cb.dataset.perfectId;
+        if (cb.checked) { if (!state.perfect.includes(id)) state.perfect.push(id); }
+        else { state.perfect = state.perfect.filter(x => x !== id); }
+        markDirty();
+        renderPerfect();
+      });
+    });
+  }
+
+  const count = state.perfect.length;
+  counterEl.textContent = count + " / 13 selected";
+  counterEl.className = "perfect-counter" + (count > 13 ? " over" : "");
+
+  let slotsHtml = "";
+  for (let i = 0; i < 13; i++) {
+    const id = state.perfect[i];
+    if (id) {
+      const f = fives.find(x => x.id === id);
+      slotsHtml += '<div class="perfect-slot"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>' + (f ? f.title + " \u2014 " + f.album : "") + '</span></div>';
+    } else {
+      slotsHtml += '<div class="perfect-slot empty"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>empty slot</span></div>';
+    }
+  }
+  slotsEl.innerHTML = slotsHtml;
+  if (count > 13) {
+    slotsEl.innerHTML += '<p class="hint" style="color:#a32d2d; margin-top:0.5rem;">More than 13 checked &mdash; only the first 13 slots are shown as filled above; uncheck a few.</p>';
+  }
+}
+
+/* ============================================================
+   EXPORT / IMPORT
+   ============================================================ */
+function exportData() {
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    scores: state.scores,
+    eras: state.eras,
+    perfect: state.perfect
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = "taylor-swift-scores-" + stamp + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  dirty = false;
+  setStatus("Downloaded backup file");
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      state.scores = parsed.scores || {};
+      state.eras = parsed.eras || [];
+      state.perfect = parsed.perfect || [];
+      saveState();
+      dirty = false;
+      renderAlbumGrid();
+      renderPanel();
+      renderFavorites();
+      renderEras();
+      renderPerfect();
+      setStatus("Loaded scores from file");
+    } catch (e) {
+      alert("That file couldn't be read as a scores file. Make sure it's a JSON file downloaded from this page's \"Save scores to file\" button.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ============================================================
+   PDF SNAPSHOT (uses the browser's print-to-PDF)
+   ============================================================ */
+function buildPrintSnapshot() {
+  const ranked = ALBUMS.map((a, ai) => ({ ai, name: a.name, avg: albumAverage(ai) }))
+    .sort((a, b) => (b.avg === null ? -1 : b.avg) - (a.avg === null ? -1 : a.avg));
+
+  let html = '<div class="print-section"><div class="print-h1">Taylor Swift Song &amp; Album Scoring &mdash; snapshot</div>';
+  html += '<div style="font-size:12px;color:#666;">' + new Date().toLocaleString() + '</div></div>';
+
+  html += '<div class="print-section"><div class="print-h2">My Favorite Albums</div>';
+  ranked.forEach((r, i) => {
+    html += '<div class="print-row">' + (i + 1) + '. ' + r.name + ' &mdash; ' + (r.avg === null ? "\u2013" : r.avg.toFixed(2)) + '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="print-section"><div class="print-h2">My Eras Album</div>';
+  if (state.eras.length === 0) html += '<div class="print-row">No songs selected yet.</div>';
+  state.eras.forEach(id => {
+    const [ai, si] = id.split("-").map(Number);
+    html += '<div class="print-row">' + ALBUMS[ai].songs[si] + ' \u2014 ' + ALBUMS[ai].name + '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="print-section"><div class="print-h2">My Perfect Album</div>';
+  if (state.perfect.length === 0) html += '<div class="print-row">No songs selected yet.</div>';
+  state.perfect.forEach((id, i) => {
+    const [ai, si] = id.split("-").map(Number);
+    html += '<div class="print-row">' + (i + 1) + '. ' + ALBUMS[ai].songs[si] + ' \u2014 ' + ALBUMS[ai].name + '</div>';
+  });
+  html += '</div>';
+
+  document.getElementById("printSnapshot").innerHTML = html;
+}
+
+/* ============================================================
+   BEFOREUNLOAD REMINDER
+   Only warns if there's progress that hasn't been exported.
+   ============================================================ */
+window.addEventListener("beforeunload", (e) => {
+  if (dirty) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
+/* ============================================================
+   WIRE UP TOOLBAR + INIT
+   ============================================================ */
+document.getElementById("btnExport").addEventListener("click", exportData);
+document.getElementById("importFile").addEventListener("change", (e) => {
+  if (e.target.files[0]) importData(e.target.files[0]);
+  e.target.value = "";
+});
+document.getElementById("btnPrint").addEventListener("click", () => {
+  buildPrintSnapshot();
+  window.print();
+});
+document.getElementById("btnReset").addEventListener("click", () => {
+  if (confirm("Reset every score and checkbox? This can't be undone (unless you have an exported backup file).")) {
+    state = { scores: {}, eras: [], perfect: [] };
+    saveState();
+    dirty = false;
+    renderAlbumGrid();
+    renderPanel();
+    renderFavorites();
+    renderEras();
+    renderPerfect();
+    setStatus("Everything reset");
+  }
+});
+
+loadState();
+renderAlbumGrid();
+renderPanel();
+renderFavorites();
+renderEras();
+renderPerfect();
+</script>
+</body>
+</html>
