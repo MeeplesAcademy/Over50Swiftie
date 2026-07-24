@@ -38,7 +38,7 @@ a { color: inherit; }
 .page-header { text-align:center; padding:2.5rem 1.5rem 1.5rem; border-bottom:1px solid var(--border); background:var(--bg2); }
 .page-title { font-family:'Cinzel',serif; font-size:clamp(1.6rem,4vw,2.8rem); font-weight:900; letter-spacing:0.03em; color:var(--text); line-height:1.15; }
 .page-sub { font-size:clamp(1rem,2.2vw,1.25rem); font-weight:600; color:var(--text2); letter-spacing:0.03em; text-transform:uppercase; margin-top:0.5rem; }
-.page-note { font-size:15px; color:var(--text2); margin-top:1rem; line-height:1.7; max-width:640px; margin-left:auto; margin-right:auto; }
+.page-note { font-size:17px; color:var(--text2); margin-top:1rem; line-height:1.7; max-width:640px; margin-left:auto; margin-right:auto; }
 
 /* ============================================================
    SHARED LAYOUT WRAP
@@ -55,7 +55,7 @@ a { color: inherit; }
 .instructions .chevron { width:28px; height:28px; color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
 .instructions[open] > summary .chevron { transform:rotate(180deg); }
 .instructions-body { padding:0 1.25rem 1.25rem; border-top:1px solid var(--border); }
-.instructions-body p { font-size:15px; line-height:1.7; color:var(--text2); margin-top:0.9rem; }
+.instructions-body p { font-size:17px; line-height:1.7; color:var(--text2); margin-top:0.9rem; }
 .instructions-body p strong { color:var(--text); }
 
 /* ============================================================
@@ -74,15 +74,14 @@ a { color: inherit; }
    ALBUM TAB GRID (always visible)
    ============================================================ */
 .album-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; margin-bottom:1.5rem; }
-.album-tile { cursor:pointer; border-radius:10px; overflow:hidden; border:1.5px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
+.album-tile { display:flex; flex-direction:column; height:100%; cursor:pointer; border-radius:10px; overflow:hidden; border:3px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
 .album-tile:hover { transform:translateY(-1px); }
-.album-tile.active { border-width:3px; }
-.album-cover { aspect-ratio:1/1; height:auto; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; }
-.album-tile-info { padding:9px 10px 10px; }
+.album-cover { flex-shrink:0; aspect-ratio:1/1; height:auto; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; }
+.album-tile-info { padding:9px 10px 10px; flex:1; display:flex; flex-direction:column; justify-content:center; }
 .album-tile-name { font-size:19px; font-weight:700; line-height:1.2; font-family:'Cinzel',serif; }
-.album-tile-score { font-size:12px; opacity:0.9; margin-top:5px; font-weight:600; }
+.album-tile-score { font-size:14px; opacity:0.9; margin-top:5px; font-weight:600; }
 /* PLACEHOLDER STATUS COLORS -- replace once you've picked your palette */
-.album-tile-status { font-size:11px; margin-top:3px; font-weight:600; }
+.album-tile-status { font-size:13px; margin-top:3px; font-weight:600; }
 .album-tile-status.incomplete { color:#a35c1d; }
 .album-tile-status.complete { color:#2e7d32; }
 .album-tile-info.active .album-tile-status.incomplete { color:#ffd9a8; }
@@ -97,6 +96,7 @@ a { color: inherit; }
 .panel-body { display:flex; gap:1.5rem; padding:1.25rem; flex-wrap:wrap; }
 .panel-cover { width:120px; height:120px; flex-shrink:0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.6rem; }
 .panel-songs { flex:1; min-width:260px; display:flex; flex-direction:column; gap:2px; }
+.jump-top-btn { align-self:flex-start; margin-top:14px; }
 .songs-col-header { display:flex; align-items:center; gap:10px; padding:0 4px 6px; }
 .info-icon-wrap { position:relative; width:16px; flex-shrink:0; }
 .info-icon { display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:var(--muted); color:#fff; font-size:11px; font-weight:700; cursor:pointer; user-select:none; }
@@ -453,8 +453,13 @@ function renderPanel() {
           '</div>' +
         '</div>' +
         songsHtml +
+        '<button class="btn jump-top-btn" id="jumpTopBtn">\u2191 Jump to Top</button>' +
       '</div>' +
     '</div>';
+
+  document.getElementById("jumpTopBtn").addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   document.getElementById("panelHeaderClose").addEventListener("click", () => {
     activeAlbum = null;
