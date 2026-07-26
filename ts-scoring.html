@@ -37,8 +37,8 @@ a { color: inherit; }
    ============================================================ */
 .page-header { text-align:center; padding:2.5rem 1.5rem 1.5rem; border-bottom:1px solid var(--border); background:var(--bg2); }
 .page-title { font-family:'Cinzel',serif; font-size:clamp(1.6rem,4vw,2.8rem); font-weight:900; letter-spacing:0.03em; color:var(--text); line-height:1.15; }
-.page-sub { font-size:clamp(1rem,2.2vw,1.25rem); font-weight:600; color:var(--text2); letter-spacing:0.03em; text-transform:uppercase; margin-top:0.5rem; }
-.page-note { font-size:17px; color:var(--text2); margin-top:1rem; line-height:1.7; max-width:640px; margin-left:auto; margin-right:auto; }
+.page-sub { font-size:clamp(1rem,2.2vw,1.25rem); font-weight:600; color:var(--text); letter-spacing:0.03em; text-transform:uppercase; margin-top:0.5rem; }
+.page-note { font-size:17px; color:var(--text); margin-top:1rem; line-height:1.7; max-width:640px; margin-left:auto; margin-right:auto; }
 
 /* ============================================================
    SHARED LAYOUT WRAP
@@ -55,31 +55,53 @@ a { color: inherit; }
 .instructions .chevron { width:28px; height:28px; color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
 .instructions[open] > summary .chevron { transform:rotate(180deg); }
 .instructions-body { padding:0 1.25rem 1.25rem; border-top:1px solid var(--border); }
-.instructions-body p { font-size:17px; line-height:1.7; color:var(--text2); margin-top:0.9rem; }
+.instructions-body p { font-size:17px; line-height:1.7; color:var(--text); margin-top:0.9rem; }
 .instructions-body p strong { color:var(--text); }
 
 /* ============================================================
    TOOLBAR (save / export / import / print)
    ============================================================ */
 .toolbar { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; margin-bottom:1.5rem; }
-.btn { font-family:'Barlow',sans-serif; font-size:14px; font-weight:600; letter-spacing:0.02em; padding:9px 16px; border-radius:8px; border:1.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; transition:background 0.15s, border-color 0.15s; }
+.btn { font-family:'Barlow',sans-serif; font-size:16px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; padding:9px 16px; border-radius:8px; border:1.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; transition:background 0.15s, border-color 0.15s; }
 .btn:hover { background:var(--bg3); border-color:var(--muted); }
 .btn-primary { background:var(--text); color:#fff; border-color:var(--text); }
 .btn-primary:hover { background:#000; }
+.btn-danger { border:2px solid #c0392b; color:#c0392b; }
+.btn-danger:hover { background:#c0392b; color:#fff; }
 .file-label { display:inline-flex; }
 .file-label input { display:none; }
-.toolbar-status { font-size:13px; color:var(--muted); margin-left:auto; }
+.toolbar-status { font-size:15px; font-weight:600; color:var(--text); margin-left:auto; }
+.toolbar-hint { font-size:15px; color:var(--text); margin-bottom:0.5rem; }
+
+.btn-tooltip-wrap { position:relative; display:inline-flex; }
+.btn-tooltip {
+  position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+  width:240px; background:var(--text); color:#fff; font-size:15px; font-weight:500; line-height:1.5;
+  padding:8px 10px; border-radius:8px; text-align:left; text-transform:none; letter-spacing:normal;
+  opacity:0; visibility:hidden; pointer-events:none; z-index:10;
+  transition:opacity 0.1s ease 0.5s, visibility 0s linear 0.5s;
+}
+.btn-tooltip-wrap:hover .btn-tooltip { opacity:1; visibility:visible; }
+
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(20,18,14,0.55); z-index:100; align-items:center; justify-content:center; padding:1.5rem; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--bg2); border-radius:14px; max-width:420px; width:100%; padding:1.75rem; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.3); }
+.modal-title { font-family:'Cinzel',serif; font-weight:900; font-size:1.8rem; letter-spacing:0.02em; margin-bottom:0.3rem; }
+.modal-subtitle { font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#c0392b; margin-bottom:1rem; }
+.modal-box p { font-size:17px; line-height:1.6; color:var(--text); margin-bottom:1.5rem; }
+.modal-warning-text { font-size:19px !important; font-weight:600; color:#c0392b !important; }
+.modal-actions { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; }
 
 /* ============================================================
    ALBUM TAB GRID (always visible)
    ============================================================ */
-.album-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; margin-bottom:1.5rem; }
+.album-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:10px; margin-bottom:1.5rem; }
 .album-tile { display:flex; flex-direction:column; height:100%; cursor:pointer; border-radius:10px; overflow:hidden; border:3px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
 .album-tile:hover { transform:translateY(-1px); }
 .album-cover { flex-shrink:0; aspect-ratio:1/1; height:auto; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; }
-.album-tile-info { padding:9px 10px 10px; flex:1; display:flex; flex-direction:column; justify-content:center; }
+.album-tile-info { padding:9px 10px 10px; flex:1; display:flex; flex-direction:column; justify-content:flex-start; }
 .album-tile-name { font-size:19px; font-weight:700; line-height:1.2; font-family:'Cinzel',serif; }
-.album-tile-score { font-size:14px; opacity:0.9; margin-top:5px; font-weight:600; }
+.album-tile-score { font-size:15px; opacity:0.9; margin-top:5px; font-weight:600; }
 /* PLACEHOLDER STATUS COLORS -- replace once you've picked your palette */
 .album-tile-status { font-size:13px; margin-top:3px; font-weight:600; }
 .album-tile-status.incomplete { color:#a35c1d; }
@@ -91,7 +113,7 @@ a { color: inherit; }
    SHARED SCORING PANEL
    ============================================================ */
 .panel { border:2px solid var(--border2); border-radius:12px; overflow:hidden; background:var(--bg2); margin-bottom:2.5rem; }
-.panel-placeholder { padding:2.5rem 1.25rem; text-align:center; color:var(--muted); font-size:15px; }
+.panel-placeholder { padding:2.5rem 1.25rem; text-align:center; color:var(--text); font-size:15px; }
 .panel-header { padding:0.9rem 1.25rem; display:flex; align-items:center; justify-content:space-between; font-size:1.1rem; font-weight:700; font-family:'Cinzel',serif; letter-spacing:0.02em; }
 .panel-body { display:flex; gap:1.5rem; padding:1.25rem; flex-wrap:wrap; }
 .panel-cover { width:120px; height:120px; flex-shrink:0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.6rem; }
@@ -100,11 +122,11 @@ a { color: inherit; }
 .songs-col-header { display:flex; align-items:center; gap:10px; padding:0 4px 6px; }
 .info-icon-wrap { position:relative; width:16px; flex-shrink:0; }
 .info-icon { display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:var(--muted); color:#fff; font-size:11px; font-weight:700; cursor:pointer; user-select:none; }
-.info-tooltip { display:none; position:absolute; top:22px; left:0; z-index:5; width:220px; background:var(--text); color:#fff; font-size:12px; font-weight:500; line-height:1.5; padding:8px 10px; border-radius:8px; }
+.info-tooltip { display:none; position:absolute; top:22px; left:0; z-index:5; width:220px; background:var(--text); color:#fff; font-size:15px; font-weight:500; line-height:1.5; padding:8px 10px; border-radius:8px; }
 .info-icon-wrap:hover .info-tooltip, .info-icon-wrap.show .info-tooltip { display:block; }
 .song-row { display:flex; align-items:center; gap:10px; padding:6px 4px; border-bottom:1px solid var(--border); }
 .song-row input[type="checkbox"] { flex-shrink:0; width:16px; height:16px; cursor:pointer; }
-.song-title { flex:1; font-size:14px; padding:4px 9px; border-radius:6px; background:var(--bg3); color:var(--text); }
+.song-title { flex:1; font-size:15px; padding:4px 9px; border-radius:6px; background:var(--bg3); color:var(--text); }
 .song-title.scored-0 { text-decoration:line-through; opacity:0.7; }
 .song-select { font-family:'Barlow',sans-serif; font-size:13px; font-weight:600; padding:4px 6px; border-radius:6px; border:1.5px solid var(--border2); background:var(--bg3); color:var(--text); min-width:52px; text-align:center; cursor:pointer; }
 
@@ -119,12 +141,12 @@ a { color: inherit; }
 .results-tab-swatch { height:64px; }
 .results-tab-info { padding:9px 10px 10px; }
 .results-tab-name { font-size:19px; font-weight:700; font-family:'Cinzel',serif; line-height:1.2; }
-.results-tab-sub { font-size:12px; margin-top:5px; font-weight:600; opacity:0.9; }
+.results-tab-sub { font-size:15px; margin-top:5px; font-weight:600; opacity:0.9; }
 
 .results-panel { border:2px solid var(--border2); border-radius:12px; overflow:hidden; background:var(--bg2); margin-bottom:2.5rem; }
 .results-panel-header { padding:0.9rem 1.25rem; font-size:1.1rem; font-weight:700; font-family:'Cinzel',serif; letter-spacing:0.02em; }
 .results-panel-body { padding:1.25rem; }
-.results-panel-body p.hint { font-size:14px; color:var(--text2); margin-bottom:1rem; line-height:1.6; }
+.results-panel-body p.hint { font-size:15px; color:var(--text); margin-bottom:1rem; line-height:1.6; }
 
 .fav-row { display:flex; align-items:center; gap:12px; padding:8px 10px; border-radius:8px; margin-bottom:6px; }
 .fav-rank { font-family:'Cinzel',serif; font-weight:700; font-size:1rem; width:24px; text-align:center; flex-shrink:0; }
@@ -134,19 +156,19 @@ a { color: inherit; }
 .fav-score { font-size:20px; font-weight:700; font-family:'Cinzel',serif; }
 
 .eras-list, .perfect-pool { display:flex; flex-direction:column; gap:2px; }
-.eras-counter, .perfect-counter { font-size:14px; font-weight:600; margin-bottom:0.75rem; }
+.eras-counter, .perfect-counter { font-size:15px; font-weight:600; margin-bottom:0.75rem; }
 .eras-counter.over, .perfect-counter.over { color:#a32d2d; }
 .perfect-columns { display:flex; gap:1.5rem; flex-wrap:wrap; }
 .perfect-pool-col { flex:1; min-width:260px; }
 .perfect-slots-col { flex:1; min-width:220px; }
-.perfect-slot { display:flex; align-items:center; gap:8px; padding:6px 9px; border-radius:6px; background:var(--bg3); margin-bottom:4px; font-size:13px; }
+.perfect-slot { display:flex; align-items:center; gap:8px; padding:6px 9px; border-radius:6px; background:var(--bg3); margin-bottom:4px; font-size:15px; }
 .perfect-slot-num { font-weight:700; width:18px; flex-shrink:0; }
 .perfect-slot.empty { color:var(--muted); font-style:italic; }
 
 /* ============================================================
    FOOTER
    ============================================================ */
-footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:13px; color:var(--muted); line-height:1.8; }
+footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(--text); line-height:1.8; }
 
 /* ============================================================
    PRINT / PDF SNAPSHOT
@@ -164,9 +186,13 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:13px; color:var(
   .print-row { font-size: 13px; padding: 2px 0; }
 }
 
+@media (max-width: 900px) {
+  .album-grid { grid-template-columns:repeat(3, 1fr); }
+}
 @media (max-width: 640px) {
   .wrap { padding:1.5rem 1rem 2rem; }
   .panel-body { padding:1rem; }
+  .album-grid { grid-template-columns:repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -194,14 +220,48 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:13px; color:var(
     </div>
   </details>
 
+  <p class="toolbar-hint">Hover on Buttons for Info</p>
   <div class="toolbar">
-    <button class="btn btn-primary" id="btnExport"><i></i>Save scores to file</button>
-    <label class="btn file-label" id="btnImport">Load scores from file
-      <input type="file" id="importFile" accept="application/json">
-    </label>
-    <button class="btn" id="btnPrint">Save PDF snapshot</button>
-    <button class="btn" id="btnReset">Reset all</button>
+    <div class="btn-tooltip-wrap">
+      <button class="btn btn-primary" id="btnExport">Save scores to file</button>
+      <div class="btn-tooltip">Click to download a JSON file backup you can re-upload later (even on a different device or browser).</div>
+    </div>
+    <div class="btn-tooltip-wrap">
+      <label class="btn file-label" id="btnImport">Load scores from file
+        <input type="file" id="importFile" accept="application/json">
+      </label>
+      <div class="btn-tooltip">Click to select a JSON file from your device to restore your data from a previous download.</div>
+    </div>
+    <div class="btn-tooltip-wrap">
+      <button class="btn" id="btnPrint">Print / Save PDF Snapshot</button>
+      <div class="btn-tooltip">Click to print your scores and results or change your printer to PDF to save a copy you can share with friends.</div>
+    </div>
+    <div class="btn-tooltip-wrap">
+      <button class="btn btn-danger" id="btnReset">Reset all</button>
+      <div class="btn-tooltip">Click to reset ALL of your data. This will wipe the page. Only do this if you want to start over. You can only restore data by loading your scores from a previously saved JSON file.</div>
+    </div>
     <span class="toolbar-status" id="toolbarStatus"></span>
+  </div>
+
+  <div class="modal-overlay" id="resetModalOverlay">
+    <div class="modal-box">
+      <p class="modal-warning-text">This will wipe the page. Only do this if you want to start over. You can only restore data by loading your scores from a previously saved JSON file.</p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="resetModalConfirm"></button>
+        <button class="btn" id="resetModalCancel"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="privacyModalOverlay">
+    <div class="modal-box">
+      <div class="modal-title">...READY FOR IT?</div>
+      <div class="modal-subtitle">Please Read</div>
+      <p>This site does not use cookies or store or sell your personal data for any reason. You have the option to save your data to your local device so you can upload it again later to save your progress. Neither the page creator nor anyone else will see your scores or data unless you share them on your own.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="privacyModalOk">You're On Your Own, Kid</button>
+      </div>
+    </div>
   </div>
 
   <div class="album-grid" id="albumGrid"></div>
@@ -217,7 +277,22 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:13px; color:var(
 
 <footer>
   Built for scoring 12 albums (and counting). Your scores never leave your browser unless you choose to export them.
+  <br><br>
+  <button class="btn" id="btnPrivacyNotice">Privacy</button>
 </footer>
+
+<div class="modal-overlay" id="privacyNoticeOverlay">
+  <div class="modal-box">
+    <div class="modal-title">Privacy Notice</div>
+    <p style="text-align:left; margin-top:1.5rem;"><em>Dear Reader:</em></p>
+    <p>This site does not use cookies or store or sell your personal data for any reason. While you're not <em>Invisible,</em> you're <em>Untouchable</em> and <em>Clean</em>.</p>
+    <p>This site does see your device type (iOS, MacOS, Windows, Linux, Android), which browser you're using, and what country you're from... using GoatCounter... purely for page count traffic and Swiftie curiosity. No other personal data of any kind is seen, stored, collected, used, or sold. There is no <em>Invisible String</em>.</p>
+    <p>ONLY YOU have the option to save your scoring data to your local device so you can upload it again later to save your progress. Neither the page creator nor anyone else will see your scores or data unless you share them on your own.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="privacyNoticeClose">Close</button>
+    </div>
+  </div>
+</div>
 
 <div id="printSnapshot"></div>
 
@@ -396,7 +471,7 @@ function renderAlbumGrid() {
       '<div class="album-tile-info' + (isActive ? " active" : "") + '" style="background:' + (isActive ? theme.base : "var(--bg2)") + '; color:' + (isActive ? "#fff" : theme.text) + ';">' +
         '<div class="album-tile-name">' + album.name + '</div>' +
         '<div class="album-tile-score">Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</div>' +
-        '<div class="album-tile-status ' + (complete ? "complete" : "incomplete") + '">' + (complete ? "Song Scoring Complete" : "Missing Song Scores") + '</div>' +
+        '<div class="album-tile-status ' + (complete ? "complete" : "incomplete") + '">' + (complete ? "Scoring Complete" : "Missing Song Scores") + '</div>' +
       '</div>';
     tile.addEventListener("click", () => { activeAlbum = (activeAlbum === ai) ? null : ai; renderAlbumGrid(); renderPanel(); });
     grid.appendChild(tile);
@@ -632,7 +707,7 @@ function renderResultsPanel() {
       return '<div class="song-row">' +
         '<input type="checkbox" data-perfect-id="' + f.id + '" ' + (checked ? "checked" : "") + '>' +
         '<span class="song-title" style="background:' + theme.light + '; color:' + theme.text + ';">' + f.title + '</span>' +
-        '<span class="fav-score" style="color:' + theme.text + '; font-size:12px;">' + f.album + '</span>' +
+        '<span class="fav-score" style="color:' + theme.text + '; font-size:15px;">' + f.album + '</span>' +
       '</div>';
     }).join("");
   }
@@ -726,6 +801,9 @@ function importData(file) {
 /* ============================================================
    PDF SNAPSHOT (uses the browser's print-to-PDF)
    ============================================================ */
+/* TODO (per user request): revisit this snapshot's content/layout --
+   add the full list of every scored song (not just Favorites/Eras/
+   Perfect) to the bottom of the printed PDF. */
 function buildPrintSnapshot() {
   const ranked = ALBUMS.map((a, ai) => ({ ai, name: a.name, avg: albumAverage(ai) }))
     .sort((a, b) => (b.avg === null ? -1 : b.avg) - (a.avg === null ? -1 : a.avg));
@@ -781,17 +859,47 @@ document.getElementById("btnPrint").addEventListener("click", () => {
   buildPrintSnapshot();
   window.print();
 });
+/* ============================================================
+   RESET CONFIRMATION MODAL
+   Accept/Cancel button text is picked at random from a pool of
+   song titles each time the modal opens.
+   ============================================================ */
+const RESET_CONFIRM_TEXTS = [
+  "RESET: Fearless", "RESET: Begin Again", "RESET: Jump Then Fall", "RESET: End Game",
+  "RESET: Exile", "RESET: It's Time To Go", "RESET: No Body, No Crime", "RESET: You're Losing Me",
+  "RESET: My Boy Only Breaks His Favorite Toys", "RESET: I Can Do It With A Broken Heart",
+  "RESET: Imgonnagetyouback", "RESET: I Hate It Here", "RESET: The Fate of Ophelia"
+];
+const RESET_CANCEL_TEXTS = [
+  "CANCEL: Stay Stay Stay", "CANCEL: Everything Has Changed", "CANCEL: Come Back... Be Here",
+  "CANCEL: Shake It Off", "CANCEL: Say Don't Go", "CANCEL: Long Live", "CANCEL: Epiphany",
+  "CANCEL: This Is Me Trying", "CANCEL: Right Where You Left Me", "CANCEL: But Daddy, I Love Him",
+  "CANCEL: CANCELLED!"
+];
+function randomFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+const resetModalOverlay = document.getElementById("resetModalOverlay");
 document.getElementById("btnReset").addEventListener("click", () => {
-  if (confirm("Reset every score and checkbox? This can't be undone (unless you have an exported backup file).")) {
-    state = { scores: {}, eras: [], perfect: [] };
-    saveState();
-    dirty = false;
-    renderAlbumGrid();
-    renderPanel();
-    renderResultsTabs();
-    renderResultsPanel();
-    setStatus("Everything reset");
-  }
+  document.getElementById("resetModalConfirm").textContent = randomFrom(RESET_CONFIRM_TEXTS);
+  document.getElementById("resetModalCancel").textContent = randomFrom(RESET_CANCEL_TEXTS);
+  resetModalOverlay.classList.add("open");
+});
+document.getElementById("resetModalCancel").addEventListener("click", () => {
+  resetModalOverlay.classList.remove("open");
+});
+resetModalOverlay.addEventListener("click", (e) => {
+  if (e.target === resetModalOverlay) resetModalOverlay.classList.remove("open");
+});
+document.getElementById("resetModalConfirm").addEventListener("click", () => {
+  resetModalOverlay.classList.remove("open");
+  state = { scores: {}, eras: [], perfect: [] };
+  saveState();
+  dirty = false;
+  renderAlbumGrid();
+  renderPanel();
+  renderResultsTabs();
+  renderResultsPanel();
+  setStatus("Everything reset");
 });
 
 loadState();
@@ -799,6 +907,37 @@ renderAlbumGrid();
 renderPanel();
 renderResultsTabs();
 renderResultsPanel();
+
+/* ============================================================
+   PRIVACY NOTICE (shown once per browser, on first visit)
+   ============================================================ */
+const PRIVACY_SEEN_KEY = "ts_privacy_notice_seen_v1";
+if (!localStorage.getItem(PRIVACY_SEEN_KEY)) {
+  document.getElementById("privacyModalOverlay").classList.add("open");
+}
+document.getElementById("privacyModalOk").addEventListener("click", () => {
+  localStorage.setItem(PRIVACY_SEEN_KEY, "1");
+  document.getElementById("privacyModalOverlay").classList.remove("open");
+});
+
+/* ============================================================
+   PRIVACY NOTICE (on-demand, via the footer button)
+   ============================================================ */
+const privacyNoticeOverlay = document.getElementById("privacyNoticeOverlay");
+document.getElementById("btnPrivacyNotice").addEventListener("click", () => {
+  privacyNoticeOverlay.classList.add("open");
+});
+document.getElementById("privacyNoticeClose").addEventListener("click", () => {
+  privacyNoticeOverlay.classList.remove("open");
+});
+privacyNoticeOverlay.addEventListener("click", (e) => {
+  if (e.target === privacyNoticeOverlay) privacyNoticeOverlay.classList.remove("open");
+});
 </script>
+<!-- GoatCounter: privacy-friendly, cookieless page-view analytics.
+     No visible counter is added -- this only tracks pageviews silently.
+     Replace YOURCODE with your actual GoatCounter site code (from your
+     dashboard at https://www.goatcounter.com/ after you sign up). -->
+<script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
