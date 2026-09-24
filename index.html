@@ -104,6 +104,59 @@ a { color: inherit; }
 }
 
 /* ============================================================
+   LYRICS QUIZ
+   Lives below Your Results. Reads LYRICS for questions and
+   ALBUMS for wrong-answer choices. Never touches saved scores.
+   Styling is a first pass; theme it later.
+   ============================================================ */
+.quiz-jump { margin-top:0.75rem; }
+.quiz-section { scroll-margin-top:1rem; margin-bottom:2.5rem; }
+.quiz-card { border:2px solid var(--border2); border-radius:12px; background:var(--bg2); padding:1.25rem 1.5rem 1.5rem; }
+.quiz-topbar { display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:600; margin-bottom:0.6rem; }
+.quiz-track { height:6px; background:var(--bg3); border-radius:6px; overflow:hidden; margin-bottom:1.5rem; }
+.quiz-fill { height:100%; background:var(--gold); width:0; transition:width 0.25s ease; }
+.quiz-lyric {
+  font-family:'Barlow',sans-serif; font-style:italic; font-weight:500;
+  font-size:clamp(1.25rem,2.6vw,1.6rem); line-height:1.45; text-align:center;
+  white-space:pre-line; text-wrap:balance; margin:0 auto 1.5rem; max-width:100%;
+}
+.quiz-options { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+.quiz-option {
+  display:flex; align-items:center; gap:12px; text-align:left; width:100%;
+  font-family:'Barlow',sans-serif; font-size:17px; font-weight:500; color:var(--text);
+  padding:12px 14px; border:1.5px solid var(--border2); border-radius:10px; background:var(--bg2);
+  cursor:pointer; transition:border-color 0.15s, background 0.15s;
+}
+.quiz-option:hover:not(:disabled) { border-color:var(--gold); background:var(--gold-light); }
+.quiz-option:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.quiz-option:disabled { cursor:default; }
+.quiz-letter {
+  flex-shrink:0; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:15px; background:var(--bg3); color:var(--text);
+}
+.quiz-option.correct { background:#e3f6e5; border-color:#3f9a4a; color:#1f5a26; }
+.quiz-option.correct .quiz-letter { background:#3f9a4a; color:#fff; }
+.quiz-option.incorrect { background:#fbe9e7; border-color:#c0392b; color:#7a1f16; }
+.quiz-option.incorrect .quiz-letter { background:#c0392b; color:#fff; }
+.quiz-feedback { min-height:1.6em; margin-top:1rem; font-size:17px; font-weight:600; text-align:center; }
+.quiz-feedback.good { color:#1f5a26; }
+.quiz-feedback.bad { color:#7a1f16; }
+.quiz-nav { display:flex; justify-content:center; margin-top:1rem; }
+.quiz-result { text-align:center; }
+.quiz-result-title { font-family:'Cinzel',serif; font-size:2rem; font-weight:900; margin-bottom:0.25rem; }
+.quiz-result-score { font-size:20px; font-weight:600; margin-bottom:1.25rem; }
+.quiz-missed { text-align:left; margin:0 auto 1.25rem; max-width:720px; }
+.quiz-missed-head { font-size:17px; font-weight:700; margin-bottom:0.5rem; }
+.quiz-missed-item { background:var(--bg3); border-radius:10px; padding:10px 14px; margin-bottom:8px; font-size:16px; line-height:1.5; }
+.quiz-missed-item .ml { font-style:italic; white-space:pre-line; display:block; }
+.quiz-missed-item .ms { font-weight:700; display:block; margin-top:4px; }
+@media (max-width: 640px) {
+  .quiz-card { padding:1rem; }
+  .quiz-options { grid-template-columns:1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .quiz-fill { transition:none; } }
+
+/* ============================================================
    TOOLBAR (save / export / import / print)
    ============================================================ */
 .toolbar { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; margin-bottom:1.5rem; }
@@ -267,6 +320,7 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
         <div class="lyric-text" id="lyricText"></div>
         <div class="lyric-source" id="lyricSource"></div>
         <button type="button" class="btn lyric-btn" id="lyricNextBtn">New lyric</button>
+        <button type="button" class="btn btn-primary quiz-jump" id="quizJumpBtn">Take a lyrics quiz</button>
       </div>
     </div>
 
@@ -348,6 +402,11 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
 
   <div class="results-tab-row" id="resultsTabRow"></div>
   <div class="results-panel" id="resultsPanel"></div>
+
+  <section class="quiz-section" id="lyricsQuiz" aria-labelledby="quizHeading">
+    <div class="results-heading" id="quizHeading">Lyrics Quiz</div>
+    <div class="quiz-card" id="quizCard"></div>
+  </section>
 
 </div>
 
@@ -994,7 +1053,7 @@ const LYRICS = [
   // Fearless (TV)
   { song: "Fearless", quotes: ["And I don't know why, but with you,\nI'd dance In a storm, in my best dress", "It's the first kiss, it's flawless, really somethin'"] },
   { song: "Fifteen", quotes: ["But in your life, you'll do things greater than dating the boy on the football team", "You sit in class next to a redhead named Abigail,\nand soon enough, you're best friends"] },
-  { song: "Love Story", quotes: ["You'll be the prince and I'll be the princess", "Baby, just say \"Yes'\""] },
+  { song: "Love Story", quotes: ["You'll be the prince and I'll be the princess", "Baby, just say ‘Yes'’"] },
   { song: "Tell Me Why", quotes: ["And you might think I'm bulletproof, but I'm not"] },
   { song: "Forever & Always", quotes: ["Oh, and it rains in your bedroom,\nEverything is wrong,"] },
   { song: "Change", quotes: ["But I believe in whatever you do,\nAnd I'll do anything to see it through", "These walls that they put up to hold us back will fall down,\nThis revolution, the time will come\nFor us to finally win"] },
@@ -1002,7 +1061,7 @@ const LYRICS = [
   { song: "Mine", quotes: ["You made a rebel of a careless man's careful daughter"] },
   { song: "Sparks Fly", quotes: ["My mind forgets to remind me you're a bad idea", "Drop everything now,\nmeet me in the pouring rain"] },
   { song: "Back to December", quotes: ["You gave me roses\nand I left them there to die", "It turns out freedom ain't nothing but missin' you,\nWishin' I'd realized what I had when you were mine"] },
-  { song: "Enchanted", quotes: ["Please, don't be in love with someone else,\nPlease, don't have somebody waitin' on you", "Your eyes whispered, \"Have we met?\"\nAcross the room, your silhouette\nStarts to make its way to me"] },
+  { song: "Enchanted", quotes: ["Please, don't be in love with someone else,\nPlease, don't have somebody waitin' on you", "Your eyes whispered, ‘Have we met?’\nAcross the room, your silhouette\nStarts to make its way to me"] },
   { song: "Better than Revenge", quotes: ["She thinks I'm psycho\n'cause I like to rhyme her name with things"] },
   { song: "Long Live", quotes: ["I had the time of my life fighting dragons with you.", "If you have children some day,\nWhen they point to the pictures\nPlease, tell 'em my name"] },
   { song: "Ours", quotes: ["So don't you worry your pretty little mind\nPeople throw rocks at things that shine"] },
@@ -1021,7 +1080,7 @@ const LYRICS = [
   { song: "The Moment I Knew", quotes: ["You should've been there"] },
   { song: "Nothing New (feat. Phoebe Bridgers) (From the Vault)", quotes: ["How long will it be cute,\nall this cryin' in my room?", "And I wake up in the middle of the night\nIt's like I can feel time moving"] },
   { song: "Forever Winter (From the Vault)", quotes: ["If I was standing there in your apartment\nI'd take that bomb in your head and disarm it", "His laugh is a symphony,\nwhen the lights go out,\nit's hard to breathe"] },
-  { song: "All Too Well (10 Minute Version) (From the Vault)", quotes: ["You kept me like a secret,\nbut I kept you like an oath.", "Check the pulse and come back swearin' it's the same,\nafter three months in the grave.", "Fuck the patriarchy.", "You who charmed my dad with self-effacing jokes\nSippin' coffee like you're on a late-night show\nBut then he watched me watch the front door all night, willin' you to come\nAnd he said, \"It's supposed to be fun turning twenty-one\""] },
+  { song: "All Too Well (10 Minute Version) (From the Vault)", quotes: ["You kept me like a secret,\nbut I kept you like an oath.", "Check the pulse and come back swearin' it's the same,\nafter three months in the grave.", "Fuck the patriarchy.", "You who charmed my dad with self-effacing jokes\nSippin' coffee like you're on a late-night show\nBut then he watched me watch the front door all night, willin' you to come\nAnd he said, ‘It's supposed to be fun turning twenty-one’"] },
   // 1989 (TV)
   { song: "Welcome to New York", quotes: ["The lights are so bright, but they never blind me", "And you can want who you want,\nBoys and boys and girls and girls", "It's a new soundtrack, I could dance to this beat"] },
   { song: "Blank Space", quotes: ["You look like my next mistake", "I can make the bad guys good for a weekend", "Cause, darling, I'm a nightmare dressed like a daydream"] },
@@ -1049,7 +1108,7 @@ const LYRICS = [
   { song: "New Year's Day", quotes: ["Hold on to the memories,\nthey will hold on to you", "Please, don't ever become a stranger\nWhose laugh I could recognize anywhere", "Don't read the last page"] },
   // Lover
   { song: "I Forgot That You Existed", quotes: ["Got out some popcorn As soon as my rep started going down, down, down", "It isn't love,\nit isn't hate,\nit's just indifference"] },
-  { song: "Cruel Summer", quotes: ["And if I bleed, you'll be the last to know", "And I scream, \"For whatever it's worth\nI love you, ain't that the worst thing you ever heard?\""] },
+  { song: "Cruel Summer", quotes: ["And if I bleed, you'll be the last to know", "And I scream, ‘For whatever it's worth\nI love you, ain't that the worst thing you ever heard?’"] },
   { song: "Lover", quotes: ["And you'll save all your dirtiest jokes for me,\nAnd at every table, I'll save you a seat, lover", "Have I known you twenty seconds or twenty years?"] },
   { song: "The Man", quotes: ["They’d say I hustled, put in the work,\nThey wouldn't shake their heads and question how much of this I deserve"] },
   { song: "The Archer", quotes: ["I've got a hundred thrown-out speeches I almost said to you"] },
@@ -1119,6 +1178,137 @@ document.querySelectorAll(".info-tab").forEach(tab => {
 });
 
 showLyric(false);
+
+/* ============================================================
+   LYRICS QUIZ
+   - A round is QUIZ_LENGTH questions, no song repeats within a round.
+   - Wrong answers come from every song in ALBUMS. Alternate
+     versions (piano, acoustic, feat., vault) share a "base title",
+     so a question never shows two versions of one song, or an
+     alternate version of the right answer.
+   - Balanced answer slots: at the start of each round the correct
+     letters are dealt evenly (for 10 questions: two letters get 3,
+     two get 2, chosen at random) and then shuffled, so every letter
+     is correct 2 or 3 times per round in an unpredictable order.
+   ============================================================ */
+const QUIZ_LENGTH = 10;
+const QUIZ_LETTERS = ["A", "B", "C", "D"];
+let quiz = null;
+
+function shuffleInPlace(arr) {          // Fisher-Yates: every order equally likely
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function baseTitle(t) {
+  return t.replace(/\s*\([^)]*\)/g, "").replace(/[\u2026.!?]+$/, "").trim().toLowerCase();
+}
+function quizEscape(t) {
+  return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function dealCorrectSlots(n) {
+  const slots = [];
+  for (let k = 0; k < Math.floor(n / 4); k++) slots.push(0, 1, 2, 3);
+  slots.push(...shuffleInPlace([0, 1, 2, 3]).slice(0, n % 4));   // leftovers go to random, different letters
+  return shuffleInPlace(slots);
+}
+function buildQuestion(entry, slot) {
+  const quote = entry.quotes[Math.floor(Math.random() * entry.quotes.length)];
+  const used = new Set([baseTitle(entry.song)]);
+  const pool = shuffleInPlace(ALBUMS.flatMap(a => a.songs).slice());
+  const wrong = [];
+  for (const t of pool) {
+    const b = baseTitle(t);
+    if (used.has(b)) continue;
+    used.add(b); wrong.push(t);
+    if (wrong.length === 3) break;
+  }
+  const options = wrong.slice();
+  options.splice(slot, 0, entry.song);
+  return { quote, answer: entry.song, options, correctIndex: slot };
+}
+function startQuiz() {
+  const eligible = shuffleInPlace(LYRICS.filter(l => l.quotes && l.quotes.length > 0).slice());
+  const picks = eligible.slice(0, Math.min(QUIZ_LENGTH, eligible.length));
+  const slots = dealCorrectSlots(picks.length);
+  quiz = { index: 0, score: 0, missed: [], answered: false, questions: [] };
+  quiz.questions = picks.map((entry, k) => buildQuestion(entry, slots[k]));
+  renderQuizQuestion();
+}
+function renderQuizQuestion() {
+  const card = document.getElementById("quizCard");
+  const q = quiz.questions[quiz.index];
+  const total = quiz.questions.length;
+  card.innerHTML =
+    '<div class="quiz-topbar"><span>Question ' + (quiz.index + 1) + ' of ' + total + '</span><span>Score: ' + quiz.score + '</span></div>' +
+    '<div class="quiz-track"><div class="quiz-fill" style="width:' + (quiz.index / total * 100) + '%"></div></div>' +
+    '<div class="quiz-lyric">\u201C' + quizEscape(q.quote) + '\u201D</div>' +
+    '<div class="quiz-options">' + q.options.map((o, i) =>
+      '<button type="button" class="quiz-option" data-i="' + i + '"><span class="quiz-letter">' + QUIZ_LETTERS[i] + '</span><span>' + quizEscape(o) + '</span></button>'
+    ).join("") + '</div>' +
+    '<div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>' +
+    '<div class="quiz-nav" id="quizNav"></div>';
+  quiz.answered = false;
+  card.querySelectorAll(".quiz-option").forEach(b => b.addEventListener("click", () => answerQuiz(Number(b.dataset.i))));
+}
+function answerQuiz(i) {
+  if (quiz.answered) return;
+  quiz.answered = true;
+  const q = quiz.questions[quiz.index];
+  const btns = document.querySelectorAll("#quizCard .quiz-option");
+  btns.forEach(b => { b.disabled = true; });
+  btns[q.correctIndex].classList.add("correct");
+  const fb = document.getElementById("quizFeedback");
+  if (i === q.correctIndex) {
+    quiz.score++;
+    fb.className = "quiz-feedback good"; fb.textContent = "Correct!";
+  } else {
+    btns[i].classList.add("incorrect");
+    quiz.missed.push(q);
+    fb.className = "quiz-feedback bad"; fb.textContent = "Not quite. It\u2019s " + q.answer + ".";
+  }
+  document.querySelector("#quizCard .quiz-topbar span:last-child").textContent = "Score: " + quiz.score;
+  const last = quiz.index === quiz.questions.length - 1;
+  const nav = document.getElementById("quizNav");
+  nav.innerHTML = '<button type="button" class="btn btn-primary" id="quizNextBtn">' + (last ? "See my score" : "Next lyric") + '</button>';
+  const nb = document.getElementById("quizNextBtn");
+  nb.addEventListener("click", () => {
+    if (last) renderQuizResult(); else { quiz.index++; renderQuizQuestion(); }
+  });
+  nb.focus({ preventScroll: true });
+}
+function quizVerdict(score, total) {
+  if (score === total) return "Mastermind";
+  if (score >= total * 0.7) return "Long Live";
+  if (score >= total * 0.4) return "Shake It Off";
+  return "Begin Again";
+}
+function renderQuizResult() {
+  const total = quiz.questions.length;
+  const card = document.getElementById("quizCard");
+  let missedHtml = "";
+  if (quiz.missed.length) {
+    missedHtml = '<div class="quiz-missed"><div class="quiz-missed-head">Lyrics you missed</div>' +
+      quiz.missed.map(q => '<div class="quiz-missed-item"><span class="ml">\u201C' + quizEscape(q.quote) + '\u201D</span><span class="ms">\u2014 ' + quizEscape(q.answer) + '</span></div>').join("") +
+      '</div>';
+  }
+  card.innerHTML =
+    '<div class="quiz-track"><div class="quiz-fill" style="width:100%"></div></div>' +
+    '<div class="quiz-result">' +
+      '<div class="quiz-result-title">' + quizVerdict(quiz.score, total) + '</div>' +
+      '<div class="quiz-result-score">You got ' + quiz.score + ' of ' + total + ' right.</div>' +
+      missedHtml +
+      '<button type="button" class="btn btn-primary" id="quizAgainBtn">Play again</button>' +
+    '</div>';
+  document.getElementById("quizAgainBtn").addEventListener("click", startQuiz);
+}
+document.getElementById("quizJumpBtn").addEventListener("click", () => {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.getElementById("lyricsQuiz").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+});
+startQuiz();
 
 /* ============================================================
    CONTACT EMAIL
