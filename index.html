@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Taylor Swift Song &amp; Album Scoring</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    BASE / THEME
@@ -46,17 +46,60 @@ a { color: inherit; }
 .wrap { max-width:1200px; margin:0 auto; padding:2rem 1.5rem 3rem; }
 
 /* ============================================================
-   INSTRUCTIONS (collapsible)
+   INFO TABS (Lyric of the Day / How This Works / About the Designer)
+   Folder-style tabs: the active tab joins the panel below it.
+   To add a tab: add a button to .info-tabs and a matching
+   .info-panel with the same data-panel name.
    ============================================================ */
-.instructions { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; overflow:hidden; margin-bottom:1.5rem; }
-.instructions > summary { list-style:none; cursor:pointer; padding:1.1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; font-family:'Cinzel',serif; font-weight:900; font-size:2rem; letter-spacing:0.02em; -webkit-tap-highlight-color:transparent; }
-.instructions > summary::-webkit-details-marker { display:none; }
-.instructions > summary:hover { background:var(--bg3); }
-.instructions .chevron { width:28px; height:28px; color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
-.instructions[open] > summary .chevron { transform:rotate(180deg); }
-.instructions-body { padding:0 1.25rem 1.25rem; border-top:1px solid var(--border); }
-.instructions-body p { font-size:17px; line-height:1.7; color:var(--text); margin-top:0.9rem; }
-.instructions-body p strong { color:var(--text); }
+.info-block { margin-bottom:1.5rem; }
+.info-tabs { display:flex; gap:6px; flex-wrap:wrap; position:relative; z-index:1; }
+.info-tab {
+  font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:0.02em;
+  padding:0.75rem 1.25rem; border:1px solid var(--border2); border-bottom:none;
+  border-radius:10px 10px 0 0; background:var(--bg3); color:var(--text);
+  cursor:pointer; margin-bottom:-1px; transition:background 0.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.info-tab:hover { background:#e8e4da; }
+.info-tab.active { background:var(--bg2); padding-bottom:calc(0.75rem + 1px); }
+.info-tab:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.info-panel {
+  display:none; background:var(--bg2); border:1px solid var(--border2);
+  border-radius:0 12px 12px 12px; padding:1.25rem 1.5rem 1.5rem;
+}
+.info-panel.active { display:block; }
+.info-panel p { font-size:17px; line-height:1.7; color:var(--text); margin-top:0.9rem; }
+.info-panel p:first-child { margin-top:0; }
+
+/* Lyric of the Day */
+.lyric-wrap { display:flex; flex-direction:column; align-items:center; text-align:center; padding:1rem 0.5rem 0.25rem; }
+.lyric-text {
+  font-family:'Barlow',sans-serif; font-style:italic; font-weight:500;
+  font-size:clamp(1.3rem,3vw,1.75rem); line-height:1.45; color:var(--text);
+  max-width:34ch; white-space:pre-line; transition:opacity 0.2s ease;
+}
+.lyric-source { font-size:17px; font-weight:600; margin-top:0.8rem; color:var(--text); transition:opacity 0.2s ease; }
+.lyric-wrap.fading .lyric-text, .lyric-wrap.fading .lyric-source { opacity:0; }
+.lyric-btn { margin-top:1.4rem; }
+/* About the Designer + Ko-fi card (light-theme version of the MeeplesDestiny tool card) */
+.about-text { max-width:68ch; }
+.kofi-card {
+  display:flex; align-items:center; gap:14px; margin-top:1.5rem; max-width:420px;
+  padding:10px 14px; border:1.5px solid var(--border2); border-radius:10px;
+  background:var(--bg2); color:var(--text); text-decoration:none;
+  transition:border-color 0.15s, background 0.15s;
+}
+.kofi-card:hover { border-color:var(--gold); background:var(--gold-light); }
+.kofi-card:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.kofi-icon { width:54px; height:54px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--gold-light); color:var(--gold-text); border-radius:8px; }
+.kofi-icon svg { width:62%; height:62%; }
+.kofi-info { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.kofi-name { font-size:17px; font-weight:700; letter-spacing:0.02em; }
+.kofi-desc { font-size:15px; line-height:1.4; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lyric-text, .lyric-source { transition:none; }
+}
 
 /* ============================================================
    TOOLBAR (save / export / import / print)
@@ -191,6 +234,10 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
 }
 @media (max-width: 640px) {
   .wrap { padding:1.5rem 1rem 2rem; }
+  .info-tabs { flex-wrap:nowrap; gap:4px; }
+  .info-tab { flex:1 1 0; font-size:15px; padding:0.6rem 0.4rem; line-height:1.2; text-align:center; }
+  .info-tab.active { padding-bottom:calc(0.6rem + 1px); }
+  .info-panel { border-radius:0 0 12px 12px; padding:1rem; }
   .panel-body { padding:1rem; }
   .album-grid { grid-template-columns:repeat(2, 1fr); }
 }
@@ -206,19 +253,45 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
 
 <div class="wrap">
 
-  <details class="instructions">
-    <summary>
-      <span>How this works</span>
-      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </summary>
-    <div class="instructions-body">
+  <div class="info-block">
+    <div class="info-tabs" role="tablist" aria-label="Page info">
+      <button type="button" class="info-tab active" role="tab" data-panel="lyric" aria-selected="true">Lyric of the Day</button>
+      <button type="button" class="info-tab" role="tab" data-panel="how" aria-selected="false">How This Works</button>
+      <button type="button" class="info-tab" role="tab" data-panel="about" aria-selected="false">About the Designer</button>
+    </div>
+
+    <div class="info-panel active" role="tabpanel" data-panel="lyric">
+      <div class="lyric-wrap" id="lyricWrap" aria-live="polite">
+        <div class="lyric-text" id="lyricText"></div>
+        <div class="lyric-source" id="lyricSource"></div>
+        <button type="button" class="btn lyric-btn" id="lyricNextBtn">New lyric</button>
+      </div>
+    </div>
+
+    <div class="info-panel" role="tabpanel" data-panel="how">
       <p><strong>1. Score songs.</strong> Click an album tile below to open its song list in the panel underneath the grid. Give each song a score from 0&ndash;5. The song and its score change color as you go &mdash; that's your running conditional formatting.</p>
       <p><strong>2. Watch albums rank themselves.</strong> Each tile shows a live average of that album's scored songs. The "My Favorite Albums" section below sorts all 12 highest to lowest, automatically.</p>
       <p><strong>3. Build your Eras Album.</strong> Check the box next to one song per album (plus one bonus pick from anywhere) to assemble a 13-track "Eras" playlist in the results section.</p>
       <p><strong>4. Build your Perfect Album.</strong> Every song you score a 5 shows up in the Perfect Album pool. Check 13 of them to fill your Perfect Album's 13 track slots.</p>
       <p><strong>5. Save your progress.</strong> Your scores auto-save in this browser as you go. Use <em>Save scores to file</em> to download a backup you can re-upload later (even on a different device or browser), and <em>Save PDF snapshot</em> to keep a dated printable copy of your results.</p>
     </div>
-  </details>
+
+    <div class="info-panel" role="tabpanel" data-panel="about">
+      <div class="about-text">
+        <p>My name is Rich and I’m an Over 50 Swiftie. I made this scoring tool as a Google Sheet that I posted for the TS Reddit community back before TLOAS came out. I recently changed it to be an interactive webpage so I could have more fun with it and Swifties like you could get more use out of it. (It’s most recently been updated to include the TLOAS: Encore songs.)</p>
+        <p>I used to work in country radio and met Taylor when she was 16, touring stations to promote her debut album. At the time, I worked simultaneously for KZLA radio in Los Angeles and a nationally syndicated show called AfterMidNite. She visited AfterMidNite and then the next night played at the Whisky. She was incredibly sweet and I’ve followed her career as a fan ever since.</p>
+        <p>Please share this page with your Swiftie friends and family (or randoms on social!).</p>
+        <p>I plan to keep updating this page’s features and will of course update the page with every new album or TV/deluxe version that adds new songs. If you like this page’s features and want to drop me a donation through Ko-fi, that’s much appreciated.</p>
+      </div>
+      <a class="kofi-card" href="https://ko-fi.com/guardianmeeples" target="_blank" rel="noopener">
+        <span class="kofi-icon"><svg fill="currentColor" aria-hidden="true" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.351 2.715c-2.7 0-4.986.025-6.83.26C2.078 3.285 0 5.154 0 8.61c0 3.506.182 6.13 1.585 8.493 1.584 2.701 4.233 4.182 7.662 4.182h.83c4.209 0 6.494-2.234 7.637-4a9.5 9.5 0 0 0 1.091-2.338C21.792 14.688 24 12.22 24 9.208v-.415c0-3.247-2.13-5.507-5.792-5.87-1.558-.156-2.65-.208-6.857-.208m0 1.947c4.208 0 5.09.052 6.571.182 2.624.311 4.13 1.584 4.13 4v.39c0 2.156-1.792 3.844-3.87 3.844h-.935l-.156.649c-.208 1.013-.597 1.818-1.039 2.546-.909 1.428-2.545 3.064-5.922 3.064h-.805c-2.571 0-4.831-.883-6.078-3.195-1.09-2-1.298-4.155-1.298-7.506 0-2.181.857-3.402 3.012-3.714 1.533-.233 3.559-.26 6.39-.26m6.547 2.287c-.416 0-.65.234-.65.546v2.935c0 .311.234.545.65.545 1.324 0 2.051-.754 2.051-2s-.727-2.026-2.052-2.026m-10.39.182c-1.818 0-3.013 1.48-3.013 3.142 0 1.533.858 2.857 1.949 3.897.727.701 1.87 1.429 2.649 1.896a1.47 1.47 0 0 0 1.507 0c.78-.467 1.922-1.195 2.623-1.896 1.117-1.039 1.974-2.364 1.974-3.897 0-1.662-1.247-3.142-3.039-3.142-1.065 0-1.792.545-2.338 1.298-.493-.753-1.246-1.298-2.312-1.298"/></svg></span>
+        <span class="kofi-info">
+          <span class="kofi-name">Support on Ko-fi</span>
+          <span class="kofi-desc">Leave a tip at ko-fi.com/guardianmeeples</span>
+        </span>
+      </a>
+    </div>
+  </div>
 
   <p class="toolbar-hint">Hover on Buttons for Info</p>
   <div class="toolbar">
@@ -315,7 +388,7 @@ const ALBUMS = [
   { num: 9, name: "Evermore", songs: ["Willow", "Champagne Problems", "Gold Rush", "'Tis the Damn Season", "Tolerate It", "No Body, No Crime (feat. Haim)", "Happiness", "Dorothea", "Coney Island (feat. the National)", "Ivy", "Cowboy like Me", "Long Story Short", "Marjorie", "Closure", "Evermore (feat. Bon Iver)", "Right Where You Left Me", "It's Time to Go"] },
   { num: 10, name: "Midnights", songs: ["Lavender Haze", "Maroon", "Anti-Hero", "Snow on the Beach (feat. Lana Del Rey)", "You're on Your Own, Kid", "Midnight Rain", "Question...?", "Vigilante Shit", "Bejeweled", "Labyrinth", "Karma", "Sweet Nothing", "Mastermind", "The Great War", "Bigger Than the Whole Sky", "Paris", "High Infidelity", "Glitch", "Would've, Could've, Should've", "Dear Reader", "Hits Different", "Snow on the Beach (feat. More Lana Del Rey)", "Karma (feat. Ice Spice)", "You're Losing Me (From the Vault)", "You're On Your Own Kid (strings remix)", "Sweet Nothing (Piano remix)"] },
   { num: 11, name: "The Tortured Poets Department", songs: ["Fortnight (feat. Post Malone)", "The Tortured Poets Department", "My Boy Only Breaks His Favorite Toys", "Down Bad", "So Long, London", "But Daddy I Love Him", "Fresh Out the Slammer", "Florida!!! (feat. Florence and the Machine)", "Guilty as Sin?", "Who's Afraid of Little Old Me?", "I Can Fix Him (No Really I Can)", "Loml", "I Can Do It with a Broken Heart", "The Smallest Man Who Ever Lived", "The Alchemy", "Clara Bow", "The Black Dog", "Imgonnagetyouback", "The Albatross", "Chloe or Sam or Sophia or Marcus", "How Did It End?", "So High School", "I Hate It Here", "Thank You Aimee", "I Look in People's Windows", "The Prophecy", "Cassandra", "Peter", "The Bolter", "Robin", "The Manuscript"] },
-  { num: 12, name: "The Life Of A Showgirl", songs: ["The Fate of Ophelia", "Elizabeth Taylor", "Opalite", "Father Figure", "Eldest Daughter", "Ruin the Friendship", "Actually Romantic", "Wi$h Li$t", "Wood", "CANCELLED!", "Honey", "The Life of a Showgirl (feat. Sabrina Carpenter)"] }
+  { num: 12, name: "The Life Of A Showgirl", songs: ["The Fate of Ophelia", "Elizabeth Taylor", "Opalite", "Father Figure", "Eldest Daughter", "Ruin the Friendship", "Actually Romantic", "Wi$h Li$t", "Wood", "CANCELLED!", "Honey", "The Life of a Showgirl (feat. Sabrina Carpenter)", "Patient Zero (Encore)", "Cleveland! (Encore)", "Pink Clouding (Encore)", "Babylon (Encore)"] }
 ];
 
 /* ============================================================
@@ -901,6 +974,148 @@ document.getElementById("resetModalConfirm").addEventListener("click", () => {
   renderResultsPanel();
   setStatus("Everything reset");
 });
+
+/* ============================================================
+   LYRIC OF THE DAY
+   One entry per song. Songs with an empty quotes list are
+   skipped automatically. Each song can have 1-4 quotes.
+   Selection is song-first: every eligible song has an equal
+   chance, then one of its quotes is picked at random. The
+   "New lyric" button never repeats the same song twice in a row.
+   Only songs that have at least one quote are listed here.
+   Line breaks inside a quote are written as \n.
+   ============================================================ */
+const LYRICS = [
+  // Taylor Swift
+  { song: "Mary's Song (Oh My My My)", quotes: ["And I'll be eighty-seven,\nyou'll be eighty-nine.", "Take me back when our world was one block wide,\nI dared you to kiss me and ran when you tried"] },
+  // Fearless (TV)
+  { song: "Fearless", quotes: ["And I don't know why, but with you,\nI'd dance In a storm, in my best dress", "It's the first kiss, it's flawless, really somethin'"] },
+  { song: "Fifteen", quotes: ["But in your life, you'll do things greater than dating the boy on the football team", "You sit in class next to a redhead named Abigail,\nand soon enough, you're best friends"] },
+  { song: "Love Story", quotes: ["You'll be the prince and I'll be the princess", "Baby, just say \"Yes'\""] },
+  { song: "Tell Me Why", quotes: ["And you might think I'm bulletproof, but I'm not"] },
+  { song: "Forever & Always", quotes: ["Oh, and it rains in your bedroom,\nEverything is wrong,"] },
+  { song: "Change", quotes: ["But I believe in whatever you do,\nAnd I'll do anything to see it through", "These walls that they put up to hold us back will fall down,\nThis revolution, the time will come\nFor us to finally win"] },
+  // Speak Now (TV)
+  { song: "Mine", quotes: ["You made a rebel of a careless man's careful daughter"] },
+  { song: "Sparks Fly", quotes: ["My mind forgets to remind me you're a bad idea", "Drop everything now,\nmeet me in the pouring rain"] },
+  { song: "Back to December", quotes: ["You gave me roses\nand I left them there to die", "It turns out freedom ain't nothing but missin' you,\nWishin' I'd realized what I had when you were mine"] },
+  { song: "Enchanted", quotes: ["Please, don't be in love with someone else,\nPlease, don't have somebody waitin' on you", "Your eyes whispered, \"Have we met?\"\nAcross the room, your silhouette\nStarts to make its way to me"] },
+  { song: "Better than Revenge", quotes: ["She thinks I'm psycho\n'cause I like to rhyme her name with things"] },
+  { song: "Long Live", quotes: ["I had the time of my life fighting dragons with you.", "If you have children some day,\nWhen they point to the pictures\nPlease, tell 'em my name"] },
+  { song: "Ours", quotes: ["So don't you worry your pretty little mind\nPeople throw rocks at things that shine"] },
+  { song: "Electric Touch (feat. Fall Out Boy) (From the Vault)", quotes: ["I've got my money on things goin' badly,\nGot a history of stories ending sadly", "All I know\nis this could either break my heart\nor bring it back to life"] },
+  { song: "When Emma Falls in Love (From the Vault)", quotes: ["Cause she's the kind of book that you can't put down\nLike if Cleopatra grew up in a small town"] },
+  { song: "I Can See You (From the Vault)", quotes: ["You won't believe half the things I see inside my head\nWait 'til you see half the things that haven’t happened yet"] },
+  { song: "Timeless (From the Vault)", quotes: ["Cause I believe that we were supposed to find this", "Time breaks down your mind and body\nDon't you let it touch your soul"] },
+  // Red (TV)
+  { song: "State of Grace", quotes: ["This is the worthwhile fight\nLove is a ruthless game\nUnless you play it good and right", "We fall in love 'til it hurts or bleeds or fades in time", "So you were never a saint and I loved in shades of wrong\nWe learn to live with the pain, mosaic broken hearts\nBut this love is brave and wild"] },
+  { song: "Red", quotes: ["Loving him is like driving a new Maserati down a dead-end street\nFaster than the wind, passionate as sin, ending so suddenly"] },
+  { song: "Treacherous", quotes: ["Put your lips close to mine\nAs long as they don't touch\nOut of focus, eye to eye\n'Til the gravity's too much"] },
+  { song: "I Knew You Were Trouble", quotes: ["Once upon a time, a few mistakes ago"] },
+  { song: "22", quotes: ["We're happy, free, confused, and lonely at the same time,\nIt's miserable and magical, oh yeah"] },
+  { song: "Holy Ground", quotes: ["Tonight, I'm gonna dance\nFor all that we've been through,\nBut I don't wanna dance If I'm not dancin' with you"] },
+  { song: "Begin Again", quotes: ["I've been spendin' the last eight months\nThinkin' all love ever does is break and burn and end"] },
+  { song: "The Moment I Knew", quotes: ["You should've been there"] },
+  { song: "Nothing New (feat. Phoebe Bridgers) (From the Vault)", quotes: ["How long will it be cute,\nall this cryin' in my room?", "And I wake up in the middle of the night\nIt's like I can feel time moving"] },
+  { song: "Forever Winter (From the Vault)", quotes: ["If I was standing there in your apartment\nI'd take that bomb in your head and disarm it", "His laugh is a symphony,\nwhen the lights go out,\nit's hard to breathe"] },
+  { song: "All Too Well (10 Minute Version) (From the Vault)", quotes: ["You kept me like a secret,\nbut I kept you like an oath.", "Check the pulse and come back swearin' it's the same,\nafter three months in the grave.", "Fuck the patriarchy.", "You who charmed my dad with self-effacing jokes\nSippin' coffee like you're on a late-night show\nBut then he watched me watch the front door all night, willin' you to come\nAnd he said, \"It's supposed to be fun turning twenty-one\""] },
+  // 1989 (TV)
+  { song: "Welcome to New York", quotes: ["The lights are so bright, but they never blind me", "And you can want who you want,\nBoys and boys and girls and girls", "It's a new soundtrack, I could dance to this beat"] },
+  { song: "Blank Space", quotes: ["You look like my next mistake", "I can make the bad guys good for a weekend", "Cause, darling, I'm a nightmare dressed like a daydream"] },
+  { song: "Style", quotes: ["And I got that red lip classic thing that you like", "And I got that good girl faith and a tight little skirt"] },
+  { song: "Out of the Woods", quotes: ["We were built to fall apart\nAnd fall back together"] },
+  { song: "All You Had to Do Was Stay", quotes: ["People like you always want back The love they pushed aside, But people like me are gone forever When you say goodbye"] },
+  { song: "Shake It Off", quotes: ["I go on too many dates\nBut I can't make them stay\nAt least, that's what people say", "Just think, while you've been gettin' down and out about the liars\nAnd the dirty, dirty cheats of the world\nYou could've been gettin' down to this sick beat"] },
+  { song: "Wildest Dreams", quotes: ["Say you'll remember me\nStandin' in a nice dress\nStarin' at the sunset, babe", "Someday, when you leave me I bet these memories\nFollow you around"] },
+  { song: "This Love", quotes: ["In silent screams, in wildest dreams I never dreamed of this"] },
+  { song: "I Know Places", quotes: ["Loose lips sink ships all the damn time"] },
+  { song: "Clean", quotes: ["The rain came pouring down\nWhen I was drownin', that's when I could finally breathe"] },
+  { song: "You Are in Love", quotes: ["You can hear it in the silence\nYou can feel it on the way home\nYou can see it with the lights out"] },
+  { song: "New Romantics", quotes: ["Cause, baby, I could build a castle\nOut of all the bricks they threw at me"] },
+  { song: "Is It Over Now? (From the Vault)", quotes: ["You dream of my mouth before it called you a lying traitor"] },
+  // reputation
+  { song: "…Ready for It?", quotes: ["And he can be my jailer,\nBurton to this Taylor\nEvery love I've known in comparison is a failure"] },
+  { song: "End Game (feat. Ed Sheeran and Future)", quotes: ["And I bury hatchets, but I keep maps of where I put 'em", "I swear I don't love the drama,\nit loves me"] },
+  { song: "I Did Something Bad", quotes: ["I never trust a playboy, but they love me\nSo I fly 'em all around the world And I let them think they saved me", "This is how the world works\nYou gotta leave before you get left", "They're burning all the witches, even if you aren't one"] },
+  { song: "Don't Blame Me", quotes: ["Lord, save me, my drug is my baby\nI'll be usin' for the rest of my life"] },
+  { song: "Look What You Made Me Do", quotes: ["Honey, I rose up from the dead, I do it all the time,\nI've got a list of names and yours is in red, underlined"] },
+  { song: "Gorgeous", quotes: ["Whisky on ice,\nSunset and Vine,\nYou've ruined my life by not bein' mine", "You make me so happy it turns back to sad,\nThere's nothin' I hate more than what I can't have"] },
+  { song: "King of My Heart", quotes: ["Salute to me, I'm your American queen\nAnd you move to me like I'm a Motown beat\nAnd we rule the kingdom inside my room", "The taste of your lips is my idea of luxury"] },
+  { song: "Dress", quotes: ["Say my name and everything just stops\nI don’t want you like a best friend"] },
+  { song: "This Is Why We Can't Have Nice Things", quotes: ["And there are no rules when you show up here\nBass beat rattling the chandelier\nFeelin' so Gatsby for that whole year", "And here's to you\nCause forgiveness is a nice thing to do ...\nHaha, I can't even say it with a straight face"] },
+  { song: "New Year's Day", quotes: ["Hold on to the memories,\nthey will hold on to you", "Please, don't ever become a stranger\nWhose laugh I could recognize anywhere", "Don't read the last page"] },
+  // Lover
+  { song: "I Forgot That You Existed", quotes: ["Got out some popcorn As soon as my rep started going down, down, down", "It isn't love,\nit isn't hate,\nit's just indifference"] },
+  { song: "Cruel Summer", quotes: ["And if I bleed, you'll be the last to know", "And I scream, \"For whatever it's worth\nI love you, ain't that the worst thing you ever heard?\""] },
+  { song: "Lover", quotes: ["And you'll save all your dirtiest jokes for me,\nAnd at every table, I'll save you a seat, lover", "Have I known you twenty seconds or twenty years?"] },
+  { song: "The Man", quotes: ["They’d say I hustled, put in the work,\nThey wouldn't shake their heads and question how much of this I deserve"] },
+  { song: "The Archer", quotes: ["I've got a hundred thrown-out speeches I almost said to you"] },
+  { song: "I Think He Knows", quotes: ["Lyrical smile, indigo eyes, hand on my thigh\nWe could follow the sparks, I'll drive"] },
+  { song: "Miss Americana & the Heartbreak Prince", quotes: ["The whole school is rolling fake dice\nYou play stupid games, you win stupid prizes"] },
+  { song: "Paper Rings", quotes: ["I hate accidents, except when we went from friends to this"] },
+  { song: "Death by a Thousand Cuts", quotes: ["I get drunk, but it's not enough\n’Cause the morning comes and you're not my baby", "You said it was a great love, one for the ages\nBut if the story’s over, why am I still writing pages?"] },
+  // folklore
+  { song: "The 1", quotes: ["In my defense, I have none"] },
+  // Midnights
+  { song: "Bejeweled", quotes: ["Nice!"] },
+  // The Tortured Poets Department
+  { song: "Guilty as Sin?", quotes: ["What if I roll the stone away?\nThey're gonna crucify me anyway"] },
+  { song: "The Smallest Man Who Ever Lived", quotes: ["WYSBSWWMDDYSWAGUOBWYWABWYASCSIFYWATBDAYCWYDIAISGRCIWSOIWFIWDFYSIIJDIAYDPBYWGTYSIIASTTBYCMPAYRCYSNGWBBYWGBTMYKOTSLBYSPAIPSYHBYAWYDAIFYBINFTSMWEL"] }
+];
+
+let lastLyricSong = null;
+
+function pickLyric() {
+  const eligible = LYRICS.filter(l => l.quotes && l.quotes.length > 0);
+  if (eligible.length === 0) return null;
+  // Exclude the song just shown, unless it's the only one available
+  const pool = eligible.length > 1 ? eligible.filter(l => l.song !== lastLyricSong) : eligible;
+  const entry = pool[Math.floor(Math.random() * pool.length)];
+  const quote = entry.quotes[Math.floor(Math.random() * entry.quotes.length)];
+  lastLyricSong = entry.song;
+  return { song: entry.song, quote };
+}
+
+function showLyric(animate) {
+  const wrap = document.getElementById("lyricWrap");
+  const textEl = document.getElementById("lyricText");
+  const srcEl = document.getElementById("lyricSource");
+  const apply = () => {
+    const pick = pickLyric();
+    if (!pick) {
+      textEl.textContent = "No lyrics added yet.";
+      srcEl.textContent = "";
+      return;
+    }
+    textEl.textContent = "\u201C" + pick.quote + "\u201D";
+    srcEl.textContent = "\u2014 " + pick.song;
+  };
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!animate || reduceMotion) { apply(); return; }
+  wrap.classList.add("fading");
+  setTimeout(() => { apply(); wrap.classList.remove("fading"); }, 200);
+}
+
+document.getElementById("lyricNextBtn").addEventListener("click", () => showLyric(true));
+
+/* ============================================================
+   INFO TABS
+   ============================================================ */
+document.querySelectorAll(".info-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const name = tab.dataset.panel;
+    document.querySelectorAll(".info-tab").forEach(t => {
+      const on = t === tab;
+      t.classList.toggle("active", on);
+      t.setAttribute("aria-selected", String(on));
+    });
+    document.querySelectorAll(".info-panel").forEach(p => {
+      p.classList.toggle("active", p.dataset.panel === name);
+    });
+  });
+});
+
+showLyric(false);
 
 loadState();
 renderAlbumGrid();
