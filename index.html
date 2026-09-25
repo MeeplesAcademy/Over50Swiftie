@@ -212,7 +212,14 @@ a { color: inherit; }
    ============================================================ */
 .panel { border:2px solid var(--border2); border-radius:12px; overflow:hidden; background:var(--bg2); margin-bottom:2.5rem; }
 .panel-placeholder { padding:2.5rem 1.25rem; text-align:center; color:var(--text); font-size:15px; }
-.panel-header { padding:0.9rem 1.25rem; display:flex; align-items:center; justify-content:space-between; font-size:1.1rem; font-weight:700; font-family:'Cinzel',serif; letter-spacing:0.02em; }
+.panel, .album-grid { scroll-margin-top:1rem; }
+.panel-header { padding:0.9rem 1.25rem; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:1rem; font-size:1.1rem; font-weight:700; font-family:'Cinzel',serif; letter-spacing:0.02em; }
+.panel-header-score { text-align:right; }
+.panel-close-note { font-family:'Barlow',sans-serif; font-size:15px; font-weight:500; font-style:italic; letter-spacing:0; text-align:center; opacity:0.95; }
+@media (max-width: 640px) {
+  .panel-header { grid-template-columns:1fr auto; row-gap:0.35rem; }
+  .panel-close-note { grid-column:1 / -1; grid-row:2; }
+}
 .panel-body { display:flex; gap:1.5rem; padding:1.25rem; flex-wrap:wrap; }
 .panel-cover { width:120px; height:120px; flex-shrink:0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.6rem; }
 .panel-songs { flex:1; min-width:260px; display:flex; flex-direction:column; gap:2px; }
@@ -608,7 +615,14 @@ function renderAlbumGrid() {
         '<div class="album-tile-score">Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</div>' +
         '<div class="album-tile-status ' + (complete ? "complete" : "incomplete") + '">' + (complete ? "Scoring Complete" : "Missing Song Scores") + '</div>' +
       '</div>';
-    tile.addEventListener("click", () => { activeAlbum = (activeAlbum === ai) ? null : ai; renderAlbumGrid(); renderPanel(); });
+    tile.addEventListener("click", () => {
+      activeAlbum = (activeAlbum === ai) ? null : ai;
+      renderAlbumGrid(); renderPanel();
+      if (activeAlbum !== null) {   // opened (or switched to) an album: jump to its songs. Closing stays put.
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        document.getElementById("albumPanel").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      }
+    });
     grid.appendChild(tile);
   });
   wireCoverFallbacks(grid);
@@ -651,7 +665,9 @@ function renderPanel() {
 
   panel.innerHTML =
     '<div class="panel-header" id="panelHeaderClose" title="Click to close" style="background:' + theme.base + '; color:#fff; cursor:pointer;">' +
-      '<span>' + album.name + '</span><span>Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</span>' +
+      '<span>' + album.name + '</span>' +
+      '<span class="panel-close-note">Click here to close this scoring screen.</span>' +
+      '<span class="panel-header-score">Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</span>' +
     '</div>' +
     '<div class="panel-body">' +
       '<div class="panel-cover" style="background:' + theme.light + '; color:' + theme.text + '; padding:0; overflow:hidden;">' + coverImgTag(activeAlbum, album, theme, "panel-cover") + '</div>' +
@@ -675,6 +691,9 @@ function renderPanel() {
     activeAlbum = null;
     renderAlbumGrid();
     renderPanel();
+    // Closing from the header: jump back up to the album tiles
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("albumGrid").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   });
 
   wireCoverFallbacks(panel);
