@@ -70,6 +70,9 @@ a { color: inherit; }
 .info-panel.active { display:block; }
 .info-panel p { font-size:17px; line-height:1.7; color:var(--text); margin-top:0.9rem; }
 .info-panel p:first-child { margin-top:0; }
+.score-key { list-style:none; margin:0.6rem 0 0 1.5rem; }
+.score-key li { font-size:17px; line-height:1.6; color:var(--text); margin-top:0.35rem; }
+.score-key strong { display:inline-block; min-width:2.2em; }
 
 /* Lyric of the Day */
 .lyric-wrap { display:flex; flex-direction:column; align-items:center; text-align:center; padding:1rem 0.5rem 0.25rem; }
@@ -335,11 +338,21 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
     </div>
 
     <div class="info-panel" role="tabpanel" data-panel="how">
-      <p><strong>1. Score songs.</strong> Click an album tile below to open its song list in the panel underneath the grid. Give each song a score from 0&ndash;5. The song and its score change color as you go &mdash; that's your running conditional formatting.</p>
-      <p><strong>2. Watch albums rank themselves.</strong> Each tile shows a live average of that album's scored songs. The "My Favorite Albums" section below sorts all 12 highest to lowest, automatically.</p>
-      <p><strong>3. Build your Eras Album.</strong> Check the box next to one song per album (plus one bonus pick from anywhere) to assemble a 13-track "Eras" playlist in the results section.</p>
-      <p><strong>4. Build your Perfect Album.</strong> Every song you score a 5 shows up in the Perfect Album pool. Check 13 of them to fill your Perfect Album's 13 track slots.</p>
-      <p><strong>5. Save your progress.</strong> Your scores auto-save in this browser as you go. Use <em>Save scores to file</em> to download a backup you can re-upload later (even on a different device or browser), and <em>Save PDF snapshot</em> to keep a dated printable copy of your results.</p>
+      <p><strong>1. Score songs.</strong> Click an album tile below to open its song list in the panel underneath the grid. Give each song a score from 0&ndash;5. The song and its score change color as you go.</p>
+      <ul class="score-key">
+        <li><strong>5</strong> = a potential Top 10 Fav of All Time. When anyone asks you &ldquo;What&rsquo;s your favorite TS song?&rdquo; these are the ones that come to mind first! (Can be more than 10 of these, of course!)</li>
+        <li><strong>4.5</strong> = almost a top 10 fav</li>
+        <li><strong>4</strong> = you love this but it might not be mentioned in your Top 10.</li>
+        <li><strong>3</strong> = a really good song, we still like these!</li>
+        <li><strong>2</strong> = these could be really good songs that you just don&rsquo;t vibe with, and likely would not make a playlist unless you&rsquo;re in the mood to hear them</li>
+        <li><strong>1</strong> = you wouldn&rsquo;t put these on any playlist you build, they are not for you</li>
+        <li><strong>0</strong> = your least favorites, obviously. We&rsquo;re not haters out here. But we&rsquo;re good without these.</li>
+      </ul>
+      <p><strong>2. Albums rank themselves.</strong> Each tile shows a live average of that album&rsquo;s scored songs. The &ldquo;My Favorite Albums&rdquo; results section below sorts all 12 highest to lowest, automatically. (NOTE: this is &ldquo;mathematically&rdquo; your favorite album order&hellip; but it doesn&rsquo;t change your heart&rsquo;s true album order. Your fav is still your fav!)</p>
+      <p><strong>3. Build your Eras Album.</strong> Check the box next to one song per album (plus one bonus pick from any album) to assemble a 13-track &ldquo;Eras&rdquo; playlist in the results section.</p>
+      <p><strong>4. Build your Perfect Album.</strong> Every song you score as a 5 shows up in the &ldquo;Perfect Album&rdquo; pool in the Results section below. Choose 13 of those songs (choices are hard!) to fill your Perfect Album&rsquo;s 13 track slots.</p>
+      <p><strong>5. SAVE your progress.</strong> Your scores auto-save in this browser as you go. Use the <em>Save scores to file</em> button to download a backup you can re-upload later (even on a different device or browser), and <em>Print / Save PDF Snapshot</em> to keep a dated printable copy of your results.</p>
+      <p><strong>6. HAVE FUN!</strong> Play the lyrics game and see how you do. More lyrics will be updated/included soon. And when TS13, Debut TV or Rep TV drop, this site will be updated to include new tracks and vault tracks.</p>
     </div>
 
     <div class="info-panel" role="tabpanel" data-panel="about">
@@ -348,7 +361,7 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
         <p>I used to work in country radio and met Taylor when she was 16, touring stations to promote her debut album. At the time, I worked simultaneously for KZLA radio in Los Angeles and a nationally syndicated show called AfterMidNite. She visited AfterMidNite and then the next night played at the Whisky. She was incredibly sweet and I’ve followed her career as a fan ever since.</p>
         <p>Please share this page with your Swiftie friends and family (or randoms on social!).</p>
         <p>If you have any questions or suggestions, email me at <a class="contact-email" id="contactEmail" href="#">info (at) over50swiftie (dot) com</a>.</p>
-        <p>I plan to keep updating this page’s features and will of course update the page with every new album or TV/deluxe version that adds new songs. If you like this page’s features and want to drop me a donation through Ko-fi, that’s much appreciated.</p>
+        <p>I plan to keep updating this page’s features and will of course update the page with every new album or TV/deluxe version that adds new songs. I was laid off last year the day TLOAS dropped (!) and was thankful to have a banger album to vibe to and counter the major bummer of that news. I did this as a fun project while looking for work. If you like this page’s features and want to drop me a donation through Ko-fi, that’s much appreciated.</p>
       </div>
       <a class="kofi-card" href="https://ko-fi.com/over50swiftie" target="_blank" rel="noopener">
         <span class="kofi-icon"><svg fill="currentColor" aria-hidden="true" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.351 2.715c-2.7 0-4.986.025-6.83.26C2.078 3.285 0 5.154 0 8.61c0 3.506.182 6.13 1.585 8.493 1.584 2.701 4.233 4.182 7.662 4.182h.83c4.209 0 6.494-2.234 7.637-4a9.5 9.5 0 0 0 1.091-2.338C21.792 14.688 24 12.22 24 9.208v-.415c0-3.247-2.13-5.507-5.792-5.87-1.558-.156-2.65-.208-6.857-.208m0 1.947c4.208 0 5.09.052 6.571.182 2.624.311 4.13 1.584 4.13 4v.39c0 2.156-1.792 3.844-3.87 3.844h-.935l-.156.649c-.208 1.013-.597 1.818-1.039 2.546-.909 1.428-2.545 3.064-5.922 3.064h-.805c-2.571 0-4.831-.883-6.078-3.195-1.09-2-1.298-4.155-1.298-7.506 0-2.181.857-3.402 3.012-3.714 1.533-.233 3.559-.26 6.39-.26m6.547 2.287c-.416 0-.65.234-.65.546v2.935c0 .311.234.545.65.545 1.324 0 2.051-.754 2.051-2s-.727-2.026-2.052-2.026m-10.39.182c-1.818 0-3.013 1.48-3.013 3.142 0 1.533.858 2.857 1.949 3.897.727.701 1.87 1.429 2.649 1.896a1.47 1.47 0 0 0 1.507 0c.78-.467 1.922-1.195 2.623-1.896 1.117-1.039 1.974-2.364 1.974-3.897 0-1.662-1.247-3.142-3.039-3.142-1.065 0-1.792.545-2.338 1.298-.493-.753-1.246-1.298-2.312-1.298"/></svg></span>
