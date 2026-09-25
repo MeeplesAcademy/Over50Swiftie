@@ -282,9 +282,12 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
    ============================================================ */
 #printSnapshot { display:none; }
 @media print {
-  body * { visibility: hidden; }
-  #printSnapshot, #printSnapshot * { visibility: visible; }
-  #printSnapshot { display:block; position:absolute; top:0; left:0; width:100%; padding:1rem; }
+  /* Remove everything except the snapshot from the printout entirely
+     (display:none, not visibility:hidden, so hidden parts take up no
+     pages and no hover tooltip can sneak back in). */
+  body > *:not(#printSnapshot) { display:none !important; }
+  .btn-tooltip, .info-tooltip { display:none !important; }
+  #printSnapshot { display:block; position:static; width:100%; padding:1rem; }
   .print-section { margin-bottom: 1.5rem; page-break-inside: avoid; }
   .print-h1 { font-size: 22px; font-weight:700; margin-bottom: 4px; }
   .print-h2 { font-size: 16px; font-weight:700; margin: 14px 0 6px; border-bottom: 1px solid #ccc; padding-bottom:3px; }
