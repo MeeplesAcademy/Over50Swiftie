@@ -262,6 +262,21 @@ a { color: inherit; }
 .fav-thumb { width:40px; height:40px; border-radius:6px; overflow:hidden; flex-shrink:0; }
 .fav-name { flex:1; font-size:20px; font-weight:600; }
 .fav-score { font-size:20px; font-weight:700; font-family:'Cinzel',serif; }
+.results-panel-body p.hint.fav-hint { font-size:17px; font-weight:600; }
+.fav-jump { flex-shrink:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; border:none; border-radius:8px; background:transparent; cursor:pointer; transition:background 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
+.fav-jump:hover { background:rgba(255,255,255,0.22); transform:translateY(-1px); }
+.fav-jump:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+.fav-jump svg { width:24px; height:24px; }
+/* Custom tooltip: the browser's built-in title tooltip has a fixed ~1s delay we can't change */
+.fav-jump { position:relative; }
+.fav-jump::after {
+  content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); right:0;
+  white-space:nowrap; background:var(--text); color:#fff; font-family:'Barlow',sans-serif;
+  font-size:15px; font-weight:500; line-height:1.4; padding:6px 10px; border-radius:8px;
+  opacity:0; visibility:hidden; pointer-events:none; z-index:10;
+  transition:opacity 0.1s ease 0.15s, visibility 0s linear 0.15s;
+}
+.fav-jump:hover::after, .fav-jump:focus-visible::after { opacity:1; visibility:visible; }
 
 .eras-list, .perfect-pool { display:flex; flex-direction:column; gap:2px; }
 .eras-counter, .perfect-counter { font-size:15px; font-weight:600; margin-bottom:0.75rem; }
@@ -272,6 +287,8 @@ a { color: inherit; }
 .perfect-slot { display:flex; align-items:center; gap:8px; padding:6px 9px; border-radius:6px; background:var(--bg3); margin-bottom:4px; font-size:15px; }
 .perfect-slot-num { font-weight:700; width:18px; flex-shrink:0; }
 .perfect-slot.empty { color:var(--muted); font-style:italic; }
+/* Bold song titles on the solid album colors so dark text stays crisp on mid-tone colors (1989, folklore) */
+.perfect-pool .song-title, .perfect-slot:not(.empty) { font-weight:600; }
 
 /* ============================================================
    FOOTER
@@ -359,8 +376,9 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
       <div class="about-text">
         <p>My name is Rich and I’m an Over 50 Swiftie. I made this scoring tool as a Google Sheet that I posted for the TS Reddit community back before TLOAS came out. I recently changed it to be an interactive webpage so I could have more fun with it and Swifties like you could get more use out of it. (It’s most recently been updated to include the TLOAS: The Encore songs.)</p>
         <p>I used to work in country radio and met Taylor when she was 16, touring stations to promote her debut album. At the time, I worked simultaneously for KZLA radio in Los Angeles and a nationally syndicated show called AfterMidNite. She visited AfterMidNite and then the next night played at the Whisky. She was incredibly sweet and I’ve followed her career as a fan ever since.</p>
+        <p>I decided to make this when a Swiftie friend asked me my 3 favorite albums, and I named them, but then questioned myself on the order. So I made a spreadsheet, scored them all and sorted it. I was surprised to find the top 3 were still the top 3, but in a different order (mathematically). I’ve had fun updating and iterating on this since then (and of course the order has changed as some song scores have changed and we’ve gotten 2 new albums since then)!</p>
         <p>Please share this page with your Swiftie friends and family (or randoms on social!).</p>
-        <p>If you have any questions or suggestions, email me at <a class="contact-email" id="contactEmail" href="#">info (at) over50swiftie (dot) com</a>.</p>
+        <p>If you have any questions, suggestions, or find any errors, email me at <a class="contact-email" id="contactEmail" href="#">info (at) over50swiftie (dot) com</a>.</p>
         <p>I plan to keep updating this page’s features and will of course update the page with every new album or TV/deluxe version that adds new songs. I was laid off last year the day TLOAS dropped (!) and was thankful to have a banger album to vibe to and counter the major bummer of that news. I did this as a fun project while looking for work. If you like this page’s features and want to drop me a donation through Ko-fi, that’s much appreciated.</p>
       </div>
       <a class="kofi-card" href="https://ko-fi.com/over50swiftie" target="_blank" rel="noopener">
@@ -480,21 +498,23 @@ const ALBUMS = [
    ALBUM THEME COLORS  <-- REPLACE THESE WITH YOUR OWN HEX CODES
    base = tab/header color, light = cover/background tint,
    text = dark readable text color for use on the light tint.
+   on   = text color that stays readable ON the solid base color
+          (white for dark bases, #1a1a1a for light ones like Fearless/Lover).
    Keyed by album name so you can swap them freely.
    ============================================================ */
 const ALBUM_THEMES = {
-  "Taylor Swift":                     { base: "#3f6b4a", light: "#e3ecdf", text: "#274430" },
-  "Fearless (TV)":                    { base: "#c9a24a", light: "#f7ecd3", text: "#6b4f14" },
-  "Speak Now (TV)":                   { base: "#7a3f8f", light: "#ecdcf2", text: "#4a2258" },
-  "Red (TV)":                         { base: "#8f2a2a", light: "#f5dcdc", text: "#5c1a1a" },
-  "1989 (TV)":                        { base: "#4a90c9", light: "#dceefa", text: "#1e4d70" },
-  "reputation":                       { base: "#2b2b2b", light: "#dcdcdc", text: "#1a1a1a" },
-  "Lover":                            { base: "#e78bb0", light: "#fce6ef", text: "#8a3a5a" },
-  "folklore":                         { base: "#8a8a80", light: "#e8e7e2", text: "#4d4d46" },
-  "Evermore":                         { base: "#7a5a3a", light: "#ecdfc9", text: "#4a3418" },
-  "Midnights":                        { base: "#2f3a63", light: "#dbe0f0", text: "#1c2440" },
-  "The Tortured Poets Department":    { base: "#5a5a52", light: "#e6e5df", text: "#333330" },
-  "The Life Of A Showgirl":           { base: "#D73F00", light: "#fbe0d1", text: "#7a2400" }
+  "Taylor Swift":                     { base: "#3f6b4a", light: "#e3ecdf", text: "#274430", on: "#ffffff" },
+  "Fearless (TV)":                    { base: "#c9a24a", light: "#f7ecd3", text: "#6b4f14", on: "#1a1a1a" },
+  "Speak Now (TV)":                   { base: "#7a3f8f", light: "#ecdcf2", text: "#4a2258", on: "#ffffff" },
+  "Red (TV)":                         { base: "#8f2a2a", light: "#f5dcdc", text: "#5c1a1a", on: "#ffffff" },
+  "1989 (TV)":                        { base: "#4a90c9", light: "#dceefa", text: "#1e4d70", on: "#1a1a1a" },
+  "reputation":                       { base: "#2b2b2b", light: "#dcdcdc", text: "#1a1a1a", on: "#ffffff" },
+  "Lover":                            { base: "#e78bb0", light: "#fce6ef", text: "#8a3a5a", on: "#1a1a1a" },
+  "folklore":                         { base: "#8a8a80", light: "#e8e7e2", text: "#4d4d46", on: "#1a1a1a" },
+  "Evermore":                         { base: "#7a5a3a", light: "#ecdfc9", text: "#4a3418", on: "#ffffff" },
+  "Midnights":                        { base: "#2f3a63", light: "#dbe0f0", text: "#1c2440", on: "#ffffff" },
+  "The Tortured Poets Department":    { base: "#5a5a52", light: "#e6e5df", text: "#333330", on: "#ffffff" },
+  "The Life Of A Showgirl":           { base: "#D73F00", light: "#fbe0d1", text: "#7a2400", on: "#ffffff" }
 };
 
 /* ============================================================
@@ -805,20 +825,32 @@ function renderResultsPanel() {
     const rows = ranked.map((r, rank) => {
       const theme = ALBUM_THEMES[r.name] || { base: "#888", light: "#eee", text: "#333" };
       const album = ALBUMS[r.ai];
-      return '<div class="fav-row" style="background:' + theme.light + ';">' +
-        '<span class="fav-rank" style="color:' + theme.text + ';">' + (rank + 1) + '</span>' +
+      const onColor = theme.on || "#ffffff";
+      return '<div class="fav-row" style="background:' + theme.base + ';">' +
+        '<span class="fav-rank" style="color:' + onColor + ';">' + (rank + 1) + '</span>' +
         '<span class="fav-thumb">' + coverImgTag(r.ai, album, theme, "fav-thumb") + '</span>' +
-        '<span class="fav-name" style="color:' + theme.text + ';">' + r.name + '</span>' +
-        '<span class="fav-score" style="color:' + theme.text + ';">' + (r.avg === null ? "\u2013" : r.avg.toFixed(2)) + '</span>' +
+        '<span class="fav-name" style="color:' + onColor + ';">' + r.name + '</span>' +
+        '<span class="fav-score" style="color:' + onColor + ';">' + (r.avg === null ? "\u2013" : r.avg.toFixed(2)) + '</span>' +
+        '<button type="button" class="fav-jump" data-jump-album="' + r.ai + '" style="color:' + onColor + ';" data-tip="Review ' + r.name + ' scores" aria-label="Open ' + r.name + ' scores">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>' +
+        '</button>' +
       '</div>';
     }).join("");
     panel.innerHTML =
       '<div class="results-panel-header" style="background:linear-gradient(90deg, ' + favoritesGradient() + '); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.45);">My Favorite Albums</div>' +
       '<div class="results-panel-body">' +
-        '<p class="hint">All 12 albums, sorted by your live average score, highest to lowest. Ties keep spreadsheet (release) order.</p>' +
+        '<p class="hint fav-hint">All 12 albums, sorted by your live average score, highest to lowest. Ties keep album release order. Click an album\'s arrow to jump back to review your scores. (Remember, this is just the math ranking based on your scores. Your true fav album order is still what you decide.)</p>' +
         rows +
       '</div>';
     wireCoverFallbacks(panel);
+    panel.querySelectorAll("[data-jump-album]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeAlbum = Number(btn.dataset.jumpAlbum);   // always opens (never toggles closed)
+        renderAlbumGrid(); renderPanel();
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        document.getElementById("albumPanel").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      });
+    });
     return;
   }
 
@@ -837,10 +869,10 @@ function renderResultsPanel() {
         const [ai, si] = id.split("-").map(Number);
         const album = ALBUMS[ai];
         const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
-        return '<div class="fav-row" style="background:' + theme.light + ';">' +
-          '<span class="fav-swatch" style="background:' + theme.base + ';"></span>' +
-          '<span class="fav-name" style="color:' + theme.text + ';">' + album.songs[si] + '</span>' +
-          '<span class="fav-score" style="color:' + theme.text + ';">' + album.name + '</span>' +
+        const onColor = theme.on || "#ffffff";
+        return '<div class="fav-row" style="background:' + theme.base + ';">' +
+          '<span class="fav-name" style="color:' + onColor + ';">' + album.songs[si] + '</span>' +
+          '<span class="fav-score" style="color:' + onColor + ';">' + album.name + '</span>' +
         '</div>';
       }).join("");
       if (count > 13) {
@@ -876,7 +908,7 @@ function renderResultsPanel() {
       const checked = state.perfect.includes(f.id);
       return '<div class="song-row">' +
         '<input type="checkbox" data-perfect-id="' + f.id + '" ' + (checked ? "checked" : "") + '>' +
-        '<span class="song-title" style="background:' + theme.light + '; color:' + theme.text + ';">' + f.title + '</span>' +
+        '<span class="song-title" style="background:' + theme.base + '; color:' + (theme.on || "#ffffff") + ';">' + f.title + '</span>' +
         '<span class="fav-score" style="color:' + theme.text + '; font-size:15px;">' + f.album + '</span>' +
       '</div>';
     }).join("");
@@ -889,7 +921,7 @@ function renderResultsPanel() {
     if (id) {
       const f = fives.find(x => x.id === id);
       const theme = f ? (ALBUM_THEMES[f.album] || { light: "var(--bg3)", text: "var(--text)" }) : { light: "var(--bg3)", text: "var(--text)" };
-      slotsHtml += '<div class="perfect-slot" style="background:' + theme.light + '; color:' + theme.text + ';"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>' + (f ? f.title + " \u2014 " + f.album : "") + '</span></div>';
+      slotsHtml += '<div class="perfect-slot" style="background:' + (theme.base || theme.light) + '; color:' + (theme.on || theme.text) + ';"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>' + (f ? f.title + " \u2014 " + f.album : "") + '</span></div>';
     } else {
       slotsHtml += '<div class="perfect-slot empty"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>empty slot</span></div>';
     }
@@ -1086,7 +1118,7 @@ const LYRICS = [
   // Taylor Swift
   { song: "Mary's Song (Oh My My My)", quotes: ["And I'll be eighty-seven,\nyou'll be eighty-nine.", "Take me back when our world was one block wide,\nI dared you to kiss me and ran when you tried"] },
   // Fearless (TV)
-  { song: "Fearless", quotes: ["And I don't know why, but with you,\nI'd dance In a storm, in my best dress", "It's the first kiss, it's flawless, really somethin'"] },
+  { song: "Fearless", quotes: ["And I don't know why, but with you, I'd dance\nIn a storm, in my best dress", "It's the first kiss, it's flawless, really somethin'"] },
   { song: "Fifteen", quotes: ["But in your life, you'll do things greater than dating the boy on the football team", "You sit in class next to a redhead named Abigail,\nand soon enough, you're best friends"] },
   { song: "Love Story", quotes: ["You'll be the prince and I'll be the princess", "Baby, just say ‘Yes'’"] },
   { song: "Tell Me Why", quotes: ["And you might think I'm bulletproof, but I'm not"] },
