@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Taylor Swift Song &amp; Album Scoring</title>
+<title>Taylor Swift Song Scoring &amp; Ranking</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
 <style>
@@ -38,7 +38,9 @@ a { color: inherit; }
 .page-header { text-align:center; padding:2.5rem 1.5rem 1.5rem; border-bottom:1px solid var(--border); background:var(--bg2); }
 .page-title { font-family:'Cinzel',serif; font-size:clamp(1.6rem,4vw,2.8rem); font-weight:900; letter-spacing:0.03em; color:var(--text); line-height:1.15; }
 .page-sub { font-size:clamp(1rem,2.2vw,1.25rem); font-weight:600; color:var(--text); letter-spacing:0.03em; text-transform:uppercase; margin-top:0.5rem; }
-.page-note { font-size:17px; color:var(--text); margin-top:1rem; line-height:1.7; max-width:640px; margin-left:auto; margin-right:auto; }
+/* Each intro sentence sits on its own line; long ones wrap evenly on phones */
+.page-note .note-line { display:block; text-wrap:balance; }
+.page-note { font-size:17px; color:var(--text); margin-top:1rem; line-height:1.7; max-width:720px; margin-left:auto; margin-right:auto; }
 
 /* ============================================================
    SHARED LAYOUT WRAP
@@ -70,6 +72,23 @@ a { color: inherit; }
 .info-panel.active { display:block; }
 .info-panel p { font-size:17px; line-height:1.7; color:var(--text); margin-top:0.9rem; }
 .info-panel p:first-child { margin-top:0; }
+.how-choose { align-items:center; }
+.how-choose-word { font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--text); }
+.how-choose-dot { margin-left:-6px; }
+.how-heading { font-size:17px; font-weight:700; letter-spacing:0.04em; margin-bottom:0.5rem; }
+.score-table { border-collapse:collapse; margin:0.9rem 0 0.25rem; width:100%; }
+.score-table th { width:64px; padding:6px 12px 6px 0; vertical-align:top; text-align:left; }
+.score-table td { font-size:17px; line-height:1.6; padding:6px 0; border-bottom:1px solid var(--border); vertical-align:top; }
+.score-table tr:last-child td { border-bottom:none; }
+.score-swatch { display:inline-block; min-width:48px; text-align:center; font-size:17px; font-weight:700; padding:3px 8px; border-radius:6px; background:var(--bg3); }
+.how-note { background:var(--gold-light); border-radius:8px; padding:0.75rem 1rem; }
+.inline-pill-btn {
+  font-family:'Barlow',sans-serif; font-size:16px; font-weight:700; letter-spacing:0.02em;
+  padding:6px 16px; border:1.5px solid var(--text); border-radius:999px; background:var(--bg2); color:var(--text);
+  cursor:pointer; vertical-align:baseline;
+}
+.inline-pill-btn:hover { background:var(--text); color:#fff; }
+.inline-pill-btn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 .score-key { list-style:none; margin:0.6rem 0 0 1.5rem; }
 .score-key li { font-size:17px; line-height:1.6; color:var(--text); margin-top:0.35rem; }
 .score-key strong { display:inline-block; min-width:2.2em; }
@@ -88,6 +107,8 @@ a { color: inherit; }
 .about-text { max-width:none; }
 .contact-email { color:var(--gold-text); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
 .contact-email:hover { color:var(--text); }
+.social-link { color:var(--gold-text); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
+.social-link:hover { color:var(--text); }
 .kofi-card {
   display:flex; align-items:center; gap:14px; margin-top:1.5rem; max-width:420px;
   padding:10px 14px; border:1.5px solid var(--border2); border-radius:10px;
@@ -101,6 +122,32 @@ a { color: inherit; }
 .kofi-info { display:flex; flex-direction:column; gap:3px; min-width:0; }
 .kofi-name { font-size:17px; font-weight:700; letter-spacing:0.02em; }
 .kofi-desc { font-size:15px; line-height:1.4; }
+/* Behind the Scenes sub-tabs (pill style, so they read as a second level under the folder tabs) */
+.sub-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+.sub-tab {
+  font-family:'Barlow',sans-serif; font-size:16px; font-weight:600; letter-spacing:0.02em;
+  padding:6px 16px; border:1.5px solid var(--border2); border-radius:999px;
+  background:var(--bg2); color:var(--text); cursor:pointer;
+  transition:background 0.15s, border-color 0.15s; -webkit-tap-highlight-color:transparent;
+}
+.sub-tab:hover { background:var(--bg3); border-color:var(--muted); }
+.sub-tab.active { background:var(--text); color:#fff; border-color:var(--text); }
+.sub-tab:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.sub-panel { display:none; }
+.sub-panel.active { display:block; }
+/* Updates scroll window: grows with entries up to max-height, then scrolls inside */
+.updates-scroll {
+  max-height:360px; overflow-y:auto; overscroll-behavior:contain;
+  padding-right:0.75rem; scrollbar-gutter:stable;
+}
+.updates-scroll:focus-visible { outline:2px solid var(--gold); outline-offset:4px; border-radius:4px; }
+/* Updates tab: entries are written by hand in the HTML, newest first */
+.updates-list { list-style:none; }
+.updates-list li { padding:0.75rem 0; border-bottom:1px solid var(--border); }
+.updates-list li:first-child { padding-top:0; }
+.updates-list li:last-child { border-bottom:none; padding-bottom:0; }
+.update-date { display:block; font-size:15px; font-weight:700; color:var(--gold-text); letter-spacing:0.02em; }
+.update-text { display:block; font-size:17px; line-height:1.7; color:var(--text); margin-top:0.15rem; }
 
 @media (prefers-reduced-motion: reduce) {
   .lyric-text, .lyric-source { transition:none; }
@@ -153,6 +200,9 @@ a { color: inherit; }
 .quiz-missed-item { background:var(--bg3); border-radius:10px; padding:10px 14px; margin-bottom:8px; font-size:16px; line-height:1.5; }
 .quiz-missed-item .ml { font-style:italic; white-space:pre-line; display:block; }
 .quiz-missed-item .ms { font-weight:700; display:block; margin-top:4px; }
+/* Opt-in wrapping for single giant "words" (e.g. the TSMWEL acronym).
+   Only applied to LYRICS entries flagged breakAll: true. */
+.break-anywhere { overflow-wrap:anywhere; word-break:break-all; }
 @media (max-width: 640px) {
   .quiz-card { padding:1rem; }
   .quiz-options { grid-template-columns:1fr; }
@@ -207,6 +257,7 @@ a { color: inherit; }
 .album-tile-status { font-size:13px; margin-top:3px; font-weight:600; }
 .album-tile-status.incomplete { color:#a35c1d; }
 .album-tile-status.complete { color:#2e7d32; }
+.album-tile-status.ranked-status { color:inherit; opacity:0.9; }
 .album-tile-info.active .album-tile-status.incomplete { color:#ffd9a8; }
 .album-tile-info.active .album-tile-status.complete { color:#c7f0c2; }
 
@@ -234,6 +285,57 @@ a { color: inherit; }
 .info-icon-wrap:hover .info-tooltip, .info-icon-wrap.show .info-tooltip { display:block; }
 .song-row { display:flex; align-items:center; gap:10px; padding:6px 4px; border-bottom:1px solid var(--border); }
 .song-row input[type="checkbox"] { flex-shrink:0; width:16px; height:16px; cursor:pointer; }
+/* Album panel view tabs (Song Scoring / Song Ranking): folder tabs that join the panel body */
+.panel-tabs { display:flex; gap:6px; flex-wrap:wrap; padding:0.6rem 1.25rem 0; border-bottom:2px solid; }
+.panel-tab {
+  font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:0.02em;
+  padding:0.55rem 1.1rem; border:2px solid transparent; border-bottom:none; border-radius:10px 10px 0 0;
+  background:transparent; cursor:pointer; margin-bottom:-2px; -webkit-tap-highlight-color:transparent;
+}
+.panel-tab:hover:not(.active) { background:rgba(255,255,255,0.55); }
+.panel-tab.active { background:var(--bg2); padding-bottom:calc(0.55rem + 2px); }
+.panel-tab:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.track-num { width:24px; flex-shrink:0; text-align:right; font-size:15px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
+.score-chip { flex-shrink:0; min-width:40px; text-align:center; font-size:15px; font-weight:600; padding:3px 6px; border-radius:6px; }
+
+/* Song Ranking tab */
+.rank-intro { margin-bottom:1.25rem; }
+.rank-hint { font-size:15px; line-height:1.6; color:var(--text); }
+.rank-tools { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:0.85rem; }
+.btn:disabled, .btn:disabled:hover { opacity:0.45; cursor:not-allowed; background:var(--bg2); border-color:var(--border2); }
+/* One shared grid: row --r on the left and right always match heights */
+.rank-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); column-gap:1.5rem; }
+.rank-grid > * { grid-row:var(--r); min-width:0; }
+.rank-grid > .L { grid-column:1; }
+.rank-grid > .R { grid-column:2; }
+.rank-grid.list-hidden > .rank-slot { display:none; }
+.rank-col-head { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; font-family:'Cinzel',serif; font-weight:700; font-size:17px; padding:0 4px 8px; border-bottom:2px solid var(--border2); scroll-margin-top:1rem; }
+.rank-head-btns { display:flex; gap:6px; flex-wrap:wrap; }
+.rank-col-head .btn { font-size:15px; padding:6px 12px; }
+.rank-hidden-note { font-size:15px; font-style:italic; color:var(--text); padding:8px 4px; }
+/* Track rows and rank slots share the exact same row recipe */
+.rank-track, .rank-slot { display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px solid var(--border); min-height:44px; }
+.rank-num { width:24px; flex-shrink:0; text-align:right; font-size:15px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; }
+.rank-empty { flex:1; color:var(--muted); font-style:italic; font-size:15px; padding:4px 9px; }
+.rank-select.is-ranked { font-weight:700; border-color:var(--text); }
+.rank-actions { display:flex; gap:4px; flex-shrink:0; }
+.rank-btn {
+  width:28px; height:28px; display:flex; align-items:center; justify-content:center; padding:0;
+  font-size:14px; line-height:1; border:1.5px solid var(--border2); border-radius:6px;
+  background:var(--bg2); color:var(--text); cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.rank-btn:hover:not(:disabled) { background:var(--bg3); border-color:var(--muted); }
+.rank-btn:disabled { opacity:0.3; cursor:default; }
+.rank-btn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+.rank-remove { color:#c0392b; }
+/* Jump buttons only matter when the lists are stacked (phones/tablets) */
+.rank-jump { display:none; }
+@media (max-width: 900px) {
+  .rank-grid { grid-template-columns:1fr; }
+  .rank-grid > *, .rank-grid > .L, .rank-grid > .R { grid-row:auto; grid-column:1; }
+  .rank-grid > .L.rank-col-head { margin-top:1.5rem; }
+  .rank-jump { display:inline-flex; }
+}
 .song-title { flex:1; font-size:15px; padding:4px 9px; border-radius:6px; background:var(--bg3); color:var(--text); }
 .song-title.scored-0 { text-decoration:line-through; opacity:0.7; }
 .song-select { font-family:'Barlow',sans-serif; font-size:13px; font-weight:600; padding:4px 6px; border-radius:6px; border:1.5px solid var(--border2); background:var(--bg3); color:var(--text); min-width:52px; text-align:center; cursor:pointer; }
@@ -279,13 +381,19 @@ a { color: inherit; }
 .fav-jump:hover::after, .fav-jump:focus-visible::after { opacity:1; visibility:visible; }
 
 .eras-list, .perfect-pool { display:flex; flex-direction:column; gap:2px; }
+.results-sub-tabs { margin-bottom:1rem; }
+.fav-row.ones-empty { background:var(--bg2); border:2px dashed; }
+.ones-empty-text { color:var(--text); font-style:italic; font-weight:500; }
 .eras-counter, .perfect-counter { font-size:15px; font-weight:600; margin-bottom:0.75rem; }
 .eras-counter.over, .perfect-counter.over { color:#a32d2d; }
 .perfect-columns { display:flex; gap:1.5rem; flex-wrap:wrap; }
 .perfect-pool-col { flex:1; min-width:260px; }
 .perfect-slots-col { flex:1; min-width:220px; }
 .perfect-slot { display:flex; align-items:center; gap:8px; padding:6px 9px; border-radius:6px; background:var(--bg3); margin-bottom:4px; font-size:15px; }
-.perfect-slot-num { font-weight:700; width:18px; flex-shrink:0; }
+.perfect-slot-num { font-weight:700; width:24px; flex-shrink:0; }
+.perfect-slot-title { flex:1; min-width:0; }
+.perfect-slot:not(.empty) { min-height:42px; padding-top:5px; padding-bottom:5px; }
+.perfect-slot.empty { min-height:42px; }
 .perfect-slot.empty { color:var(--muted); font-style:italic; }
 /* Bold song titles on the solid album colors so dark text stays crisp on mid-tone colors (1989, folklore) */
 .perfect-pool .song-title, .perfect-slot:not(.empty) { font-weight:600; }
@@ -331,9 +439,13 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
 <body>
 
 <div class="page-header">
-  <div class="page-title">Taylor Swift Song &amp; Album Scoring</div>
-  <div class="page-sub">Score every song &middot; rank every album &middot; build your dream playlists</div>
-  <div class="page-note">Score each song 0&ndash;5. Album averages update live, checkboxes below feed your Eras Album and Perfect Album lists at the bottom of the page.</div>
+  <div class="page-title">TAYLOR SWIFT SONG SCORING &amp; RANKING</div>
+  <div class="page-note">
+    <span class="note-line">Score &amp; Rank every song.</span>
+    <span class="note-line">Build your Eras Album, Your Perfect Album, and your Eras: The 1s Album.</span>
+    <span class="note-line"><em>Please share this page with your Swiftie friends so all can enjoy!</em></span>
+    <span class="note-line">Interact with me on Twitter <a class="social-link" href="https://twitter.com/Over_50_Swiftie" target="_blank" rel="noopener">@Over_50_Swiftie</a>.</span>
+  </div>
 </div>
 
 <div class="wrap">
@@ -342,7 +454,7 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
     <div class="info-tabs" role="tablist" aria-label="Page info">
       <button type="button" class="info-tab active" role="tab" data-panel="lyric" aria-selected="true">Lyric of the Day</button>
       <button type="button" class="info-tab" role="tab" data-panel="how" aria-selected="false">How This Works</button>
-      <button type="button" class="info-tab" role="tab" data-panel="about" aria-selected="false">About the Designer</button>
+      <button type="button" class="info-tab" role="tab" data-panel="bts" aria-selected="false">Behind the Scenes</button>
     </div>
 
     <div class="info-panel active" role="tabpanel" data-panel="lyric">
@@ -355,24 +467,61 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
     </div>
 
     <div class="info-panel" role="tabpanel" data-panel="how">
-      <p><strong>1. Score songs.</strong> Click an album tile below to open its song list in the panel underneath the grid. Give each song a score from 0&ndash;5. The song and its score change color as you go.</p>
-      <ul class="score-key">
-        <li><strong>5</strong> = a potential Top 10 Fav of All Time. When anyone asks you &ldquo;What&rsquo;s your favorite TS song?&rdquo; these are the ones that come to mind first! (Can be more than 10 of these, of course!)</li>
-        <li><strong>4.5</strong> = almost a top 10 fav</li>
-        <li><strong>4</strong> = you love this but it might not be mentioned in your Top 10.</li>
-        <li><strong>3</strong> = a really good song, we still like these!</li>
-        <li><strong>2</strong> = these could be really good songs that you just don&rsquo;t vibe with, and likely would not make a playlist unless you&rsquo;re in the mood to hear them</li>
-        <li><strong>1</strong> = you wouldn&rsquo;t put these on any playlist you build, they are not for you</li>
-        <li><strong>0</strong> = your least favorites, obviously. We&rsquo;re not haters out here. But we&rsquo;re good without these.</li>
-      </ul>
-      <p><strong>2. Albums rank themselves.</strong> Each tile shows a live average of that album&rsquo;s scored songs. The &ldquo;My Favorite Albums&rdquo; results section below sorts all 12 highest to lowest, automatically. (NOTE: this is &ldquo;mathematically&rdquo; your favorite album order&hellip; but it doesn&rsquo;t change your heart&rsquo;s true album order. Your fav is still your fav!)</p>
+      <div class="sub-tabs how-choose" role="tablist" aria-label="How this works">
+        <span class="how-choose-word">Choose</span>
+        <button type="button" class="sub-tab active" role="tab" data-subpanel="scoring" aria-selected="true">Song Scoring</button>
+        <span class="how-choose-word">OR</span>
+        <button type="button" class="sub-tab" role="tab" data-subpanel="ranking" aria-selected="false">Song Ranking</button><span class="how-choose-word how-choose-dot">.</span>
+      </div>
+
+      <div class="sub-panel active" role="tabpanel" data-subpanel="scoring">
+      <div class="how-heading">SCORE EVERY SONG TO AUTO-RANK ALBUMS</div>
+      <p><strong>1.</strong> Click an album tile below to open its song list in the panel underneath the grid. Make sure you have the Song Scoring Tab selected.</p>
+      <p><strong>2.</strong> Give each song a score from 0&ndash;5. The song and its score change color as you go.</p>
+      <!-- Score colors are filled in by JS from scoreColor(), so they always match the scoring panel -->
+      <table class="score-table">
+        <tbody>
+          <tr><th scope="row"><span class="score-swatch" data-score-swatch="5">5</span></th><td>a potential Top 10 Fav of All Time. When anyone asks you &ldquo;What&rsquo;s your favorite TS song?&rdquo; these are the ones that come to mind first! (Can be more than 10 of these, of course!)</td></tr>
+          <tr><th scope="row"><span class="score-swatch" data-score-swatch="4.5">4.5</span></th><td>almost a top 10 fav, could go either way, but here for now.</td></tr>
+          <tr><th scope="row"><span class="score-swatch" data-score-swatch="4">4</span></th><td>you love this but it might not be mentioned in your Top 10.</td></tr>
+          <tr><th scope="row"><span class="score-swatch" data-score-swatch="3">3</span></th><td>a really good song, we still like these! These would be included on an expanded TS playlist.</td></tr>
+          <tr><th scope="row"><span class="score-swatch" data-score-swatch="2">2</span></th><td>these might actually be really good songs that you just don&rsquo;t vibe with and likely would not make a playlist unless you&rsquo;re in the mood to hear them. Or they could be ones you don&rsquo;t like and generally skip unless you&rsquo;re in the mood to hear them.</td></tr>
+          <tr><th scope="row"><span class="score-swatch" data-score-swatch="1">1</span></th><td>you wouldn&rsquo;t put these on any playlist you build, they are not for you.</td></tr>
+          <tr><th scope="row"><span class="score-swatch" data-score-swatch="0">0</span></th><td>your least favorites, obviously. We&rsquo;re not haters out here. But we&rsquo;re good without these.</td></tr>
+        </tbody>
+      </table>
+      <p class="how-note"><strong>NOTE: Albums rank themselves.</strong> Each album tile shows a live average of that album&rsquo;s scored songs. The &ldquo;My Favorite Albums&rdquo; results section below sorts all 12 highest to lowest, automatically. (NOTE: this is &ldquo;mathematically&rdquo; your favorite album order&hellip; but it doesn&rsquo;t change your heart&rsquo;s true album order. Your fav is still your fav!)</p>
       <p><strong>3. Build your Eras Album.</strong> Check the box next to one song per album (plus one bonus pick from any album) to assemble a 13-track &ldquo;Eras&rdquo; playlist in the results section.</p>
-      <p><strong>4. Build your Perfect Album.</strong> Every song you score as a 5 shows up in the &ldquo;Perfect Album&rdquo; pool in the Results section below. Choose 13 of those songs (choices are hard!) to fill your Perfect Album&rsquo;s 13 track slots.</p>
-      <p><strong>5. SAVE your progress.</strong> Your scores auto-save in this browser as you go. Use the <em>Save scores to file</em> button to download a backup you can re-upload later (even on a different device or browser), and <em>Print / Save PDF Snapshot</em> to keep a dated printable copy of your results.</p>
+      <p><strong>4. Build your Perfect Album.</strong> Every song you scored as a 5 shows up in the &ldquo;Perfect Album&rdquo; pool in the Results section below. Choose 13 of those songs (choices are hard!) to fill your Perfect Album&rsquo;s 13 track slots. Then arrange them in the order you&rsquo;d want to listen to that album.</p>
+      <p><strong>5. SAVE your progress.</strong> Your scores auto-save in this browser as you go, but they can disappear if you clear your browsing data, use a private window, or switch devices. Use the <em>Save data to file</em> button to download a backup you can re-upload later (even on a different device or browser). Use the <em>Print / Save PDF Snapshot</em> to keep a dated printable copy of your results.</p>
       <p><strong>6. HAVE FUN!</strong> Play the lyrics game and see how you do. More lyrics will be updated/included soon. And when TS13, Debut TV or Rep TV drop, this site will be updated to include new tracks and vault tracks.</p>
+      <p class="how-cta"><button type="button" class="inline-pill-btn" data-goto-subpanel="ranking">How Do I RANK Songs Instead?</button></p>
+      </div>
+
+      <div class="sub-panel" role="tabpanel" data-subpanel="ranking">
+        <div class="how-heading">RANKING SONGS FOR EVERY ALBUM</div>
+        <p><strong>1.</strong> Click an album tile below to open its song list in the panel underneath the grid. Make sure you have the Song Ranking Tab selected.</p>
+        <p><strong>2.</strong> The left column shows the album in track order with your song scores (if you&rsquo;ve done that). The right column shows your rankings for this album.</p>
+        <p><strong>3.</strong> You can begin ranking songs using the RANK menu -OR- if you already have songs scored, populate your ranking with the &lsquo;Start From My Scores&rsquo; button.</p>
+        <p class="how-note"><strong>NOTE:</strong> When ranking, picking a number that&rsquo;s already taken slides the other songs down to make room.</p>
+        <p><strong>4.</strong> Use the arrows to nudge songs up or down, and &#x2715; to take one out. (You don&rsquo;t have to rank every song.)</p>
+        <p><strong>This builds your &ldquo;Eras: The 1s&rdquo; Album automatically down in the Results section.</strong></p>
+        <p class="how-note"><strong>NOTE:</strong> Your Rankings auto-save in this browser as you go, but they can disappear if you clear your browsing data, use a private window, or switch devices. Use the <em>Save data to file</em> button to download a backup you can re-upload later (even on a different device or browser). Use the <em>Print / Save PDF Snapshot</em> to keep a dated printable copy of your results.</p>
+        <p><strong>5. HAVE FUN!</strong></p>
+        <p class="how-cta"><button type="button" class="inline-pill-btn" data-goto-subpanel="scoring">How Do I SCORE Songs Instead?</button></p>
+      </div>
     </div>
 
-    <div class="info-panel" role="tabpanel" data-panel="about">
+    <div class="info-panel" role="tabpanel" data-panel="bts">
+      <!-- BEHIND THE SCENES: to add a sub-tab, add a button to .sub-tabs
+           and a matching .sub-panel with the same data-subpanel name. -->
+      <div class="sub-tabs" role="tablist" aria-label="Behind the scenes">
+        <button type="button" class="sub-tab active" role="tab" data-subpanel="about" aria-selected="true">About the Designer</button>
+        <button type="button" class="sub-tab" role="tab" data-subpanel="suggest" aria-selected="false">Suggestion Box</button>
+        <button type="button" class="sub-tab" role="tab" data-subpanel="updates" aria-selected="false">Updates</button>
+      </div>
+
+      <div class="sub-panel active" role="tabpanel" data-subpanel="about">
       <div class="about-text">
         <p>My name is Rich and I’m an Over 50 Swiftie. I made this scoring tool as a Google Sheet that I posted for the TS Reddit community back before TLOAS came out. I recently changed it to be an interactive webpage so I could have more fun with it and Swifties like you could get more use out of it. (It’s most recently been updated to include the TLOAS: The Encore songs.)</p>
         <p>I used to work in country radio and met Taylor when she was 16, touring stations to promote her debut album. At the time, I worked simultaneously for KZLA radio in Los Angeles and a nationally syndicated show called AfterMidNite. She visited AfterMidNite and then the next night played at the Whisky. She was incredibly sweet and I’ve followed her career as a fan ever since.</p>
@@ -388,17 +537,53 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
           <span class="kofi-desc">Leave a tip at ko-fi.com/over50swiftie</span>
         </span>
       </a>
+      </div>
+
+      <div class="sub-panel" role="tabpanel" data-subpanel="suggest">
+      <div class="about-text">
+        <p>If you have any questions, suggestions, or find any errors, email me at <a class="contact-email" href="#">info (at) over50swiftie (dot) com</a>.</p>
+        <p>I plan to keep updating this page’s features and will of course update the page with every new album or TV/deluxe version that adds new songs. I was laid off last year the day TLOAS dropped (!) and was thankful to have a banger album to vibe to and counter the major bummer of that news. I did this as a fun project while looking for work. If you like this page’s features and want to drop me a donation through Ko-fi, that’s much appreciated.</p>
+        <p>Please share this page with your Swiftie friends and family (or randoms on social!).</p>
+      </div>
+      <a class="kofi-card" href="https://ko-fi.com/over50swiftie" target="_blank" rel="noopener">
+        <span class="kofi-icon"><svg fill="currentColor" aria-hidden="true" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.351 2.715c-2.7 0-4.986.025-6.83.26C2.078 3.285 0 5.154 0 8.61c0 3.506.182 6.13 1.585 8.493 1.584 2.701 4.233 4.182 7.662 4.182h.83c4.209 0 6.494-2.234 7.637-4a9.5 9.5 0 0 0 1.091-2.338C21.792 14.688 24 12.22 24 9.208v-.415c0-3.247-2.13-5.507-5.792-5.87-1.558-.156-2.65-.208-6.857-.208m0 1.947c4.208 0 5.09.052 6.571.182 2.624.311 4.13 1.584 4.13 4v.39c0 2.156-1.792 3.844-3.87 3.844h-.935l-.156.649c-.208 1.013-.597 1.818-1.039 2.546-.909 1.428-2.545 3.064-5.922 3.064h-.805c-2.571 0-4.831-.883-6.078-3.195-1.09-2-1.298-4.155-1.298-7.506 0-2.181.857-3.402 3.012-3.714 1.533-.233 3.559-.26 6.39-.26m6.547 2.287c-.416 0-.65.234-.65.546v2.935c0 .311.234.545.65.545 1.324 0 2.051-.754 2.051-2s-.727-2.026-2.052-2.026m-10.39.182c-1.818 0-3.013 1.48-3.013 3.142 0 1.533.858 2.857 1.949 3.897.727.701 1.87 1.429 2.649 1.896a1.47 1.47 0 0 0 1.507 0c.78-.467 1.922-1.195 2.623-1.896 1.117-1.039 1.974-2.364 1.974-3.897 0-1.662-1.247-3.142-3.039-3.142-1.065 0-1.792.545-2.338 1.298-.493-.753-1.246-1.298-2.312-1.298"/></svg></span>
+        <span class="kofi-info">
+          <span class="kofi-name">Support on Ko-fi</span>
+          <span class="kofi-desc">Leave a tip at ko-fi.com/over50swiftie</span>
+        </span>
+      </a>
+      </div>
+
+      <div class="sub-panel" role="tabpanel" data-subpanel="updates">
+      <!-- UPDATES: written by hand. Add new entries at the TOP of the list:
+           copy one <li> block, paste it above the others, change the date and text. -->
+      <div class="updates-scroll" tabindex="0" aria-label="Page updates, scrollable">
+      <ul class="updates-list">
+        <li>
+          <span class="update-date">10/01/26</span>
+          <span class="update-text">Added Song Ranking feature for all albums.<br>
+            Added ranking instructions to How This Works.<br>
+            Added &ldquo;Eras: The 1s&rdquo; based on Song Rankings.<br>
+            Added manual adjustment function to My Perfect Album track order.</span>
+        </li>
+        <li>
+          <span class="update-date">09/30/26</span>
+          <span class="update-text">Added an Update Tab for page update notes. New Song Ranking feature coming soon!</span>
+        </li>
+      </ul>
+      </div>
+      </div>
     </div>
   </div>
 
   <p class="toolbar-hint">Hover on Buttons for Info</p>
   <div class="toolbar">
     <div class="btn-tooltip-wrap">
-      <button class="btn btn-primary" id="btnExport">Save scores to file</button>
+      <button class="btn btn-primary" id="btnExport">Save data to file</button>
       <div class="btn-tooltip">Click to download a JSON file backup you can re-upload later (even on a different device or browser).</div>
     </div>
     <div class="btn-tooltip-wrap">
-      <label class="btn file-label" id="btnImport">Load scores from file
+      <label class="btn file-label" id="btnImport">Load data from file
         <input type="file" id="importFile" accept="application/json">
       </label>
       <div class="btn-tooltip">Click to select a JSON file from your device to restore your data from a previous download.</div>
@@ -412,6 +597,16 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
       <div class="btn-tooltip">Click to reset ALL of your data. This will wipe the page. Only do this if you want to start over. You can only restore data by loading your scores from a previously saved JSON file.</div>
     </div>
     <span class="toolbar-status" id="toolbarStatus"></span>
+  </div>
+
+  <div class="modal-overlay" id="confirmModalOverlay">
+    <div class="modal-box">
+      <p class="modal-warning-text" id="confirmModalText"></p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="confirmModalOk"></button>
+        <button class="btn" id="confirmModalCancel"></button>
+      </div>
+    </div>
   </div>
 
   <div class="modal-overlay" id="resetModalOverlay">
@@ -578,10 +773,11 @@ function scoreColor(v) {
    perfect:  Set of "albumIndex-songIndex" strings (checked for Perfect Album)
    ============================================================ */
 const STORAGE_KEY = "ts_album_scoring_v1";
-let state = { scores: {}, eras: [], perfect: [] };
+let state = { scores: {}, eras: [], perfect: [], rankings: {}, settings: { panelTab: "score", rankListHidden: false, erasTab: "eras" } };
 let activeAlbum = null;
 let activeResultTab = "favorites";
 let dirty = false;
+let pendingFocus = null;   // selector to re-focus after the panel re-renders (keeps keyboard users in place)
 
 function songId(ai, si) { return ai + "-" + si; }
 
@@ -593,6 +789,8 @@ function loadState() {
       state.scores = parsed.scores || {};
       state.eras = parsed.eras || [];
       state.perfect = parsed.perfect || [];
+      state.rankings = parsed.rankings || {};
+      state.settings = Object.assign({ panelTab: "score", rankListHidden: false, erasTab: "eras" }, parsed.settings || {});
     }
   } catch (e) { console.warn("Could not load saved scores:", e); }
 }
@@ -650,6 +848,7 @@ function renderAlbumGrid() {
         '<div class="album-tile-name">' + album.name + '</div>' +
         '<div class="album-tile-score">Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</div>' +
         '<div class="album-tile-status ' + (complete ? "complete" : "incomplete") + '">' + (complete ? "Scoring Complete" : "Missing Song Scores") + '</div>' +
+        '<div class="album-tile-status ranked-status">Ranked ' + rankedCount(ai) + ' / ' + album.songs.length + '</div>' +
       '</div>';
     tile.addEventListener("click", () => {
       activeAlbum = (activeAlbum === ai) ? null : ai;
@@ -667,6 +866,204 @@ function renderAlbumGrid() {
 /* ============================================================
    RENDER: SHARED SCORING PANEL
    ============================================================ */
+/* ============================================================
+   SONG RANKING DATA
+   state.rankings[ai] is an array with one slot per track.
+   Each slot holds a song index (si) or null (an empty slot).
+   Rank #1 is slot 0. The RANK dropdowns and the arrows both
+   edit this same array, so the two columns always agree.
+   ============================================================ */
+function scoreIsSet(v) { return v !== undefined && v !== null && v !== ""; }
+
+function getRanking(ai) {
+  // Always returns a clean array sized to the album's current track
+  // count, so adding tracks to an album later can't break a saved ranking.
+  const n = ALBUMS[ai].songs.length;
+  const saved = Array.isArray(state.rankings[ai]) ? state.rankings[ai] : [];
+  const seen = new Set();
+  const clean = [];
+  for (let i = 0; i < n; i++) {
+    const v = saved[i];
+    if (Number.isInteger(v) && v >= 0 && v < n && !seen.has(v)) { clean.push(v); seen.add(v); }
+    else clean.push(null);
+  }
+  state.rankings[ai] = clean;
+  return clean;
+}
+function rankedCount(ai) { return getRanking(ai).filter(v => v !== null).length; }
+
+// Insert & shift: put song si at slot. If that slot is taken, the songs
+// from there slide toward the nearest hole to make room.
+function placeSong(ai, si, slot) {
+  const r = getRanking(ai);
+  const cur = r.indexOf(si);
+  if (cur === slot) return;
+  if (cur !== -1) r[cur] = null;              // lift it out; its old slot becomes the hole
+  if (r[slot] === null) { r[slot] = si; return; }
+  let hole = cur;                             // moving a ranked song: close up its old spot
+  if (hole === -1) {                          // newly ranked song: push the list down...
+    for (let i = slot + 1; i < r.length; i++) if (r[i] === null) { hole = i; break; }
+  }
+  if (hole === -1) {                          // ...unless there's no room below, then up
+    for (let i = slot - 1; i >= 0; i--) if (r[i] === null) { hole = i; break; }
+  }
+  if (hole > slot) { for (let i = hole; i > slot; i--) r[i] = r[i - 1]; }
+  else { for (let i = hole; i < slot; i++) r[i] = r[i + 1]; }
+  r[slot] = si;
+}
+function unrankSong(ai, si) {
+  const r = getRanking(ai);
+  const cur = r.indexOf(si);
+  if (cur !== -1) r[cur] = null;
+}
+function moveSlot(ai, slot, dir) {            // arrows: swap with the neighbor (filled or empty)
+  const r = getRanking(ai);
+  const to = slot + dir;
+  if (to < 0 || to >= r.length) return;
+  [r[slot], r[to]] = [r[to], r[slot]];
+}
+function fillFromScores(ai) {                 // scored songs, highest first; ties keep track order
+  const album = ALBUMS[ai];
+  const scored = album.songs.map((_, si) => ({ si, v: state.scores[songId(ai, si)] }))
+    .filter(x => scoreIsSet(x.v))
+    .sort((x, y) => Number(y.v) - Number(x.v) || x.si - y.si);
+  const r = album.songs.map(() => null);
+  scored.forEach((x, i) => { r[i] = x.si; });
+  state.rankings[ai] = r;
+}
+
+/* Small reusable confirm dialog (same look as the Reset modal) */
+function askConfirm(text, okLabel, cancelLabel, onOk) {
+  const ov = document.getElementById("confirmModalOverlay");
+  document.getElementById("confirmModalText").textContent = text;
+  const ok = document.getElementById("confirmModalOk");
+  const cancel = document.getElementById("confirmModalCancel");
+  ok.textContent = okLabel; cancel.textContent = cancelLabel;
+  const close = () => { ov.classList.remove("open"); ok.onclick = null; cancel.onclick = null; ov.onclick = null; };
+  ok.onclick = () => { close(); onOk(); };
+  cancel.onclick = close;
+  ov.onclick = (e) => { if (e.target === ov) close(); };
+  ov.classList.add("open");
+  cancel.focus();
+}
+
+/* ============================================================
+   RENDER: SHARED SCORING PANEL
+   Two tabs: Song Scoring and Song Ranking. The last tab used is
+   remembered in state.settings.panelTab (and saved in the JSON).
+   ============================================================ */
+const PANEL_TABS = [
+  { id: "score", label: "Song Scoring" },
+  { id: "rank",  label: "Song Ranking" }
+];
+
+function scoredTitleHtml(ai, si) {
+  const v = state.scores[songId(ai, si)];
+  const c = scoreColor(v);
+  const scored0 = v === 0 || v === "0";
+  return '<span class="song-title' + (scored0 ? " scored-0" : "") + '" style="background:' + c.bg + '; color:' + c.text + ';">' + ALBUMS[ai].songs[si] + '</span>';
+}
+function scoreChipHtml(ai, si) {
+  const v = state.scores[songId(ai, si)];
+  const c = scoreColor(v);
+  return '<span class="score-chip" style="background:' + c.bg + '; color:' + c.text + ';" title="Your score">' + (scoreIsSet(v) ? v : "–") + '</span>';
+}
+
+function scoringTabHtml(ai) {
+  const album = ALBUMS[ai];
+  let songsHtml = "";
+  album.songs.forEach((title, si) => {
+    const id = songId(ai, si);
+    const v = state.scores[id];
+    const c = scoreColor(v);
+    const erasChecked = state.eras.includes(id);
+    songsHtml +=
+      '<div class="song-row">' +
+        '<input type="checkbox" title="Add to Eras Album" data-eras-id="' + id + '" ' + (erasChecked ? "checked" : "") + '>' +
+        '<span class="track-num">' + (si + 1) + '</span>' +
+        scoredTitleHtml(ai, si) +
+        '<select class="song-select" data-score-id="' + id + '" aria-label="Score for ' + quizEscape(title) + '" style="background:' + c.bg + '; color:' + c.text + ';">' +
+          '<option value=""' + (scoreIsSet(v) ? "" : " selected") + '>SCORE</option>' +
+          SCORE_VALUES.map(sv => '<option value="' + sv + '"' + (scoreIsSet(v) && Number(v) === sv ? " selected" : "") + '>' + sv + '</option>').join("") +
+        '</select>' +
+      '</div>';
+  });
+  return '<div class="songs-col-header">' +
+      '<div class="info-icon-wrap" id="erasInfoIcon">' +
+        '<div class="info-icon" tabindex="0" role="button" aria-label="What is this checkbox for?">?</div>' +
+        '<div class="info-tooltip">Check one song per album to add it to your Eras Album. You can also add one bonus pick from anywhere.</div>' +
+      '</div>' +
+    '</div>' + songsHtml;
+}
+
+function rankingTabHtml(ai) {
+  // Both lists live in ONE grid so track row #3 and rank slot #3 always
+  // share a row height and line up, even when a long title wraps.
+  // Desktop: each cell is placed by --r (row) and .L/.R (column).
+  // Phones: one column in DOM order (your ranking first, then tracks).
+  const album = ALBUMS[ai];
+  const r = getRanking(ai);
+  const n = album.songs.length;
+  const anyScored = album.songs.some((_, si) => scoreIsSet(state.scores[songId(ai, si)]));
+  const anyRanked = r.some(v => v !== null);
+  const hidden = !!state.settings.rankListHidden;
+
+  const intro = '<div class="rank-intro">' +
+    '<p class="rank-hint">Use a song’s RANK menu to place it in your ranking -or- if you already have songs scored, populate your ranking with the ‘Start From My Scores’ button. Picking a number that’s already taken slides the other songs down to make room. Use the arrows to nudge songs up or down, and ✕ to take one out. You don’t have to rank every song.</p>' +
+    '<div class="rank-tools">' +
+      '<button type="button" class="btn rank-tool" id="rankFillBtn"' + (anyScored ? "" : " disabled") + '>Start from my scores</button>' +
+      '<button type="button" class="btn rank-tool" id="rankClearBtn"' + (anyRanked ? "" : " disabled") + '>Clear ranking</button>' +
+    '</div>' +
+  '</div>';
+
+  // RIGHT column cells first (so phones show your ranking first)
+  let cells = '<div class="rank-col-head R" id="rankListHead" style="--r:1"><span>Your Ranking</span>' +
+      '<span class="rank-head-btns">' +
+        '<button type="button" class="btn rank-jump" data-jump="rankTracksHead">↓ Jump to Tracks</button>' +
+        '<button type="button" class="btn rank-toggle" id="rankToggleBtn" aria-expanded="' + !hidden + '">' + (hidden ? "Show list" : "Hide list") + '</button>' +
+      '</span>' +
+    '</div>';
+  if (hidden) {
+    cells += '<p class="rank-hidden-note R" style="--r:2">Ranking list hidden (' + r.filter(v => v !== null).length + ' of ' + n + ' ranked). Your RANK menus still work.</p>';
+  }
+  r.forEach((si, slot) => {
+    const pos = 'R" style="--r:' + (slot + 2) + '"';
+    if (si === null) {
+      cells += '<div class="rank-slot empty ' + pos + '><span class="rank-num">' + (slot + 1) + '</span><span class="rank-empty">empty slot</span></div>';
+      return;
+    }
+    const name = quizEscape(album.songs[si]);
+    cells += '<div class="rank-slot ' + pos + '>' +
+      '<span class="rank-num">' + (slot + 1) + '</span>' +
+      scoredTitleHtml(ai, si) +
+      scoreChipHtml(ai, si) +
+      '<span class="rank-actions">' +
+        '<button type="button" class="rank-btn" data-move="-1" data-slot="' + slot + '" aria-label="Move ' + name + ' up"' + (slot === 0 ? " disabled" : "") + '>▲</button>' +
+        '<button type="button" class="rank-btn" data-move="1" data-slot="' + slot + '" aria-label="Move ' + name + ' down"' + (slot === n - 1 ? " disabled" : "") + '>▼</button>' +
+        '<button type="button" class="rank-btn rank-remove" data-unrank="' + si + '" aria-label="Remove ' + name + ' from ranking" title="Remove from ranking">✕</button>' +
+      '</span>' +
+    '</div>';
+  });
+
+  // LEFT column: the album's track list in track order (never moves)
+  cells += '<div class="rank-col-head L" id="rankTracksHead" style="--r:1"><span>Track List</span>' +
+      '<span class="rank-head-btns"><button type="button" class="btn rank-jump" data-jump="rankListHead">↑ Jump to Ranks</button></span>' +
+    '</div>';
+  album.songs.forEach((title, si) => {
+    const p = r.indexOf(si);
+    let opts = '<option value=""' + (p === -1 ? " selected" : "") + '>RANK</option>';
+    for (let i = 0; i < n; i++) opts += '<option value="' + i + '"' + (p === i ? " selected" : "") + '>' + (i + 1) + '</option>';
+    cells += '<div class="rank-track L" style="--r:' + (si + 2) + '">' +
+      '<span class="track-num">' + (si + 1) + '</span>' +
+      scoredTitleHtml(ai, si) +
+      scoreChipHtml(ai, si) +
+      '<select class="song-select rank-select' + (p !== -1 ? " is-ranked" : "") + '" data-rank-si="' + si + '" aria-label="Rank for ' + quizEscape(title) + '">' + opts + '</select>' +
+    '</div>';
+  });
+
+  return intro + '<div class="rank-grid' + (hidden ? " list-hidden" : "") + '">' + cells + '</div>';
+}
+
 function renderPanel() {
   const panel = document.getElementById("albumPanel");
 
@@ -676,46 +1073,32 @@ function renderPanel() {
     return;
   }
 
-  const album = ALBUMS[activeAlbum];
+  const ai = activeAlbum;
+  const album = ALBUMS[ai];
   const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
-  const avg = albumAverage(activeAlbum);
+  const avg = albumAverage(ai);
+  const tab = state.settings.panelTab === "rank" ? "rank" : "score";
   panel.style.borderColor = theme.base;
 
-  let songsHtml = "";
-  album.songs.forEach((title, si) => {
-    const id = songId(activeAlbum, si);
-    const v = state.scores[id];
-    const c = scoreColor(v);
-    const erasChecked = state.eras.includes(id);
-    const scored0 = v === 0 || v === "0";
-    songsHtml +=
-      '<div class="song-row">' +
-        '<input type="checkbox" title="Add to Eras Album" data-eras-id="' + id + '" ' + (erasChecked ? "checked" : "") + '>' +
-        '<span class="song-title' + (scored0 ? " scored-0" : "") + '" style="background:' + c.bg + '; color:' + c.text + ';">' + title + '</span>' +
-        '<select class="song-select" data-score-id="' + id + '" style="background:' + c.bg + '; color:' + c.text + ';">' +
-          '<option value=""' + (v === undefined || v === null || v === "" ? " selected" : "") + '>\u2013</option>' +
-          SCORE_VALUES.map(sv => '<option value="' + sv + '"' + (Number(v) === sv ? " selected" : "") + '>' + sv + '</option>').join("") +
-        '</select>' +
-      '</div>';
-  });
+  const tabsHtml = '<div class="panel-tabs" role="tablist" aria-label="' + quizEscape(album.name) + ' views" style="background:' + theme.light + '; border-bottom-color:' + theme.base + ';">' +
+    PANEL_TABS.map(t => {
+      const on = t.id === tab;
+      return '<button type="button" role="tab" class="panel-tab' + (on ? " active" : "") + '" data-panel-tab="' + t.id + '" aria-selected="' + on + '" style="color:' + theme.text + ';' + (on ? " border-color:" + theme.base + ";" : "") + '">' + t.label + '</button>';
+    }).join("") +
+  '</div>';
 
   panel.innerHTML =
     '<div class="panel-header" id="panelHeaderClose" title="Click to close" style="background:' + theme.base + '; color:#fff; cursor:pointer;">' +
       '<span>' + album.name + '</span>' +
       '<span class="panel-close-note">Click here to close this scoring screen.</span>' +
-      '<span class="panel-header-score">Album Score: ' + (avg === null ? "\u2013" : avg.toFixed(2)) + '</span>' +
+      '<span class="panel-header-score">Album Score: ' + (avg === null ? "–" : avg.toFixed(2)) + '</span>' +
     '</div>' +
+    tabsHtml +
     '<div class="panel-body">' +
-      '<div class="panel-cover" style="background:' + theme.light + '; color:' + theme.text + '; padding:0; overflow:hidden;">' + coverImgTag(activeAlbum, album, theme, "panel-cover") + '</div>' +
+      '<div class="panel-cover" style="background:' + theme.light + '; color:' + theme.text + '; padding:0; overflow:hidden;">' + coverImgTag(ai, album, theme, "panel-cover") + '</div>' +
       '<div class="panel-songs">' +
-        '<div class="songs-col-header">' +
-          '<div class="info-icon-wrap" id="erasInfoIcon">' +
-            '<div class="info-icon" tabindex="0" role="button" aria-label="What is this checkbox for?">?</div>' +
-            '<div class="info-tooltip">Check one song per album to add it to your Eras Album. You can also add one bonus pick from anywhere.</div>' +
-          '</div>' +
-        '</div>' +
-        songsHtml +
-        '<button class="btn jump-top-btn" id="jumpTopBtn">\u2191 Jump to Top</button>' +
+        (tab === "rank" ? rankingTabHtml(ai) : scoringTabHtml(ai)) +
+        '<button class="btn jump-top-btn" id="jumpTopBtn">↑ Jump to Top</button>' +
       '</div>' +
     '</div>';
 
@@ -732,7 +1115,28 @@ function renderPanel() {
     document.getElementById("albumGrid").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   });
 
+  panel.querySelectorAll("[data-panel-tab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (state.settings.panelTab === btn.dataset.panelTab) return;
+      state.settings.panelTab = btn.dataset.panelTab;
+      saveState();                       // a view preference, so no "unsaved changes" warning
+      pendingFocus = '[data-panel-tab="' + btn.dataset.panelTab + '"]';
+      renderPanel();
+    });
+  });
+
   wireCoverFallbacks(panel);
+  if (tab === "rank") wireRankingTab(panel, ai);
+  else wireScoringTab(panel);
+
+  if (pendingFocus) {
+    const el = panel.querySelector(pendingFocus);
+    if (el) el.focus({ preventScroll: true });
+    pendingFocus = null;
+  }
+}
+
+function wireScoringTab(panel) {
   panel.querySelectorAll("[data-score-id]").forEach(sel => {
     sel.addEventListener("change", () => {
       const id = sel.dataset.scoreId;
@@ -768,6 +1172,64 @@ function renderPanel() {
   });
 }
 
+function wireRankingTab(panel, ai) {
+  const n = ALBUMS[ai].songs.length;
+  const albumName = ALBUMS[ai].name;
+  const changed = () => { markDirty(); renderAlbumGrid(); renderPanel(); renderResultsTabs(); renderResultsPanel(); };
+
+  panel.querySelectorAll("[data-rank-si]").forEach(sel => {
+    sel.addEventListener("change", () => {
+      const si = Number(sel.dataset.rankSi);
+      if (sel.value === "") unrankSong(ai, si);
+      else placeSong(ai, si, Number(sel.value));
+      pendingFocus = '[data-rank-si="' + si + '"]';
+      changed();
+    });
+  });
+  panel.querySelectorAll("[data-move]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const dir = Number(btn.dataset.move);
+      const to = Number(btn.dataset.slot) + dir;
+      moveSlot(ai, Number(btn.dataset.slot), dir);
+      // keep focus on the same arrow as the song travels; flip at the ends
+      const edge = (dir === -1 && to === 0) || (dir === 1 && to === n - 1);
+      pendingFocus = '[data-move="' + (edge ? -dir : dir) + '"][data-slot="' + to + '"]';
+      changed();
+    });
+  });
+  panel.querySelectorAll("[data-unrank]").forEach(btn => {
+    btn.addEventListener("click", () => { unrankSong(ai, Number(btn.dataset.unrank)); changed(); });
+  });
+  const toggle = panel.querySelector("#rankToggleBtn");
+  if (toggle) toggle.addEventListener("click", () => {
+    state.settings.rankListHidden = !state.settings.rankListHidden;
+    saveState();                       // view preference: saved, but no "unsaved changes" warning
+    pendingFocus = "#rankToggleBtn";
+    renderPanel();
+  });
+  panel.querySelectorAll("[data-jump]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = document.getElementById(btn.dataset.jump);
+      if (!target) return;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    });
+  });
+  const fill = panel.querySelector("#rankFillBtn");
+  if (fill) fill.addEventListener("click", () => {
+    const go = () => { fillFromScores(ai); changed(); };
+    if (rankedCount(ai) > 0) askConfirm("Replace your current " + albumName + " ranking with one built from your scores?", "Replace it", "Keep mine", go);
+    else go();
+  });
+  const clear = panel.querySelector("#rankClearBtn");
+  if (clear) clear.addEventListener("click", () => {
+    askConfirm("Clear your whole " + albumName + " ranking? Your scores stay put.", "Clear it", "Keep it", () => {
+      state.rankings[ai] = ALBUMS[ai].songs.map(() => null);
+      changed();
+    });
+  });
+}
+
 /* ============================================================
    RENDER: RESULTS TAB ROW (Favorites / Eras / Perfect)
    ============================================================ */
@@ -782,14 +1244,19 @@ function rankedAlbums() {
   ranked.sort((a, b) => (b.avg === null ? -1 : b.avg) - (a.avg === null ? -1 : a.avg));
   return ranked;
 }
+/* THE 1s: the #1 ranked song from each album, in release order.
+   si is null when that album has no #1 yet. */
+function theOnes() {
+  return ALBUMS.map((album, ai) => ({ ai, si: getRanking(ai)[0] }));
+}
 function renderResultsTabs() {
   const row = document.getElementById("resultsTabRow");
   const topAlbum = rankedAlbums().find(r => r.avg !== null);
   const tabs = [
     { id: "favorites", label: "My Favorite Albums", bg: "linear-gradient(90deg, " + favoritesGradient() + ")", text: "#fff",
       sub: topAlbum ? "Top: " + topAlbum.name : "Score songs to rank albums" },
-    { id: "eras", label: "My Eras Album", bg: "linear-gradient(90deg, " + erasGradient() + ")", text: "#fff",
-      sub: state.eras.length + " / 13 selected" },
+    { id: "eras", label: "My Eras Albums", bg: "linear-gradient(90deg, " + erasGradient() + ")", text: "#fff",
+      sub: "Songs Selected: " + state.eras.length + "/13 | Ranked: " + theOnes().filter(o => o.si !== null).length + "/" + ALBUMS.length + " #1s" },
     { id: "perfect", label: "My Perfect Album", bg: "var(--green5)", text: "var(--green5-text)",
       sub: state.perfect.length + " / 13 selected" }
   ];
@@ -855,37 +1322,99 @@ function renderResultsPanel() {
   }
 
   if (activeResultTab === "eras") {
-    const count = state.eras.length;
-    let rows;
-    if (count === 0) {
-      rows = '<p class="hint">Check a song\'s checkbox in the album panel above to add it here.</p>';
+    // Two pills inside: My Eras Album (checkbox picks) and The 1s (#1 ranked per album).
+    const sub = state.settings.erasTab === "ones" ? "ones" : "eras";
+    const pills = '<div class="sub-tabs results-sub-tabs" role="tablist" aria-label="Eras albums">' +
+      [["eras", "My Eras Album"], ["ones", "The 1s"]].map(([id, label]) =>
+        '<button type="button" class="sub-tab' + (sub === id ? " active" : "") + '" role="tab" data-eras-tab="' + id + '" aria-selected="' + (sub === id) + '">' + label + '</button>'
+      ).join("") +
+    '</div>';
+
+    let body;
+    if (sub === "eras") {
+      const count = state.eras.length;
+      let rows;
+      if (count === 0) {
+        rows = '<p class="hint">Check a song\'s checkbox in the album panel above to add it here.</p>';
+      } else {
+        const sortedEras = [...state.eras].sort((idA, idB) => {
+          const [aiA, siA] = idA.split("-").map(Number);
+          const [aiB, siB] = idB.split("-").map(Number);
+          return aiA - aiB || siA - siB;
+        });
+        rows = sortedEras.map(id => {
+          const [ai, si] = id.split("-").map(Number);
+          const album = ALBUMS[ai];
+          const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
+          const onColor = theme.on || "#ffffff";
+          return '<div class="fav-row" style="background:' + theme.base + ';">' +
+            '<span class="fav-name" style="color:' + onColor + ';">' + album.songs[si] + '</span>' +
+            '<span class="fav-score" style="color:' + onColor + ';">' + album.name + '</span>' +
+          '</div>';
+        }).join("");
+        if (count > 13) {
+          rows += '<p class="hint" style="color:#a32d2d; margin-top:0.75rem;">That\'s more than 13 &mdash; uncheck a few to narrow it down.</p>';
+        }
+      }
+      body =
+        '<p class="hint">One song checked per album, plus one bonus pick from anywhere &mdash; 13 tracks total. When TS13 releases, you\'ll have to change your duplicate album pick to one from TS13. I don\'t make the rules.</p>' +
+        '<div class="eras-counter' + (count > 13 ? " over" : "") + '">' + count + ' / 13 selected</div>' +
+        rows;
     } else {
-      const sortedEras = [...state.eras].sort((idA, idB) => {
-        const [aiA, siA] = idA.split("-").map(Number);
-        const [aiB, siB] = idB.split("-").map(Number);
-        return aiA - aiB || siA - siB;
-      });
-      rows = sortedEras.map(id => {
-        const [ai, si] = id.split("-").map(Number);
-        const album = ALBUMS[ai];
+      const ones = theOnes();
+      const filled = ones.filter(o => o.si !== null).length;
+      const rows = ones.map(o => {
+        const album = ALBUMS[o.ai];
         const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
         const onColor = theme.on || "#ffffff";
+        if (o.si === null) {
+          return '<div class="fav-row ones-empty" style="border-color:' + theme.base + ';">' +
+            '<span class="fav-name ones-empty-text">No #1 yet</span>' +
+            '<span class="fav-score" style="color:' + theme.text + ';">' + album.name + '</span>' +
+            '<button type="button" class="fav-jump" data-rank-album="' + o.ai + '" style="color:' + theme.text + ';" data-tip="Rank ' + album.name + ' songs" aria-label="Open ' + album.name + ' song ranking">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>' +
+            '</button>' +
+          '</div>';
+        }
         return '<div class="fav-row" style="background:' + theme.base + ';">' +
-          '<span class="fav-name" style="color:' + onColor + ';">' + album.songs[si] + '</span>' +
+          '<span class="fav-name" style="color:' + onColor + ';">' + album.songs[o.si] + '</span>' +
           '<span class="fav-score" style="color:' + onColor + ';">' + album.name + '</span>' +
+          '<button type="button" class="fav-jump" data-rank-album="' + o.ai + '" style="color:' + onColor + ';" data-tip="Review ' + album.name + ' ranking" aria-label="Open ' + album.name + ' song ranking">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>' +
+          '</button>' +
         '</div>';
       }).join("");
-      if (count > 13) {
-        rows += '<p class="hint" style="color:#a32d2d; margin-top:0.75rem;">That\'s more than 13 &mdash; uncheck a few to narrow it down.</p>';
-      }
+      body =
+        '<p class="hint">This is your #1 ranked song from each album, making an ‘Eras’ album. Only 12 tracks for now...waiting on TS13! (Let me know in the Suggestion box if I should make TTPD:The Anthology be considered a separate album.)</p>' +
+        '<div class="eras-counter">' + filled + ' / ' + ALBUMS.length + ' albums have a #1</div>' +
+        rows;
     }
+
     panel.innerHTML =
-      '<div class="results-panel-header" style="background:linear-gradient(90deg, ' + erasGradient() + '); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.45);">My Eras Album</div>' +
-      '<div class="results-panel-body">' +
-        '<p class="hint">One song checked per album, plus one bonus pick from anywhere &mdash; 13 tracks total.</p>' +
-        '<div class="eras-counter' + (count > 13 ? " over" : "") + '">' + count + ' / 13 selected</div>' +
-        rows +
-      '</div>';
+      '<div class="results-panel-header" style="background:linear-gradient(90deg, ' + erasGradient() + '); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.45);">My Eras Albums</div>' +
+      '<div class="results-panel-body">' + pills + body + '</div>';
+
+    panel.querySelectorAll("[data-eras-tab]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (state.settings.erasTab === btn.dataset.erasTab) return;
+        state.settings.erasTab = btn.dataset.erasTab;
+        saveState();
+        renderResultsPanel();
+        const again = panel.querySelector('[data-eras-tab="' + btn.dataset.erasTab + '"]');
+        if (again) again.focus({ preventScroll: true });
+      });
+    });
+    // Arrow on a 1s row: open that album straight to its Song Ranking tab
+    panel.querySelectorAll("[data-rank-album]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeAlbum = Number(btn.dataset.rankAlbum);
+        state.settings.panelTab = "rank";
+        saveState();
+        renderAlbumGrid(); renderPanel();
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        document.getElementById("albumPanel").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      });
+    });
     return;
   }
 
@@ -921,7 +1450,16 @@ function renderResultsPanel() {
     if (id) {
       const f = fives.find(x => x.id === id);
       const theme = f ? (ALBUM_THEMES[f.album] || { light: "var(--bg3)", text: "var(--text)" }) : { light: "var(--bg3)", text: "var(--text)" };
-      slotsHtml += '<div class="perfect-slot" style="background:' + (theme.base || theme.light) + '; color:' + (theme.on || theme.text) + ';"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>' + (f ? f.title + " \u2014 " + f.album : "") + '</span></div>';
+      const last = Math.min(count, 13) - 1;          // arrows only move within the 13 visible filled slots
+      const name = f ? quizEscape(f.title) : "song";
+      slotsHtml += '<div class="perfect-slot" style="background:' + (theme.base || theme.light) + '; color:' + (theme.on || theme.text) + ';">' +
+        '<span class="perfect-slot-num">' + (i + 1) + '.</span>' +
+        '<span class="perfect-slot-title">' + (f ? f.title + " \u2014 " + f.album : "") + '</span>' +
+        '<span class="rank-actions">' +
+          '<button type="button" class="rank-btn" data-pmove="-1" data-pslot="' + i + '" aria-label="Move ' + name + ' up"' + (i === 0 ? " disabled" : "") + '>\u25B2</button>' +
+          '<button type="button" class="rank-btn" data-pmove="1" data-pslot="' + i + '" aria-label="Move ' + name + ' down"' + (i >= last ? " disabled" : "") + '>\u25BC</button>' +
+        '</span>' +
+      '</div>';
     } else {
       slotsHtml += '<div class="perfect-slot empty"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>empty slot</span></div>';
     }
@@ -933,7 +1471,7 @@ function renderResultsPanel() {
   panel.innerHTML =
     '<div class="results-panel-header" style="background:var(--green5); color:var(--green5-text);">My Perfect Album</div>' +
     '<div class="results-panel-body">' +
-      '<p class="hint">Every song you scored a 5 shows up on the left. Check 13 of them to fill your Perfect Album on the right.</p>' +
+      '<p class="hint">Every song you scored a 5 shows up on the left. Check 13 of them to fill your Perfect Album on the right, then use the arrows to put your tracks in order. This isn\'t a ranking, per se, but constructing your Perfect Album track list order.</p>' +
       '<div class="perfect-counter' + (count > 13 ? " over" : "") + '">' + count + ' / 13 selected</div>' +
       '<div class="perfect-columns">' +
         '<div class="perfect-pool-col"><div class="perfect-pool">' + poolHtml + '</div></div>' +
@@ -941,6 +1479,20 @@ function renderResultsPanel() {
       '</div>' +
     '</div>';
 
+  panel.querySelectorAll("[data-pmove]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const from = Number(btn.dataset.pslot), dir = Number(btn.dataset.pmove), to = from + dir;
+      if (to < 0 || to >= Math.min(state.perfect.length, 13)) return;
+      [state.perfect[from], state.perfect[to]] = [state.perfect[to], state.perfect[from]];
+      markDirty();
+      renderResultsPanel();
+      // keep keyboard focus on the arrow that travelled with the song (flip at the ends)
+      const lastSlot = Math.min(state.perfect.length, 13) - 1;
+      const edge = (dir === -1 && to === 0) || (dir === 1 && to === lastSlot);
+      const el = panel.querySelector('[data-pmove="' + (edge ? -dir : dir) + '"][data-pslot="' + to + '"]');
+      if (el) el.focus({ preventScroll: true });
+    });
+  });
   panel.querySelectorAll("[data-perfect-id]").forEach(cb => {
     cb.addEventListener("change", () => {
       const id = cb.dataset.perfectId;
@@ -958,11 +1510,13 @@ function renderResultsPanel() {
    ============================================================ */
 function exportData() {
   const payload = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     scores: state.scores,
     eras: state.eras,
-    perfect: state.perfect
+    perfect: state.perfect,
+    rankings: state.rankings,
+    settings: state.settings
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -986,15 +1540,17 @@ function importData(file) {
       state.scores = parsed.scores || {};
       state.eras = parsed.eras || [];
       state.perfect = parsed.perfect || [];
+      state.rankings = parsed.rankings || {};
+      state.settings = Object.assign({ panelTab: "score", rankListHidden: false, erasTab: "eras" }, parsed.settings || {});
       saveState();
       dirty = false;
       renderAlbumGrid();
       renderPanel();
       renderResultsTabs();
       renderResultsPanel();
-      setStatus("Loaded scores from file");
+      setStatus("Loaded data from file");
     } catch (e) {
-      alert("That file couldn't be read as a scores file. Make sure it's a JSON file downloaded from this page's \"Save scores to file\" button.");
+      alert("That file couldn't be read as a data file. Make sure it's a JSON file downloaded from this page's \"Save data to file\" button.");
     }
   };
   reader.readAsText(file);
@@ -1010,7 +1566,7 @@ function buildPrintSnapshot() {
   const ranked = ALBUMS.map((a, ai) => ({ ai, name: a.name, avg: albumAverage(ai) }))
     .sort((a, b) => (b.avg === null ? -1 : b.avg) - (a.avg === null ? -1 : a.avg));
 
-  let html = '<div class="print-section"><div class="print-h1">Taylor Swift Song &amp; Album Scoring &mdash; snapshot</div>';
+  let html = '<div class="print-section"><div class="print-h1">Taylor Swift Song Scoring &amp; Ranking &mdash; snapshot</div>';
   html += '<div style="font-size:12px;color:#666;">' + new Date().toLocaleString() + '</div></div>';
 
   html += '<div class="print-section"><div class="print-h2">My Favorite Albums</div>';
@@ -1024,6 +1580,12 @@ function buildPrintSnapshot() {
   state.eras.forEach(id => {
     const [ai, si] = id.split("-").map(Number);
     html += '<div class="print-row">' + ALBUMS[ai].songs[si] + ' \u2014 ' + ALBUMS[ai].name + '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="print-section"><div class="print-h2">The 1s (your #1 ranked song from each album)</div>';
+  theOnes().forEach(o => {
+    html += '<div class="print-row">' + ALBUMS[o.ai].name + ' \u2014 ' + (o.si === null ? "no #1 yet" : ALBUMS[o.ai].songs[o.si]) + '</div>';
   });
   html += '</div>';
 
@@ -1094,7 +1656,7 @@ resetModalOverlay.addEventListener("click", (e) => {
 });
 document.getElementById("resetModalConfirm").addEventListener("click", () => {
   resetModalOverlay.classList.remove("open");
-  state = { scores: {}, eras: [], perfect: [] };
+  state = { scores: {}, eras: [], perfect: [], rankings: {}, settings: state.settings };   // keeps the tab preference
   saveState();
   dirty = false;
   renderAlbumGrid();
@@ -1176,7 +1738,7 @@ const LYRICS = [
   // Lover
   { song: "I Forgot That You Existed", quotes: ["Got out some popcorn As soon as my rep started going down, down, down", "It isn't love,\nit isn't hate,\nit's just indifference"] },
   { song: "Cruel Summer", quotes: ["And if I bleed, you'll be the last to know", "And I scream, ‘For whatever it's worth\nI love you, ain't that the worst thing you ever heard?’"] },
-  { song: "Lover", quotes: ["And you'll save all your dirtiest jokes for me,\nAnd at every table, I'll save you a seat, lover", "Have I known you twenty seconds or twenty years?"] },
+  { song: "Lover", quotes: ["And you'll save all your dirtiest jokes for me,\nAnd at every table, I'll save you a seat", "Have I known you twenty seconds or twenty years?"] },
   { song: "The Man", quotes: ["They’d say I hustled, put in the work,\nThey wouldn't shake their heads and question how much of this I deserve"] },
   { song: "The Archer", quotes: ["I've got a hundred thrown-out speeches I almost said to you"] },
   { song: "I Think He Knows", quotes: ["Lyrical smile, indigo eyes, hand on my thigh\nWe could follow the sparks, I'll drive"] },
@@ -1189,7 +1751,7 @@ const LYRICS = [
   { song: "Bejeweled", quotes: ["Nice!"] },
   // The Tortured Poets Department
   { song: "Guilty as Sin?", quotes: ["What if I roll the stone away?\nThey're gonna crucify me anyway"] },
-  { song: "The Smallest Man Who Ever Lived", quotes: ["WYSBSWWMDDYSWAGUOBWYWABWYASCSIFYWATBDAYCWYDIAISGRCIWSOIWFIWDFYSIIJDIAYDPBYWGTYSIIASTTBYCMPAYRCYSNGWBBYWGBTMYKOTSLBYSPAIPSYHBYAWYDAIFYBINFTSMWEL"] }
+  { song: "The Smallest Man Who Ever Lived", note: "(iykyk)", breakAll: true, noQuiz: true, quotes: ["WYSBSWWMDDYSWAGUOBWYWABWYASCSIFYWATBDAYCWYDIAISGRCIWSOIWFIWDFYSIIJDIAYDPBYWGTYSIIASTTBYCMPAYRCYSNGWBBYWGBTMYKOTSLBYSPAIPSYHBYAWYDAIFYBINFTSMWEL"] }
 ];
 
 let lastLyricSong = null;
@@ -1202,7 +1764,7 @@ function pickLyric() {
   const entry = pool[Math.floor(Math.random() * pool.length)];
   const quote = entry.quotes[Math.floor(Math.random() * entry.quotes.length)];
   lastLyricSong = entry.song;
-  return { song: entry.song, quote };
+  return { song: entry.song, quote, note: entry.note || "", breakAll: !!entry.breakAll };
 }
 
 function showLyric(animate) {
@@ -1217,7 +1779,8 @@ function showLyric(animate) {
       return;
     }
     textEl.textContent = "\u201C" + pick.quote + "\u201D";
-    srcEl.textContent = "\u2014 " + pick.song;
+    textEl.classList.toggle("break-anywhere", pick.breakAll);
+    srcEl.textContent = "\u2014 " + pick.song + (pick.note ? " " + pick.note : "");
   };
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!animate || reduceMotion) { apply(); return; }
@@ -1241,6 +1804,44 @@ document.querySelectorAll(".info-tab").forEach(tab => {
     document.querySelectorAll(".info-panel").forEach(p => {
       p.classList.toggle("active", p.dataset.panel === name);
     });
+  });
+});
+
+/* ============================================================
+   SUB-TABS (inside Behind the Scenes; works for any .sub-tabs group)
+   ============================================================ */
+document.querySelectorAll(".sub-tabs").forEach(group => {
+  const host = group.parentElement;
+  group.querySelectorAll(".sub-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      const name = tab.dataset.subpanel;
+      group.querySelectorAll(".sub-tab").forEach(t => {
+        const on = t === tab;
+        t.classList.toggle("active", on);
+        t.setAttribute("aria-selected", String(on));
+      });
+      host.querySelectorAll(":scope > .sub-panel").forEach(p => {
+        p.classList.toggle("active", p.dataset.subpanel === name);
+      });
+    });
+  });
+});
+
+// How This Works: color the score key from the same scoreColor() the panel uses
+document.querySelectorAll("[data-score-swatch]").forEach(el => {
+  const c = scoreColor(el.dataset.scoreSwatch);
+  el.style.background = c.bg; el.style.color = c.text;
+});
+// Inline buttons that open another pill in the same section (e.g. "RANK SONGS")
+document.querySelectorAll("[data-goto-subpanel]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const host = btn.closest(".info-panel");
+    const tab = host && host.querySelector('.sub-tab[data-subpanel="' + btn.dataset.gotoSubpanel + '"]');
+    if (!tab) return;
+    tab.click();
+    tab.focus({ preventScroll: true });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    host.closest(".info-block").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   });
 });
 
@@ -1297,7 +1898,7 @@ function buildQuestion(entry, slot) {
   return { quote, answer: entry.song, options, correctIndex: slot };
 }
 function startQuiz() {
-  const eligible = shuffleInPlace(LYRICS.filter(l => l.quotes && l.quotes.length > 0).slice());
+  const eligible = shuffleInPlace(LYRICS.filter(l => l.quotes && l.quotes.length > 0 && !l.noQuiz).slice());
   const picks = eligible.slice(0, Math.min(QUIZ_LENGTH, eligible.length));
   const slots = dealCorrectSlots(picks.length);
   quiz = { index: 0, score: 0, missed: [], answered: false, questions: [] };
@@ -1385,12 +1986,12 @@ startQuiz();
    "info (at) over50swiftie (dot) com" fallback text instead.
    ============================================================ */
 (function () {
-  const el = document.getElementById("contactEmail");
-  if (!el) return;
   const user = "info", domain = ["over50swiftie", "com"].join(".");
   const addr = user + String.fromCharCode(64) + domain;
-  el.href = "mail" + "to:" + addr;
-  el.textContent = addr;
+  document.querySelectorAll(".contact-email").forEach(el => {   // every contact link on the page
+    el.href = "mail" + "to:" + addr;
+    el.textContent = addr;
+  });
 })();
 
 loadState();
