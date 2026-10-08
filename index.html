@@ -122,7 +122,7 @@ a { color: inherit; }
 .kofi-info { display:flex; flex-direction:column; gap:3px; min-width:0; }
 .kofi-name { font-size:17px; font-weight:700; letter-spacing:0.02em; }
 .kofi-desc { font-size:15px; line-height:1.4; }
-/* Behind the Scenes sub-tabs (pill style, so they read as a second level under the folder tabs) */
+/* Updates-tab sub-tabs (pill style, so they read as a second level under the folder tabs) */
 .sub-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
 .sub-tab {
   font-family:'Barlow',sans-serif; font-size:16px; font-weight:600; letter-spacing:0.02em;
@@ -246,12 +246,12 @@ a { color: inherit; }
 /* ============================================================
    ALBUM TAB GRID (always visible)
    ============================================================ */
-.album-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:10px; margin-bottom:1.5rem; }
-.album-tile { display:flex; flex-direction:column; height:100%; cursor:pointer; border-radius:10px; overflow:hidden; border:3px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
+.album-grid { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:1.25rem; }
+.album-tile { display:flex; flex-direction:row; height:100%; cursor:pointer; border-radius:10px; overflow:hidden; border:3px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
 .album-tile:hover { transform:translateY(-1px); }
-.album-cover { flex-shrink:0; aspect-ratio:1/1; height:auto; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; }
-.album-tile-info { padding:9px 10px 10px; flex:1; display:flex; flex-direction:column; justify-content:flex-start; }
-.album-tile-name { font-size:19px; font-weight:700; line-height:1.2; font-family:'Cinzel',serif; }
+.album-cover { flex-shrink:0; width:88px; align-self:flex-start; aspect-ratio:1/1; height:auto; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; }
+.album-tile-info { padding:8px 10px 9px; flex:1; min-width:0; display:flex; flex-direction:column; justify-content:flex-start; }
+.album-tile-name { font-size:17px; font-weight:700; line-height:1.2; font-family:'Cinzel',serif; }
 .album-tile-score { font-size:15px; opacity:0.9; margin-top:5px; font-weight:600; }
 /* PLACEHOLDER STATUS COLORS -- replace once you've picked your palette */
 .album-tile-status { font-size:13px; margin-top:3px; font-weight:600; }
@@ -289,11 +289,11 @@ a { color: inherit; }
 .panel-tabs { display:flex; gap:6px; flex-wrap:wrap; padding:0.6rem 1.25rem 0; border-bottom:2px solid; }
 .panel-tab {
   font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:0.02em;
-  padding:0.55rem 1.1rem; border:2px solid transparent; border-bottom:none; border-radius:10px 10px 0 0;
+  padding:0.55rem 1.1rem; border:1.5px solid; border-bottom:none; border-radius:10px 10px 0 0;
   background:transparent; cursor:pointer; margin-bottom:-2px; -webkit-tap-highlight-color:transparent;
 }
 .panel-tab:hover:not(.active) { background:rgba(255,255,255,0.55); }
-.panel-tab.active { background:var(--bg2); padding-bottom:calc(0.55rem + 2px); }
+.panel-tab.active { background:var(--bg2); border-width:2px; padding-bottom:calc(0.55rem + 2px); }
 .panel-tab:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 .track-num { width:24px; flex-shrink:0; text-align:right; font-size:15px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
 .score-chip { flex-shrink:0; min-width:40px; text-align:center; font-size:15px; font-weight:600; padding:3px 6px; border-radius:6px; }
@@ -328,6 +328,45 @@ a { color: inherit; }
 .rank-btn:disabled { opacity:0.3; cursor:default; }
 .rank-btn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
 .rank-remove { color:#c0392b; }
+/* Drag & drop: grip handle works for mouse, touch and pen. On a computer
+   the whole filled row can also be grabbed. --drop / --drop-bg are set
+   per album on .rank-grid (and on the floating ghost row). */
+.drag-handle, .drag-spacer { flex-shrink:0; width:22px; height:28px; }
+.drag-handle {
+  display:flex; align-items:center; justify-content:center; border-radius:6px;
+  color:var(--muted); cursor:grab; touch-action:none; -webkit-tap-highlight-color:transparent;
+}
+.drag-handle svg { width:12px; height:18px; }
+.drag-handle:hover { background:var(--bg3); color:var(--text); }
+@media (hover: hover) and (pointer: fine) {
+  .rank-slot[data-drag-si], .rank-track[data-drag-si] { cursor:grab; }
+  .rank-slot[data-drag-si] .song-title, .rank-track[data-drag-si] .song-title { user-select:none; -webkit-user-select:none; }
+}
+.rank-slot.drag-source, .rank-track.drag-source { opacity:0.35; }
+.rank-slot.drop-target { background:var(--drop-bg); box-shadow:inset 0 0 0 2px var(--drop); border-radius:8px; }
+.rank-ghost {
+  position:fixed; z-index:200; pointer-events:none; margin:0;
+  background:var(--bg2); border:2px solid var(--drop); border-radius:8px;
+  box-shadow:0 10px 28px rgba(0,0,0,0.20); opacity:0.96;
+}
+body.rank-dragging, body.rank-dragging * { cursor:grabbing !important; user-select:none !important; -webkit-user-select:none !important; }
+.rank-slot.just-dropped { animation:rankDropFlash 0.9s ease-out; }
+@keyframes rankDropFlash { from { background:var(--drop-bg); box-shadow:inset 0 0 0 2px var(--drop); } to { background:transparent; box-shadow:none; } }
+@media (prefers-reduced-motion: reduce) { .rank-slot.just-dropped { animation:none; } }
+/* Perfect Album slots sit on solid album colors, so the grip takes the
+   slot's text color and drop feedback is a ring (the color stays put). */
+.perfect-slot .drag-handle { color:inherit; opacity:0.7; margin-left:-4px; }
+.perfect-slot .drag-handle:hover { opacity:1; background:rgba(255,255,255,0.25); }
+.perfect-slot .drag-spacer { margin-left:-4px; }
+@media (hover: hover) and (pointer: fine) {
+  .perfect-slot[data-pdrag] { cursor:grab; }
+  .perfect-slot[data-pdrag] .perfect-slot-title { user-select:none; -webkit-user-select:none; }
+}
+.perfect-slot.drag-source { opacity:0.35; }
+.perfect-slot.drop-target { box-shadow:0 0 0 3px var(--green5-text); }
+.perfect-slot.just-dropped { animation:perfectDropFlash 0.9s ease-out; }
+@keyframes perfectDropFlash { from { box-shadow:0 0 0 3px var(--green5-text); } to { box-shadow:0 0 0 3px transparent; } }
+@media (prefers-reduced-motion: reduce) { .perfect-slot.just-dropped { animation:none; } }
 /* Jump buttons only matter when the lists are stacked (phones/tablets) */
 .rank-jump { display:none; }
 @media (max-width: 900px) {
@@ -345,11 +384,11 @@ a { color: inherit; }
    ============================================================ */
 .results-heading { font-family:'Cinzel',serif; font-size:2.8rem; font-weight:900; margin:2.5rem 0 1rem; text-align:center; letter-spacing:0.03em; }
 .results-tab-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:1.5rem; }
-.results-tab { cursor:pointer; border-radius:10px; overflow:hidden; border:1.5px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
+.results-tab { display:flex; flex-direction:column; cursor:pointer; border-radius:10px; overflow:hidden; border:1.5px solid var(--border2); background:var(--bg2); transition:box-shadow 0.15s, border-color 0.15s, transform 0.1s; -webkit-tap-highlight-color:transparent; }
 .results-tab:hover { transform:translateY(-1px); }
 .results-tab.active { border-width:3px; }
 .results-tab-swatch { height:64px; }
-.results-tab-info { padding:9px 10px 10px; }
+.results-tab-info { padding:9px 10px 10px; flex:1; }
 .results-tab-name { font-size:19px; font-weight:700; font-family:'Cinzel',serif; line-height:1.2; }
 .results-tab-sub { font-size:15px; margin-top:5px; font-weight:600; opacity:0.9; }
 
@@ -399,6 +438,78 @@ a { color: inherit; }
 .perfect-pool .song-title, .perfect-slot:not(.empty) { font-weight:600; }
 
 /* ============================================================
+   MAIN SECTIONS (sticky tab bar + shared space)
+   --nav-h is measured by JS so anything we scroll to lands just
+   below the pinned bar instead of hiding under it.
+   ============================================================ */
+#mainTop { scroll-margin-top:0; }
+.main-nav {
+  position:sticky; top:0; z-index:50; background:var(--bg);
+  display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+  padding-top:0.75rem; border-bottom:3px solid var(--text);
+}
+.main-tabs { display:flex; gap:6px; }
+.main-tab {
+  font-family:'Cinzel',serif; font-weight:700; font-size:19px; letter-spacing:0.02em; line-height:1.2;
+  padding:0.8rem 1.4rem; border:2px solid #a9a598; border-bottom:none; border-radius:12px 12px 0 0;
+  background:var(--bg3); color:var(--text); cursor:pointer; margin-bottom:-3px;
+  -webkit-tap-highlight-color:transparent; transition:background 0.15s;
+}
+.main-tab:hover:not(.active) { background:#e8e4da; }
+.main-tab.active { background:var(--bg2); border:3px solid var(--text); border-bottom:3px solid var(--bg2); }
+.main-tab:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.main-panel {
+  display:none; background:var(--bg2); border:1px solid var(--border2); border-top:none;
+  border-radius:0 0 14px 14px; padding:1.25rem; margin-bottom:2.5rem;
+}
+.main-panel.active { display:block; }
+.main-panel .panel, .main-panel .results-panel { margin-bottom:0; }
+.panel, .album-grid, .rank-col-head, .results-tab-row { scroll-margin-top:calc(var(--nav-h, 72px) + 12px); }
+
+/* Save / Load / Print / Reset live in the bar. Wide screens: a row of
+   buttons with hover tips (shown BELOW, since the bar is at the top).
+   Phones: one "My Data" button that opens a menu with the tips inline. */
+.data-wrap { position:relative; align-self:center; padding-bottom:8px; }
+.data-wrap .toolbar { margin:0; flex-wrap:nowrap; gap:0.4rem; }
+.data-wrap .btn { font-size:15px; padding:8px 12px; }
+.data-menu-btn { display:none; -webkit-tap-highlight-color:transparent; }
+.main-nav .btn-tooltip {
+  top:calc(100% + 8px); bottom:auto; left:auto; right:0; transform:none;
+}
+.data-wrap .toolbar-status { display:none; }
+.toast {
+  position:fixed; left:50%; bottom:24px; transform:translate(-50%, 12px); z-index:150;
+  background:var(--text); color:#fff; font-size:16px; font-weight:600; padding:10px 18px; border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.2); opacity:0; pointer-events:none; transition:opacity 0.2s, transform 0.2s;
+  max-width:calc(100vw - 32px); text-align:center;
+}
+.toast.show { opacity:1; transform:translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { .toast { transition:none; } }
+
+/* Bottom of the album panel: back to the chooser, or on to Results */
+.panel-nav { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-top:14px; }
+
+/* Info block show/hide (not remembered: Lyric of the Day shows on every visit) */
+.info-toggle {
+  margin-left:auto; align-self:center; font-family:'Barlow',sans-serif; font-size:16px; font-weight:600;
+  padding:6px 14px; border:1.5px solid var(--border2); border-radius:999px; background:var(--bg2); color:var(--text);
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.info-toggle:hover { background:var(--bg3); border-color:var(--muted); }
+.info-toggle:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.info-block.collapsed .info-panel { display:none !important; }
+.info-block.collapsed .info-tab, .info-block.collapsed .info-tab.active {
+  background:var(--bg3); border-bottom:1px solid var(--border2); border-radius:10px; margin-bottom:0; padding-bottom:0.75rem;
+}
+
+/* Album Openers / The 5s: rows reuse the Perfect Album slot look */
+.order-tools { display:flex; justify-content:flex-end; margin:-0.25rem 0 0.75rem; }
+.order-list .perfect-slot.drop-target { box-shadow:0 0 0 3px var(--text); }
+.order-list .perfect-slot.just-dropped { animation:orderDropFlash 0.9s ease-out; }
+@keyframes orderDropFlash { from { box-shadow:0 0 0 3px var(--text); } to { box-shadow:0 0 0 3px transparent; } }
+@media (prefers-reduced-motion: reduce) { .order-list .perfect-slot.just-dropped { animation:none; } }
+
+/* ============================================================
    FOOTER
    ============================================================ */
 footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(--text); line-height:1.8; }
@@ -409,21 +520,98 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
    which JS populates right before printing.
    ============================================================ */
 #printSnapshot { display:none; }
+/* Snapshot styles (only ever visible when printing). print-color-adjust
+   tells the browser to keep the album colors instead of stripping
+   backgrounds like it normally does when printing. */
+#printSnapshot, #printSnapshot * { -webkit-print-color-adjust:exact; print-color-adjust:exact; box-sizing:border-box; }
+#printSnapshot { font-family:'Barlow',sans-serif; color:#2a2a26; background:#fff; }
+.ps-band { height:10px; border-radius:3px; }
+.ps-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin:14px 0 16px; }
+.ps-title { font-family:'Cinzel',serif; font-weight:900; font-size:28px; line-height:1.1; letter-spacing:0.02em; }
+.ps-date { font-size:13px; font-weight:600; margin-top:3px; }
+.ps-site { font-family:'Cinzel',serif; font-weight:700; font-size:15px; text-align:right; line-height:1.4; }
+.ps-site span { display:block; font-family:'Barlow',sans-serif; font-size:13px; font-weight:600; }
+.ps-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px 18px; align-items:start; }
+.ps-card { break-inside:avoid; page-break-inside:avoid; display:flex; flex-direction:column; gap:3px; }
+.ps-card-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-family:'Cinzel',serif; font-weight:700; font-size:17px; padding:0 2px 3px; }
+.ps-note { font-family:'Barlow',sans-serif; font-size:12px; font-weight:600; white-space:nowrap; }
+.ps-bar { height:6px; border-radius:3px; margin-bottom:4px; background:#ddd; }
+.ps-row { display:flex; align-items:center; gap:7px; height:24px; padding:0 8px 0 4px; border-radius:5px; font-size:13px; font-weight:600; }
+.ps-num { width:18px; flex-shrink:0; text-align:right; font-weight:700; }
+.ps-cover { width:17px; height:17px; flex-shrink:0; border-radius:3px; object-fit:cover; }
+.ps-name { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ps-right { flex-shrink:0; font-weight:700; }
+.ps-empty { font-size:13px; font-style:italic; padding:6px 4px; border:1.5px dashed #bbb; border-radius:5px; }
+.ps-break { break-before:page; page-break-before:always; }
+.ps-section-title { font-family:'Cinzel',serif; font-weight:900; font-size:20px; margin:22px 0 4px; }
+.ps-album { break-inside:avoid; page-break-inside:avoid; margin-top:12px; }
+.ps-album-head { display:flex; align-items:center; gap:10px; padding:6px 10px 6px 6px; border-radius:7px; }
+.ps-album-head img { width:38px; height:38px; border-radius:4px; object-fit:cover; flex-shrink:0; }
+.ps-album-name { flex:1; font-family:'Cinzel',serif; font-weight:700; font-size:17px; }
+.ps-album-stats { font-size:12.5px; font-weight:700; text-align:right; line-height:1.35; }
+.ps-songs-head { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); column-gap:18px; margin-top:4px; }
+.ps-songs { columns:2; column-gap:18px; }
+.ps-song-head { display:flex; justify-content:space-between; font-size:11.5px; font-weight:700; padding:3px 3px; border-bottom:1px solid #ccc; break-inside:avoid; }
+.ps-song { display:flex; align-items:center; gap:6px; height:23px; padding:0 3px; border-bottom:1px solid #eee; font-size:12.5px; break-inside:avoid; page-break-inside:avoid; }
+.ps-song-num { width:18px; text-align:right; font-weight:600; flex-shrink:0; }
+.ps-song-title { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:1px 6px; border-radius:4px; font-weight:600; }
+.ps-song-rank { width:30px; text-align:right; font-weight:800; flex-shrink:0; }
+.ps-chip { width:32px; flex-shrink:0; text-align:center; font-weight:700; padding:1px 0; border-radius:4px; }
+.ps-foot { margin-top:18px; padding-top:6px; border-top:1px solid #ccc; font-size:12px; font-weight:600; display:flex; justify-content:space-between; }
+@page { size:letter; margin:0.45in; }
 @media print {
   /* Remove everything except the snapshot from the printout entirely
      (display:none, not visibility:hidden, so hidden parts take up no
      pages and no hover tooltip can sneak back in). */
+  html, body { background:#fff !important; padding:0 !important; }
   body > *:not(#printSnapshot) { display:none !important; }
   .btn-tooltip, .info-tooltip { display:none !important; }
-  #printSnapshot { display:block; position:static; width:100%; padding:1rem; }
-  .print-section { margin-bottom: 1.5rem; page-break-inside: avoid; }
-  .print-h1 { font-size: 22px; font-weight:700; margin-bottom: 4px; }
-  .print-h2 { font-size: 16px; font-weight:700; margin: 14px 0 6px; border-bottom: 1px solid #ccc; padding-bottom:3px; }
-  .print-row { font-size: 13px; padding: 2px 0; }
+  #printSnapshot { display:block; position:static; width:100%; }
 }
 
+/* ============================================================
+   SHARE IMAGES (preview popup) + small "?" buttons
+   ============================================================ */
+.share-row { display:flex; justify-content:flex-end; align-items:center; gap:10px; margin:-0.25rem 0 0.75rem; flex-wrap:wrap; }
+.share-btn { display:inline-flex; align-items:center; gap:8px; }
+.share-btn svg { width:18px; height:18px; }
+.share-box { max-width:520px; }
+.share-preview {
+  display:flex; align-items:center; justify-content:center; min-height:200px; margin:0.5rem 0 1.25rem;
+  background:var(--bg3); border-radius:10px; overflow:hidden; font-size:17px; font-style:italic;
+}
+.share-preview img { display:block; width:100%; height:auto; max-height:58vh; object-fit:contain; }
+.ask-btn {
+  width:26px; height:26px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; padding:0;
+  border-radius:50%; border:1.5px solid var(--border2); background:var(--bg2); color:var(--text);
+  font-family:'Barlow',sans-serif; font-size:15px; font-weight:700; cursor:pointer; vertical-align:middle; margin-left:8px;
+}
+.ask-btn:hover { background:var(--bg3); border-color:var(--muted); }
+.ask-btn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.info-modal-body { text-align:center; }
+.info-modal-body a { color:var(--gold-text); font-weight:600; }
+
 @media (max-width: 900px) {
-  .album-grid { grid-template-columns:repeat(3, 1fr); }
+  .album-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .data-menu-btn { display:inline-flex; white-space:nowrap; }
+  .data-wrap .toolbar {
+    display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:60;
+    width:min(320px, calc(100vw - 32px)); flex-direction:column; align-items:stretch; gap:0;
+    background:var(--bg2); border:1.5px solid var(--border2); border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.18); padding:6px;
+  }
+  .data-wrap.open .toolbar { display:flex; }
+  .data-wrap .btn-tooltip-wrap { display:block; padding:8px; border-bottom:1px solid var(--border); }
+  .data-wrap .btn-tooltip-wrap:last-of-type { border-bottom:none; }
+  .data-wrap .toolbar .btn { width:100%; justify-content:center; }
+  .main-nav .btn-tooltip, .main-nav .btn-tooltip-wrap:hover .btn-tooltip {
+    position:static; opacity:1; visibility:visible; transform:none; width:auto;
+    background:transparent; color:var(--text); padding:6px 2px 0; transition:none;
+  }
+  .data-wrap .toolbar-status { display:block; padding:8px; font-size:15px; }
+  .data-wrap .toolbar-status:empty { display:none; }
 }
 @media (max-width: 640px) {
   .wrap { padding:1.5rem 1rem 2rem; }
@@ -432,7 +620,25 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
   .info-tab.active { padding-bottom:calc(0.6rem + 1px); }
   .info-panel { border-radius:0 0 12px 12px; padding:1rem; }
   .panel-body { padding:1rem; }
-  .album-grid { grid-template-columns:repeat(2, 1fr); }
+  .album-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+  .album-cover { width:56px; }
+  .album-tile-name { font-size:15px; }
+  .main-panel { padding:0.9rem; }
+  .main-nav { gap:6px; }
+  .main-tabs { flex:1; gap:4px; min-width:0; }
+  .main-tab { flex:1 1 0; font-size:15px; padding:0.6rem 0.35rem; text-align:center; }
+  .data-wrap .data-menu-btn { font-size:15px; padding:8px 10px; }
+  .info-toggle { font-size:15px; padding:5px 10px; }
+  /* Song Scoring / Song Ranking share one row */
+  .panel-tabs { flex-wrap:nowrap; padding:0.5rem 0.6rem 0; gap:4px; }
+  .panel-tab { flex:1 1 0; font-size:15px; padding:0.5rem 0.4rem; text-align:center; }
+  .panel-tab.active { padding-bottom:calc(0.5rem + 2px); }
+  /* Results tiles: three across and short, so the list starts right away */
+  .results-tab-row { grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; margin-bottom:1rem; }
+  .results-tab-swatch { height:18px; }
+  .results-tab-info { padding:7px 7px 8px; }
+  .results-tab-name { font-size:15px; }
+  .results-tab-sub { display:none; }
 }
 </style>
 </head>
@@ -454,7 +660,8 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
     <div class="info-tabs" role="tablist" aria-label="Page info">
       <button type="button" class="info-tab active" role="tab" data-panel="lyric" aria-selected="true">Lyric of the Day</button>
       <button type="button" class="info-tab" role="tab" data-panel="how" aria-selected="false">How This Works</button>
-      <button type="button" class="info-tab" role="tab" data-panel="bts" aria-selected="false">Behind the Scenes</button>
+      <button type="button" class="info-tab" role="tab" data-panel="bts" aria-selected="false">Updates</button>
+      <button type="button" class="info-toggle" id="infoToggle" aria-expanded="true">Hide &#9652;</button>
     </div>
 
     <div class="info-panel active" role="tabpanel" data-panel="lyric">
@@ -476,7 +683,7 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
 
       <div class="sub-panel active" role="tabpanel" data-subpanel="scoring">
       <div class="how-heading">SCORE EVERY SONG TO AUTO-RANK ALBUMS</div>
-      <p><strong>1.</strong> Click an album tile below to open its song list in the panel underneath the grid. Make sure you have the Song Scoring Tab selected.</p>
+      <p><strong>1.</strong> In the <em>Score &amp; Rank</em> tab, click an album to open its song list in the panel underneath. Make sure you have the Song Scoring Tab selected.</p>
       <p><strong>2.</strong> Give each song a score from 0&ndash;5. The song and its score change color as you go.</p>
       <!-- Score colors are filled in by JS from scoreColor(), so they always match the scoring panel -->
       <table class="score-table">
@@ -490,38 +697,39 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
           <tr><th scope="row"><span class="score-swatch" data-score-swatch="0">0</span></th><td>your least favorites, obviously. We&rsquo;re not haters out here. But we&rsquo;re good without these.</td></tr>
         </tbody>
       </table>
-      <p class="how-note"><strong>NOTE: Albums rank themselves.</strong> Each album tile shows a live average of that album&rsquo;s scored songs. The &ldquo;My Favorite Albums&rdquo; results section below sorts all 12 highest to lowest, automatically. (NOTE: this is &ldquo;mathematically&rdquo; your favorite album order&hellip; but it doesn&rsquo;t change your heart&rsquo;s true album order. Your fav is still your fav!)</p>
-      <p><strong>3. Build your Eras Album.</strong> Check the box next to one song per album (plus one bonus pick from any album) to assemble a 13-track &ldquo;Eras&rdquo; playlist in the results section.</p>
-      <p><strong>4. Build your Perfect Album.</strong> Every song you scored as a 5 shows up in the &ldquo;Perfect Album&rdquo; pool in the Results section below. Choose 13 of those songs (choices are hard!) to fill your Perfect Album&rsquo;s 13 track slots. Then arrange them in the order you&rsquo;d want to listen to that album.</p>
-      <p><strong>5. SAVE your progress.</strong> Your scores auto-save in this browser as you go, but they can disappear if you clear your browsing data, use a private window, or switch devices. Use the <em>Save data to file</em> button to download a backup you can re-upload later (even on a different device or browser). Use the <em>Print / Save PDF Snapshot</em> to keep a dated printable copy of your results.</p>
-      <p><strong>6. HAVE FUN!</strong> Play the lyrics game and see how you do. More lyrics will be updated/included soon. And when TS13, Debut TV or Rep TV drop, this site will be updated to include new tracks and vault tracks.</p>
+      <p class="how-note"><strong>NOTE: Albums rank themselves.</strong> Each album tile shows a live average of that album&rsquo;s scored songs. &ldquo;My Favorite Albums&rdquo; in the <em>Your Results</em> tab sorts all 12 highest to lowest, automatically. (NOTE: this is &ldquo;mathematically&rdquo; your favorite album order&hellip; but it doesn&rsquo;t change your heart&rsquo;s true album order. Your fav is still your fav!)</p>
+      <p><strong>3. Build your Eras Album.</strong> Check the box next to one song per album (plus one bonus pick from any album) to assemble a 13-track &ldquo;Eras&rdquo; playlist in the <em>Your Results</em> tab.</p>
+      <p><strong>4. Build your Perfect Album.</strong> Every song you scored as a 5 shows up in the &ldquo;Perfect Album&rdquo; pool in the <em>Your Results</em> tab. Choose 13 of those songs (choices are hard!) to fill your Perfect Album&rsquo;s 13 track slots. Then drag them (or use the arrows) into the order you&rsquo;d want to listen to that album.</p>
+      <p><strong>5. SAVE your progress.</strong> Your scores auto-save in this browser as you go, but they can disappear if you clear your browsing data, use a private window, or switch devices. Use the <em>Save File</em> button (top right, or in the <em>My Data</em> menu on phones) to download a backup you can re-upload later (even on a different device or browser). Use <em>Print / PDF</em> to keep a dated, full-color copy of your results. Each list in <em>Your Results</em> also has a <em>Share Image</em> button that makes a picture of that list to post or save.</p>
+      <p><strong>6. HAVE FUN!</strong> Play the lyrics game in the <em>Lyrics Quiz</em> tab and see how you do. More lyrics will be updated/included soon. And when TS13, Debut TV or Rep TV drop, this site will be updated to include new tracks and vault tracks.</p>
       <p class="how-cta"><button type="button" class="inline-pill-btn" data-goto-subpanel="ranking">How Do I RANK Songs Instead?</button></p>
       </div>
 
       <div class="sub-panel" role="tabpanel" data-subpanel="ranking">
         <div class="how-heading">RANKING SONGS FOR EVERY ALBUM</div>
-        <p><strong>1.</strong> Click an album tile below to open its song list in the panel underneath the grid. Make sure you have the Song Ranking Tab selected.</p>
+        <p><strong>1.</strong> In the <em>Score &amp; Rank</em> tab, click an album to open its song list in the panel underneath. Make sure you have the Song Ranking Tab selected.</p>
         <p><strong>2.</strong> The left column shows the album in track order with your song scores (if you&rsquo;ve done that). The right column shows your rankings for this album.</p>
         <p><strong>3.</strong> You can begin ranking songs using the RANK menu -OR- if you already have songs scored, populate your ranking with the &lsquo;Start From My Scores&rsquo; button.</p>
         <p class="how-note"><strong>NOTE:</strong> When ranking, picking a number that&rsquo;s already taken slides the other songs down to make room.</p>
-        <p><strong>4.</strong> Use the arrows to nudge songs up or down, and &#x2715; to take one out. (You don&rsquo;t have to rank every song.)</p>
-        <p><strong>This builds your &ldquo;Eras: The 1s&rdquo; Album automatically down in the Results section.</strong></p>
-        <p class="how-note"><strong>NOTE:</strong> Your Rankings auto-save in this browser as you go, but they can disappear if you clear your browsing data, use a private window, or switch devices. Use the <em>Save data to file</em> button to download a backup you can re-upload later (even on a different device or browser). Use the <em>Print / Save PDF Snapshot</em> to keep a dated printable copy of your results.</p>
-        <p><strong>5. HAVE FUN!</strong></p>
+        <p><strong>4.</strong> Drag a song by its dotted grip to move it to any spot in your ranking, or drag one straight from the Track List into a slot. (On a computer you can grab anywhere on the song&rsquo;s row.) Use the arrows to nudge songs up or down, and &#x2715; to take one out. (You don&rsquo;t have to rank every song.)</p>
+        <p><strong>This builds your &ldquo;My #1s&rdquo; Eras album automatically in the <em>Your Results</em> tab (under My Eras Albums).</strong></p>
+        <p><strong>5. Rank the Openers and The 5s.</strong> Also under My Eras Albums in <em>Your Results</em>: <em>Album Openers</em> lines up every album&rsquo;s track 1 and <em>The 5s</em> lines up every album&rsquo;s track 5. Drag them into your order.</p>
+        <p class="how-note"><strong>NOTE:</strong> Your Rankings auto-save in this browser as you go, but they can disappear if you clear your browsing data, use a private window, or switch devices. Use the <em>Save File</em> button (top right, or in the <em>My Data</em> menu on phones) to download a backup you can re-upload later (even on a different device or browser). Use <em>Print / PDF</em> to keep a dated printable copy of your results.</p>
+        <p><strong>6. HAVE FUN!</strong></p>
         <p class="how-cta"><button type="button" class="inline-pill-btn" data-goto-subpanel="scoring">How Do I SCORE Songs Instead?</button></p>
       </div>
     </div>
 
     <div class="info-panel" role="tabpanel" data-panel="bts">
-      <!-- BEHIND THE SCENES: to add a sub-tab, add a button to .sub-tabs
+      <!-- UPDATES tab (was "Behind the Scenes"): to add a sub-tab, add a button to .sub-tabs
            and a matching .sub-panel with the same data-subpanel name. -->
-      <div class="sub-tabs" role="tablist" aria-label="Behind the scenes">
-        <button type="button" class="sub-tab active" role="tab" data-subpanel="about" aria-selected="true">About the Designer</button>
+      <div class="sub-tabs" role="tablist" aria-label="Updates and more">
+        <button type="button" class="sub-tab active" role="tab" data-subpanel="updates" aria-selected="true">Updates</button>
+        <button type="button" class="sub-tab" role="tab" data-subpanel="about" aria-selected="false">About the Designer</button>
         <button type="button" class="sub-tab" role="tab" data-subpanel="suggest" aria-selected="false">Suggestion Box</button>
-        <button type="button" class="sub-tab" role="tab" data-subpanel="updates" aria-selected="false">Updates</button>
       </div>
 
-      <div class="sub-panel active" role="tabpanel" data-subpanel="about">
+      <div class="sub-panel" role="tabpanel" data-subpanel="about">
       <div class="about-text">
         <p>My name is Rich and I’m an Over 50 Swiftie. I made this scoring tool as a Google Sheet that I posted for the TS Reddit community back before TLOAS came out. I recently changed it to be an interactive webpage so I could have more fun with it and Swifties like you could get more use out of it. (It’s most recently been updated to include the TLOAS: The Encore songs.)</p>
         <p>I used to work in country radio and met Taylor when she was 16, touring stations to promote her debut album. At the time, I worked simultaneously for KZLA radio in Los Angeles and a nationally syndicated show called AfterMidNite. She visited AfterMidNite and then the next night played at the Whisky. She was incredibly sweet and I’ve followed her career as a fan ever since.</p>
@@ -554,7 +762,7 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
       </a>
       </div>
 
-      <div class="sub-panel" role="tabpanel" data-subpanel="updates">
+      <div class="sub-panel active" role="tabpanel" data-subpanel="updates">
       <!-- UPDATES: written by hand. Add new entries at the TOP of the list:
            copy one <li> block, paste it above the others, change the date and text. -->
       <div class="updates-scroll" tabindex="0" aria-label="Page updates, scrollable">
@@ -574,29 +782,6 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
       </div>
       </div>
     </div>
-  </div>
-
-  <p class="toolbar-hint">Hover on Buttons for Info</p>
-  <div class="toolbar">
-    <div class="btn-tooltip-wrap">
-      <button class="btn btn-primary" id="btnExport">Save data to file</button>
-      <div class="btn-tooltip">Click to download a JSON file backup you can re-upload later (even on a different device or browser).</div>
-    </div>
-    <div class="btn-tooltip-wrap">
-      <label class="btn file-label" id="btnImport">Load data from file
-        <input type="file" id="importFile" accept="application/json">
-      </label>
-      <div class="btn-tooltip">Click to select a JSON file from your device to restore your data from a previous download.</div>
-    </div>
-    <div class="btn-tooltip-wrap">
-      <button class="btn" id="btnPrint">Print / Save PDF Snapshot</button>
-      <div class="btn-tooltip">Click to print your scores and results or change your printer to PDF to save a copy you can share with friends.</div>
-    </div>
-    <div class="btn-tooltip-wrap">
-      <button class="btn btn-danger" id="btnReset">Reset all</button>
-      <div class="btn-tooltip">Click to reset ALL of your data. This will wipe the page. Only do this if you want to start over. You can only restore data by loading your scores from a previously saved JSON file.</div>
-    </div>
-    <span class="toolbar-status" id="toolbarStatus"></span>
   </div>
 
   <div class="modal-overlay" id="confirmModalOverlay">
@@ -630,19 +815,59 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
     </div>
   </div>
 
-  <div class="album-grid" id="albumGrid"></div>
+  <!-- ============================================================
+       MAIN SECTIONS: sticky tab bar + one shared space below it.
+       To add a main section: add a .main-tab button and a matching
+       .main-panel with the same data-main name.
+       ============================================================ -->
+  <div id="mainTop"></div>
+  <nav class="main-nav" id="mainNav" aria-label="Main sections">
+    <div class="main-tabs" role="tablist">
+      <button type="button" class="main-tab active" role="tab" data-main-tab="albums" aria-selected="true">Score &amp; Rank</button>
+      <button type="button" class="main-tab" role="tab" data-main-tab="results" aria-selected="false">Your Results</button>
+      <button type="button" class="main-tab" role="tab" data-main-tab="quiz" aria-selected="false">Lyrics Quiz</button>
+    </div>
+    <div class="data-wrap" id="dataWrap">
+      <button type="button" class="btn data-menu-btn" id="dataMenuBtn" aria-expanded="false" aria-controls="dataTools">My Data &#9662;</button>
+      <div class="toolbar" id="dataTools">
+    <div class="btn-tooltip-wrap">
+      <button class="btn btn-primary" id="btnExport">Save File</button>
+      <div class="btn-tooltip">Click to download a JSON file backup you can re-upload later (even on a different device or browser).</div>
+    </div>
+    <div class="btn-tooltip-wrap">
+      <label class="btn file-label" id="btnImport">Load File
+        <input type="file" id="importFile" accept="application/json">
+      </label>
+      <div class="btn-tooltip">Click to select a JSON file from your device to restore your data from a previous download.</div>
+    </div>
+    <div class="btn-tooltip-wrap">
+      <button class="btn" id="btnPrint">Print / PDF</button>
+      <div class="btn-tooltip">Click to print your scores and results or change your printer to PDF to save a copy you can share with friends.</div>
+    </div>
+    <div class="btn-tooltip-wrap">
+      <button class="btn btn-danger" id="btnReset">Reset All</button>
+      <div class="btn-tooltip">Click to reset ALL of your data. This will wipe the page. Only do this if you want to start over. You can only restore data by loading your scores from a previously saved JSON file.</div>
+    </div>
+        <span class="toolbar-status" id="toolbarStatus"></span>
+      </div>
+    </div>
+  </nav>
 
-  <div class="panel" id="albumPanel"></div>
+  <div class="main-panel active" role="tabpanel" data-main="albums">
+    <div class="album-grid" id="albumGrid"></div>
+    <div class="panel" id="albumPanel"></div>
+  </div>
 
-  <div class="results-heading">Your Results</div>
+  <div class="main-panel" role="tabpanel" data-main="results">
+    <div class="results-tab-row" id="resultsTabRow"></div>
+    <div class="results-panel" id="resultsPanel"></div>
+  </div>
 
-  <div class="results-tab-row" id="resultsTabRow"></div>
-  <div class="results-panel" id="resultsPanel"></div>
-
-  <section class="quiz-section" id="lyricsQuiz" aria-labelledby="quizHeading">
-    <div class="results-heading" id="quizHeading">Lyrics Quiz</div>
-    <div class="quiz-card" id="quizCard"></div>
-  </section>
+  <div class="main-panel" role="tabpanel" data-main="quiz">
+    <section class="quiz-section" id="lyricsQuiz" aria-label="Lyrics Quiz">
+      <div class="quiz-card" id="quizCard"></div>
+    </section>
+  </div>
 
 </div>
 
@@ -651,6 +876,8 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
   <br><br>
   <button class="btn" id="btnPrivacyNotice">Privacy</button>
 </footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="modal-overlay" id="privacyNoticeOverlay">
   <div class="modal-box">
@@ -662,6 +889,26 @@ footer { text-align:center; padding:2rem 1.5rem 1rem; font-size:15px; color:var(
     <div class="modal-actions">
       <button class="btn btn-primary" id="privacyNoticeClose">Close</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="shareModalOverlay" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+  <div class="modal-box share-box">
+    <div class="modal-title" id="shareModalTitle">Share</div>
+    <div class="share-preview" id="sharePreview">Making your image&hellip;</div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" id="shareNowBtn" hidden>Share</button>
+      <button type="button" class="btn" id="shareDownloadBtn" disabled>Download Image</button>
+      <button type="button" class="btn" id="shareCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="infoModalOverlay" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
+  <div class="modal-box">
+    <div class="modal-title" id="infoModalTitle"></div>
+    <div class="info-modal-body" id="infoModalBody"></div>
+    <div class="modal-actions" id="infoModalActions"></div>
   </div>
 </div>
 
@@ -773,7 +1020,7 @@ function scoreColor(v) {
    perfect:  Set of "albumIndex-songIndex" strings (checked for Perfect Album)
    ============================================================ */
 const STORAGE_KEY = "ts_album_scoring_v1";
-let state = { scores: {}, eras: [], perfect: [], rankings: {}, settings: { panelTab: "score", rankListHidden: false, erasTab: "eras" } };
+let state = { scores: {}, eras: [], perfect: [], rankings: {}, openers: [], track5s: [], settings: { panelTab: "score", rankListHidden: false, erasTab: "eras" } };
 let activeAlbum = null;
 let activeResultTab = "favorites";
 let dirty = false;
@@ -790,6 +1037,8 @@ function loadState() {
       state.eras = parsed.eras || [];
       state.perfect = parsed.perfect || [];
       state.rankings = parsed.rankings || {};
+      state.openers = parsed.openers || [];
+      state.track5s = parsed.track5s || [];
       state.settings = Object.assign({ panelTab: "score", rankListHidden: false, erasTab: "eras" }, parsed.settings || {});
     }
   } catch (e) { console.warn("Could not load saved scores:", e); }
@@ -996,6 +1245,9 @@ function scoringTabHtml(ai) {
     '</div>' + songsHtml;
 }
 
+const DRAG_GRIP = '<span class="drag-handle" aria-hidden="true" title="Drag to move"><svg viewBox="0 0 12 18" fill="currentColor"><circle cx="3" cy="3" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="3" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="3" cy="15" r="1.6"/><circle cx="9" cy="15" r="1.6"/></svg></span>';
+let justDropped = null;   // { ai, slot } of the last drag drop, so that slot can flash once
+
 function rankingTabHtml(ai) {
   // Both lists live in ONE grid so track row #3 and rank slot #3 always
   // share a row height and line up, even when a long title wraps.
@@ -1009,7 +1261,7 @@ function rankingTabHtml(ai) {
   const hidden = !!state.settings.rankListHidden;
 
   const intro = '<div class="rank-intro">' +
-    '<p class="rank-hint">Use a song’s RANK menu to place it in your ranking -or- if you already have songs scored, populate your ranking with the ‘Start From My Scores’ button. Picking a number that’s already taken slides the other songs down to make room. Use the arrows to nudge songs up or down, and ✕ to take one out. You don’t have to rank every song.</p>' +
+    '<p class="rank-hint">Use a song’s RANK menu to place it in your ranking -or- if you already have songs scored, populate your ranking with the ‘Start From My Scores’ button. Picking a number that’s already taken slides the other songs down to make room. Drag a song by its dotted grip to move it to any spot (or drag one straight from the Track List into a slot). Use the arrows to nudge songs up or down, and ✕ to take one out. You don’t have to rank every song.</p>' +
     '<div class="rank-tools">' +
       '<button type="button" class="btn rank-tool" id="rankFillBtn"' + (anyScored ? "" : " disabled") + '>Start from my scores</button>' +
       '<button type="button" class="btn rank-tool" id="rankClearBtn"' + (anyRanked ? "" : " disabled") + '>Clear ranking</button>' +
@@ -1017,7 +1269,7 @@ function rankingTabHtml(ai) {
   '</div>';
 
   // RIGHT column cells first (so phones show your ranking first)
-  let cells = '<div class="rank-col-head R" id="rankListHead" style="--r:1"><span>Your Ranking</span>' +
+  let cells = '<div class="rank-col-head R" id="rankListHead" style="--r:1"><span>Your Ranking<button type="button" class="ask-btn" id="rankShareAsk" aria-label="Share image for this ranking?" title="Share image?">?</button></span>' +
       '<span class="rank-head-btns">' +
         '<button type="button" class="btn rank-jump" data-jump="rankTracksHead">↓ Jump to Tracks</button>' +
         '<button type="button" class="btn rank-toggle" id="rankToggleBtn" aria-expanded="' + !hidden + '">' + (hidden ? "Show list" : "Hide list") + '</button>' +
@@ -1029,11 +1281,13 @@ function rankingTabHtml(ai) {
   r.forEach((si, slot) => {
     const pos = 'R" style="--r:' + (slot + 2) + '"';
     if (si === null) {
-      cells += '<div class="rank-slot empty ' + pos + '><span class="rank-num">' + (slot + 1) + '</span><span class="rank-empty">empty slot</span></div>';
+      cells += '<div class="rank-slot empty ' + pos + ' data-slot="' + slot + '"><span class="drag-spacer"></span><span class="rank-num">' + (slot + 1) + '</span><span class="rank-empty">empty slot</span></div>';
       return;
     }
     const name = quizEscape(album.songs[si]);
-    cells += '<div class="rank-slot ' + pos + '>' +
+    const flash = justDropped && justDropped.ai === ai && justDropped.slot === slot ? " just-dropped" : "";
+    cells += '<div class="rank-slot' + flash + ' ' + pos + ' data-slot="' + slot + '" data-drag-si="' + si + '">' +
+      DRAG_GRIP +
       '<span class="rank-num">' + (slot + 1) + '</span>' +
       scoredTitleHtml(ai, si) +
       scoreChipHtml(ai, si) +
@@ -1053,7 +1307,8 @@ function rankingTabHtml(ai) {
     const p = r.indexOf(si);
     let opts = '<option value=""' + (p === -1 ? " selected" : "") + '>RANK</option>';
     for (let i = 0; i < n; i++) opts += '<option value="' + i + '"' + (p === i ? " selected" : "") + '>' + (i + 1) + '</option>';
-    cells += '<div class="rank-track L" style="--r:' + (si + 2) + '">' +
+    cells += '<div class="rank-track L" style="--r:' + (si + 2) + '"' + (hidden ? '' : ' data-drag-si="' + si + '"') + '>' +
+      (hidden ? '<span class="drag-spacer"></span>' : DRAG_GRIP) +
       '<span class="track-num">' + (si + 1) + '</span>' +
       scoredTitleHtml(ai, si) +
       scoreChipHtml(ai, si) +
@@ -1061,7 +1316,9 @@ function rankingTabHtml(ai) {
     '</div>';
   });
 
-  return intro + '<div class="rank-grid' + (hidden ? " list-hidden" : "") + '">' + cells + '</div>';
+  justDropped = null;
+  const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee" };
+  return intro + '<div class="rank-grid' + (hidden ? " list-hidden" : "") + '" style="--drop:' + theme.base + '; --drop-bg:' + theme.light + ';">' + cells + '</div>';
 }
 
 function renderPanel() {
@@ -1069,7 +1326,7 @@ function renderPanel() {
 
   if (activeAlbum === null) {
     panel.style.borderColor = "var(--border2)";
-    panel.innerHTML = '<div class="panel-placeholder">Click an album tab above to start scoring its songs.</div>';
+    panel.innerHTML = '<div class="panel-placeholder">Click an album above to start scoring or ranking its songs.</div>';
     return;
   }
 
@@ -1083,7 +1340,7 @@ function renderPanel() {
   const tabsHtml = '<div class="panel-tabs" role="tablist" aria-label="' + quizEscape(album.name) + ' views" style="background:' + theme.light + '; border-bottom-color:' + theme.base + ';">' +
     PANEL_TABS.map(t => {
       const on = t.id === tab;
-      return '<button type="button" role="tab" class="panel-tab' + (on ? " active" : "") + '" data-panel-tab="' + t.id + '" aria-selected="' + on + '" style="color:' + theme.text + ';' + (on ? " border-color:" + theme.base + ";" : "") + '">' + t.label + '</button>';
+      return '<button type="button" role="tab" class="panel-tab' + (on ? " active" : "") + '" data-panel-tab="' + t.id + '" aria-selected="' + on + '" style="color:' + theme.text + ';' + " border-color:" + (on ? theme.base : theme.base + "80") + ";" + '">' + t.label + '</button>';
     }).join("") +
   '</div>';
 
@@ -1098,21 +1355,33 @@ function renderPanel() {
       '<div class="panel-cover" style="background:' + theme.light + '; color:' + theme.text + '; padding:0; overflow:hidden;">' + coverImgTag(ai, album, theme, "panel-cover") + '</div>' +
       '<div class="panel-songs">' +
         (tab === "rank" ? rankingTabHtml(ai) : scoringTabHtml(ai)) +
-        '<button class="btn jump-top-btn" id="jumpTopBtn">↑ Jump to Top</button>' +
+        '<div class="panel-nav">' +
+          '<button type="button" class="btn" id="chooserBtn">↑ Album Chooser</button>' +
+          '<button type="button" class="btn btn-primary" id="seeResultsBtn">' + (tab === "rank" ? "See My #1s →" : "See My Favorite Albums →") + '</button>' +
+        '</div>' +
       '</div>' +
     '</div>';
 
-  document.getElementById("jumpTopBtn").addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  document.getElementById("chooserBtn").addEventListener("click", scrollToMainTop);
+  document.getElementById("seeResultsBtn").addEventListener("click", () => {
+    // Smart: Scoring -> My Favorite Albums; Ranking -> My Eras Albums > My #1s
+    if (tab === "rank") {
+      activeResultTab = "eras";
+      state.settings.erasTab = "ones";
+      saveState();
+    } else {
+      activeResultTab = "favorites";
+    }
+    renderResultsTabs(); renderResultsPanel();
+    showMain("results");
+    scrollToMainTop();
   });
 
   document.getElementById("panelHeaderClose").addEventListener("click", () => {
     activeAlbum = null;
     renderAlbumGrid();
     renderPanel();
-    // Closing from the header: jump back up to the album tiles
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.getElementById("albumGrid").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    scrollToMainTop();             // closing from the header: back up to the album chooser
   });
 
   panel.querySelectorAll("[data-panel-tab]").forEach(btn => {
@@ -1176,6 +1445,7 @@ function wireRankingTab(panel, ai) {
   const n = ALBUMS[ai].songs.length;
   const albumName = ALBUMS[ai].name;
   const changed = () => { markDirty(); renderAlbumGrid(); renderPanel(); renderResultsTabs(); renderResultsPanel(); };
+  wireRankDrag(panel, ai, changed);
 
   panel.querySelectorAll("[data-rank-si]").forEach(sel => {
     sel.addEventListener("change", () => {
@@ -1199,6 +1469,13 @@ function wireRankingTab(panel, ai) {
   });
   panel.querySelectorAll("[data-unrank]").forEach(btn => {
     btn.addEventListener("click", () => { unrankSong(ai, Number(btn.dataset.unrank)); changed(); });
+  });
+  const ask = panel.querySelector("#rankShareAsk");
+  if (ask) ask.addEventListener("click", () => {
+    showInfoModal("Want to Share This?",
+      '<p>Would you want a screenshot share button here? Let me know in the Suggestion Box.</p>' +
+      '<p>Email <a class="contact-email" href="#">info (at) over50swiftie (dot) com</a></p>',
+      [{ label: "Go to Suggestion Box", primary: true, onClick: openSuggestionBox }, { label: "Close" }]);
   });
   const toggle = panel.querySelector("#rankToggleBtn");
   if (toggle) toggle.addEventListener("click", () => {
@@ -1231,6 +1508,292 @@ function wireRankingTab(panel, ai) {
 }
 
 /* ============================================================
+   DRAG & DROP (shared by Song Ranking and My Perfect Album)
+   wireDragList(container, opts) makes rows inside container
+   draggable onto drop targets inside the same container.
+     opts.rowSelector    rows that can be picked up
+     opts.targetSelector rows that can be dropped on
+     opts.dropColor      ring color for the ghost row
+     opts.onDrop(row, target)  apply the change and re-render
+   Grab by the dotted grip (any device) or anywhere on the row with
+   a mouse. Uses Pointer Events (not HTML5 drag/drop) so it works on
+   phones. Auto-scrolls near the screen edges; Esc cancels.
+   ============================================================ */
+function wireDragList(container, opts) {
+  let drag = null;
+
+  container.addEventListener("pointerdown", (e) => {
+    if (drag || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const row = e.target.closest(opts.rowSelector);
+    if (!row || !container.contains(row)) return;
+    const onHandle = !!e.target.closest(".drag-handle");
+    // Touch/pen: grip only, so the rest of the row still scrolls the page.
+    // Mouse: grip or anywhere on the row except its buttons and menus.
+    if (!onHandle && (e.pointerType !== "mouse" || e.target.closest("button, select, a, input"))) return;
+    e.preventDefault();
+    drag = {
+      row, pointerId: e.pointerId,
+      startX: e.clientX, startY: e.clientY, x: e.clientX, y: e.clientY,
+      active: false, ghost: null, offX: 0, offY: 0, target: null, raf: 0
+    };
+    window.addEventListener("pointermove", onMove, { passive: false });
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onCancel);
+    window.addEventListener("keydown", onKey);
+  });
+
+  function begin() {
+    const rect = drag.row.getBoundingClientRect();
+    drag.offX = drag.startX - rect.left;
+    drag.offY = drag.startY - rect.top;
+    const ghost = drag.row.cloneNode(true);
+    ghost.removeAttribute("id");
+    ghost.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
+    ghost.classList.remove("drag-source", "drop-target", "just-dropped");
+    ghost.classList.add("rank-ghost");
+    ghost.setAttribute("aria-hidden", "true");
+    ghost.style.width = rect.width + "px";
+    ghost.style.setProperty("--drop", opts.dropColor);
+    document.body.appendChild(ghost);
+    drag.ghost = ghost;
+    drag.active = true;
+    drag.row.classList.add("drag-source");
+    document.body.classList.add("rank-dragging");
+    drag.raf = requestAnimationFrame(autoScroll);
+  }
+
+  function placeGhost() {
+    drag.ghost.style.left = (drag.x - drag.offX) + "px";
+    drag.ghost.style.top = (drag.y - drag.offY) + "px";
+  }
+
+  function findTarget() {
+    const el = document.elementFromPoint(drag.x, drag.y);
+    let t = el ? el.closest(opts.targetSelector) : null;
+    if (t && !container.contains(t)) t = null;
+    if (t === drag.target) return;
+    if (drag.target) drag.target.classList.remove("drop-target");
+    drag.target = t;
+    if (t) t.classList.add("drop-target");
+  }
+
+  function autoScroll() {
+    if (!drag || !drag.active) return;
+    const edge = 80, maxSpeed = 18, h = window.innerHeight;
+    let v = 0;
+    if (drag.y < edge) v = -maxSpeed * (edge - drag.y) / edge;
+    else if (drag.y > h - edge) v = maxSpeed * (drag.y - (h - edge)) / edge;
+    if (v) { window.scrollBy(0, v); findTarget(); }
+    drag.raf = requestAnimationFrame(autoScroll);
+  }
+
+  function onMove(e) {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    drag.x = e.clientX; drag.y = e.clientY;
+    if (!drag.active) {
+      if (Math.hypot(drag.x - drag.startX, drag.y - drag.startY) < 5) return;   // still just a click
+      begin();
+    }
+    e.preventDefault();
+    placeGhost();
+    findTarget();
+  }
+
+  function finish(commit) {
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onCancel);
+    window.removeEventListener("keydown", onKey);
+    const d = drag;
+    drag = null;
+    if (!d || !d.active) return;
+    cancelAnimationFrame(d.raf);
+    if (d.ghost) d.ghost.remove();
+    d.row.classList.remove("drag-source");
+    if (d.target) d.target.classList.remove("drop-target");
+    document.body.classList.remove("rank-dragging");
+    if (commit && d.target) opts.onDrop(d.row, d.target);
+  }
+  function onUp(e) { if (drag && e.pointerId === drag.pointerId) finish(true); }
+  function onCancel(e) { if (drag && e.pointerId === drag.pointerId) finish(false); }
+  function onKey(e) { if (e.key === "Escape") { e.preventDefault(); finish(false); } }
+}
+const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Song Ranking: a ranked song dropped on another slot moves there and
+   the songs in between slide over (same rules as the RANK menu); a
+   Track List song dropped on a slot gets ranked there. */
+function wireRankDrag(panel, ai, onChange) {
+  const grid = panel.querySelector(".rank-grid");
+  if (!grid || grid.classList.contains("list-hidden")) return;
+  wireDragList(grid, {
+    rowSelector: "[data-drag-si]",
+    targetSelector: ".rank-slot",
+    dropColor: grid.style.getPropertyValue("--drop"),
+    onDrop(row, target) {
+      const slot = Number(target.dataset.slot);
+      const fromSlot = row.classList.contains("rank-slot") ? Number(row.dataset.slot) : -1;
+      if (slot === fromSlot) return;
+      placeSong(ai, Number(row.dataset.dragSi), slot);
+      if (!prefersReducedMotion()) justDropped = { ai, slot };
+      onChange();
+    }
+  });
+}
+
+/* My Perfect Album: drop a track on another filled slot to move it
+   there (the tracks in between slide over). Dropping on an empty
+   slot sends it to the last filled spot. */
+let justDroppedPerfect = null;
+function wirePerfectDrag(panel) {
+  const list = panel.querySelector(".perfect-slots");
+  if (!list) return;
+  wireDragList(list, {
+    rowSelector: ".perfect-slot[data-pdrag]",
+    targetSelector: ".perfect-slot",
+    dropColor: "var(--green5-text)",
+    onDrop(row, target) {
+      const from = Number(row.dataset.pdrag);
+      const last = Math.min(state.perfect.length, 13) - 1;
+      const to = target.classList.contains("empty") ? last : Number(target.dataset.pidx);
+      if (from === to) return;
+      const [id] = state.perfect.splice(from, 1);
+      state.perfect.splice(to, 0, id);
+      if (!prefersReducedMotion()) justDroppedPerfect = to;
+      markDirty();
+      renderResultsPanel();
+    }
+  });
+}
+
+/* ============================================================
+   ALBUM OPENERS / THE 5s
+   Two ranking lists built from every album's track 1 and track 5.
+   Saved as album indexes in state.openers / state.track5s. They
+   start in release order and always hold every album, so a new
+   album (TS13!) just joins the bottom of each list automatically.
+   ============================================================ */
+const TRACK_LISTS = {
+  openers: { stateKey: "openers", track: 0, title: "Album Openers",
+    hint: "Every album&rsquo;s track 1, starting in release order. Drag by the dotted grip (or use the arrows) to rank them from your favorite opener on down." },
+  fives:   { stateKey: "track5s", track: 4, title: "The 5s",
+    hint: "Every album&rsquo;s track 5, the spot Taylor saves for the most emotional song on the album. They start in release order. Drag by the dotted grip (or use the arrows) to rank them." }
+};
+let justDroppedOrder = null;
+
+function trackListOrder(key) {
+  const def = TRACK_LISTS[key];
+  const eligible = ALBUMS.map((a, ai) => ai).filter(ai => ALBUMS[ai].songs.length > def.track);
+  const saved = Array.isArray(state[def.stateKey]) ? state[def.stateKey] : [];
+  const seen = new Set();
+  const clean = [];
+  saved.forEach(ai => { if (eligible.includes(ai) && !seen.has(ai)) { clean.push(ai); seen.add(ai); } });
+  eligible.forEach(ai => { if (!seen.has(ai)) clean.push(ai); });
+  state[def.stateKey] = clean;
+  return clean;
+}
+function trackListIsDefault(key) {
+  return trackListOrder(key).every((ai, i) => i === 0 || ai > trackListOrder(key)[i - 1]);
+}
+
+function trackListBodyHtml(key) {
+  const def = TRACK_LISTS[key];
+  const order = trackListOrder(key);
+  const last = order.length - 1;
+  const rows = order.map((ai, i) => {
+    const album = ALBUMS[ai];
+    const theme = ALBUM_THEMES[album.name] || { base: "#888", light: "#eee", text: "#333" };
+    const song = album.songs[def.track];
+    const name = quizEscape(song);
+    const flash = justDroppedOrder === i ? " just-dropped" : "";
+    return '<div class="perfect-slot order-slot' + flash + '" data-oidx="' + i + '" data-odrag="' + i + '" style="background:' + theme.base + '; color:' + (theme.on || "#ffffff") + ';">' +
+      DRAG_GRIP +
+      '<span class="perfect-slot-num">' + (i + 1) + '.</span>' +
+      '<span class="perfect-slot-title">' + song + ' — ' + album.name + '</span>' +
+      '<span class="rank-actions">' +
+        '<button type="button" class="rank-btn" data-omove="-1" data-oslot="' + i + '" aria-label="Move ' + name + ' up"' + (i === 0 ? " disabled" : "") + '>▲</button>' +
+        '<button type="button" class="rank-btn" data-omove="1" data-oslot="' + i + '" aria-label="Move ' + name + ' down"' + (i === last ? " disabled" : "") + '>▼</button>' +
+      '</span>' +
+    '</div>';
+  }).join("");
+  justDroppedOrder = null;
+  return '<p class="hint">' + def.hint + '</p>' +
+    shareRowHtml(key, '<button type="button" class="btn" id="orderResetBtn" style="margin-right:auto"' + (trackListIsDefault(key) ? " disabled" : "") + '>Reset to album order</button>') +
+    '<div class="order-list">' + rows + '</div>';
+}
+
+function wireTrackList(panel, key) {
+  const def = TRACK_LISTS[key];
+  const list = panel.querySelector(".order-list");
+  if (!list) return;
+  panel.querySelectorAll("[data-omove]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const order = trackListOrder(key);
+      const from = Number(btn.dataset.oslot), dir = Number(btn.dataset.omove), to = from + dir;
+      if (to < 0 || to >= order.length) return;
+      [order[from], order[to]] = [order[to], order[from]];
+      markDirty();
+      renderResultsPanel();
+      // keep keyboard focus on the arrow that travelled with the song (flip at the ends)
+      const edge = (dir === -1 && to === 0) || (dir === 1 && to === order.length - 1);
+      const el = panel.querySelector('[data-omove="' + (edge ? -dir : dir) + '"][data-oslot="' + to + '"]');
+      if (el) el.focus({ preventScroll: true });
+    });
+  });
+  wireDragList(list, {
+    rowSelector: ".order-slot[data-odrag]",
+    targetSelector: ".order-slot",
+    dropColor: "var(--text)",
+    onDrop(row, target) {
+      const order = trackListOrder(key);
+      const from = Number(row.dataset.odrag), to = Number(target.dataset.oidx);
+      if (from === to) return;
+      const [ai] = order.splice(from, 1);
+      order.splice(to, 0, ai);
+      if (!prefersReducedMotion()) justDroppedOrder = to;
+      markDirty();
+      renderResultsPanel();
+    }
+  });
+  const reset = panel.querySelector("#orderResetBtn");
+  if (reset) reset.addEventListener("click", () => {
+    askConfirm("Put " + def.title + " back in album release order?", "Reset it", "Keep mine", () => {
+      state[def.stateKey] = [];
+      markDirty();
+      renderResultsPanel();
+    });
+  });
+}
+
+/* ============================================================
+   MAIN SECTIONS (Score & Rank / Your Results / Lyrics Quiz)
+   ============================================================ */
+let activeMain = "albums";
+function showMain(name) {
+  activeMain = name;
+  document.querySelectorAll("[data-main-tab]").forEach(t => {
+    const on = t.dataset.mainTab === name;
+    t.classList.toggle("active", on);
+    t.setAttribute("aria-selected", String(on));
+  });
+  document.querySelectorAll(".main-panel").forEach(p => p.classList.toggle("active", p.dataset.main === name));
+}
+// Only scrolls when you've scrolled past the bar; otherwise you're already there.
+function scrollToMainTop() {
+  const top = document.getElementById("mainTop");
+  if (top.getBoundingClientRect().top < 0) {
+    top.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  }
+}
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+/* ============================================================
    RENDER: RESULTS TAB ROW (Favorites / Eras / Perfect)
    ============================================================ */
 function erasGradient() {
@@ -1256,7 +1819,7 @@ function renderResultsTabs() {
     { id: "favorites", label: "My Favorite Albums", bg: "linear-gradient(90deg, " + favoritesGradient() + ")", text: "#fff",
       sub: topAlbum ? "Top: " + topAlbum.name : "Score songs to rank albums" },
     { id: "eras", label: "My Eras Albums", bg: "linear-gradient(90deg, " + erasGradient() + ")", text: "#fff",
-      sub: "Songs Selected: " + state.eras.length + "/13 | Ranked: " + theOnes().filter(o => o.si !== null).length + "/" + ALBUMS.length + " #1s" },
+      sub: "" },
     { id: "perfect", label: "My Perfect Album", bg: "var(--green5)", text: "var(--green5-text)",
       sub: state.perfect.length + " / 13 selected" }
   ];
@@ -1266,7 +1829,7 @@ function renderResultsTabs() {
       '<div class="results-tab-swatch" style="background:' + t.bg + ';"></div>' +
       '<div class="results-tab-info" style="background:' + (isActive ? t.bg : "var(--bg2)") + '; color:' + (isActive ? t.text : "var(--text)") + ';">' +
         '<div class="results-tab-name">' + t.label + '</div>' +
-        '<div class="results-tab-sub">' + t.sub + '</div>' +
+        (t.sub ? '<div class="results-tab-sub">' + t.sub + '</div>' : '') +
       '</div>' +
     '</div>';
   }).join("");
@@ -1306,6 +1869,7 @@ function renderResultsPanel() {
     panel.innerHTML =
       '<div class="results-panel-header" style="background:linear-gradient(90deg, ' + favoritesGradient() + '); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.45);">My Favorite Albums</div>' +
       '<div class="results-panel-body">' +
+        shareRowHtml("favorites") +
         '<p class="hint fav-hint">All 12 albums, sorted by your live average score, highest to lowest. Ties keep album release order. Click an album\'s arrow to jump back to review your scores. (Remember, this is just the math ranking based on your scores. Your true fav album order is still what you decide.)</p>' +
         rows +
       '</div>';
@@ -1313,6 +1877,9 @@ function renderResultsPanel() {
     panel.querySelectorAll("[data-jump-album]").forEach(btn => {
       btn.addEventListener("click", () => {
         activeAlbum = Number(btn.dataset.jumpAlbum);   // always opens (never toggles closed)
+        state.settings.panelTab = "score";
+        saveState();
+        showMain("albums");
         renderAlbumGrid(); renderPanel();
         const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         document.getElementById("albumPanel").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
@@ -1323,9 +1890,9 @@ function renderResultsPanel() {
 
   if (activeResultTab === "eras") {
     // Two pills inside: My Eras Album (checkbox picks) and The 1s (#1 ranked per album).
-    const sub = state.settings.erasTab === "ones" ? "ones" : "eras";
+    const sub = ["eras", "ones", "openers", "fives"].includes(state.settings.erasTab) ? state.settings.erasTab : "eras";
     const pills = '<div class="sub-tabs results-sub-tabs" role="tablist" aria-label="Eras albums">' +
-      [["eras", "My Eras Album"], ["ones", "The 1s"]].map(([id, label]) =>
+      [["eras", "My Eras Album"], ["ones", "My #1s"], ["openers", "Album Openers"], ["fives", "The 5s"]].map(([id, label]) =>
         '<button type="button" class="sub-tab' + (sub === id ? " active" : "") + '" role="tab" data-eras-tab="' + id + '" aria-selected="' + (sub === id) + '">' + label + '</button>'
       ).join("") +
     '</div>';
@@ -1335,7 +1902,7 @@ function renderResultsPanel() {
       const count = state.eras.length;
       let rows;
       if (count === 0) {
-        rows = '<p class="hint">Check a song\'s checkbox in the album panel above to add it here.</p>';
+        rows = '<p class="hint">Check a song\'s checkbox on an album\'s Song Scoring tab (in Score &amp; Rank) to add it here.</p>';
       } else {
         const sortedEras = [...state.eras].sort((idA, idB) => {
           const [aiA, siA] = idA.split("-").map(Number);
@@ -1358,8 +1925,10 @@ function renderResultsPanel() {
       }
       body =
         '<p class="hint">One song checked per album, plus one bonus pick from anywhere &mdash; 13 tracks total. When TS13 releases, you\'ll have to change your duplicate album pick to one from TS13. I don\'t make the rules.</p>' +
-        '<div class="eras-counter' + (count > 13 ? " over" : "") + '">' + count + ' / 13 selected</div>' +
+        shareRowHtml("eras", '<div class="eras-counter' + (count > 13 ? " over" : "") + '" style="margin:0 auto 0 0">' + count + ' / 13 selected</div>') +
         rows;
+    } else if (sub === "openers" || sub === "fives") {
+      body = trackListBodyHtml(sub);
     } else {
       const ones = theOnes();
       const filled = ones.filter(o => o.si !== null).length;
@@ -1385,8 +1954,8 @@ function renderResultsPanel() {
         '</div>';
       }).join("");
       body =
-        '<p class="hint">This is your #1 ranked song from each album, making an ‘Eras’ album. Only 12 tracks for now...waiting on TS13! (Let me know in the Suggestion box if I should make TTPD:The Anthology be considered a separate album.)</p>' +
-        '<div class="eras-counter">' + filled + ' / ' + ALBUMS.length + ' albums have a #1</div>' +
+        '<p class="hint">These are your #1 ranked songs from each album&rsquo;s Song Ranking, making an ‘Eras’ album. Only 12 tracks for now...waiting on TS13! (Let me know in the Suggestion box if I should make TTPD:The Anthology be considered a separate album.)</p>' +
+        shareRowHtml("ones", '<div class="eras-counter" style="margin:0 auto 0 0">' + filled + ' / ' + ALBUMS.length + ' albums have a #1</div>') +
         rows;
     }
 
@@ -1404,12 +1973,14 @@ function renderResultsPanel() {
         if (again) again.focus({ preventScroll: true });
       });
     });
-    // Arrow on a 1s row: open that album straight to its Song Ranking tab
+    if (sub === "openers" || sub === "fives") wireTrackList(panel, sub);
+    // Arrow on a #1s row: open that album straight to its Song Ranking tab
     panel.querySelectorAll("[data-rank-album]").forEach(btn => {
       btn.addEventListener("click", () => {
         activeAlbum = Number(btn.dataset.rankAlbum);
         state.settings.panelTab = "rank";
         saveState();
+        showMain("albums");
         renderAlbumGrid(); renderPanel();
         const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         document.getElementById("albumPanel").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
@@ -1452,7 +2023,9 @@ function renderResultsPanel() {
       const theme = f ? (ALBUM_THEMES[f.album] || { light: "var(--bg3)", text: "var(--text)" }) : { light: "var(--bg3)", text: "var(--text)" };
       const last = Math.min(count, 13) - 1;          // arrows only move within the 13 visible filled slots
       const name = f ? quizEscape(f.title) : "song";
-      slotsHtml += '<div class="perfect-slot" style="background:' + (theme.base || theme.light) + '; color:' + (theme.on || theme.text) + ';">' +
+      const flash = justDroppedPerfect === i ? " just-dropped" : "";
+      slotsHtml += '<div class="perfect-slot' + flash + '" data-pidx="' + i + '" data-pdrag="' + i + '" style="background:' + (theme.base || theme.light) + '; color:' + (theme.on || theme.text) + ';">' +
+        DRAG_GRIP +
         '<span class="perfect-slot-num">' + (i + 1) + '.</span>' +
         '<span class="perfect-slot-title">' + (f ? f.title + " \u2014 " + f.album : "") + '</span>' +
         '<span class="rank-actions">' +
@@ -1461,7 +2034,7 @@ function renderResultsPanel() {
         '</span>' +
       '</div>';
     } else {
-      slotsHtml += '<div class="perfect-slot empty"><span class="perfect-slot-num">' + (i + 1) + '.</span><span>empty slot</span></div>';
+      slotsHtml += '<div class="perfect-slot empty" data-pidx="' + i + '"><span class="drag-spacer"></span><span class="perfect-slot-num">' + (i + 1) + '.</span><span>empty slot</span></div>';
     }
   }
   if (count > 13) {
@@ -1471,14 +2044,16 @@ function renderResultsPanel() {
   panel.innerHTML =
     '<div class="results-panel-header" style="background:var(--green5); color:var(--green5-text);">My Perfect Album</div>' +
     '<div class="results-panel-body">' +
-      '<p class="hint">Every song you scored a 5 shows up on the left. Check 13 of them to fill your Perfect Album on the right, then use the arrows to put your tracks in order. This isn\'t a ranking, per se, but constructing your Perfect Album track list order.</p>' +
-      '<div class="perfect-counter' + (count > 13 ? " over" : "") + '">' + count + ' / 13 selected</div>' +
+      '<p class="hint">Every song you scored a 5 shows up on the left. Check 13 of them to fill your Perfect Album on the right, then drag tracks by their dotted grip (or use the arrows) to put them in order. This isn\'t a ranking, per se, but constructing your Perfect Album track list order.</p>' +
+      shareRowHtml("perfect", '<div class="perfect-counter' + (count > 13 ? " over" : "") + '" style="margin:0 auto 0 0">' + count + ' / 13 selected</div>') +
       '<div class="perfect-columns">' +
         '<div class="perfect-pool-col"><div class="perfect-pool">' + poolHtml + '</div></div>' +
-        '<div class="perfect-slots-col"><div>' + slotsHtml + '</div></div>' +
+        '<div class="perfect-slots-col"><div class="perfect-slots">' + slotsHtml + '</div></div>' +
       '</div>' +
     '</div>';
 
+  justDroppedPerfect = null;
+  wirePerfectDrag(panel);
   panel.querySelectorAll("[data-pmove]").forEach(btn => {
     btn.addEventListener("click", () => {
       const from = Number(btn.dataset.pslot), dir = Number(btn.dataset.pmove), to = from + dir;
@@ -1506,6 +2081,267 @@ function renderResultsPanel() {
 }
 
 /* ============================================================
+   SHARE IMAGES
+   Each results list can be drawn as a 1080x1350 (portrait) PNG in
+   the browser: nothing is uploaded anywhere. The color band and
+   footer line follow the list's own order. On phones the popup's
+   Share button opens the phone's share sheet; everywhere there's
+   a Download button. Album covers draw only when the page is
+   served from a website (opened as a local file, browsers block
+   reading the cover pixels, so plain color squares are used).
+   ============================================================ */
+const SHARE_W = 1080, SHARE_H = 1350, SHARE_PAD = 64;
+const SHORT_ALBUM = { "The Tortured Poets Department": "TTPD", "The Life Of A Showgirl": "TLOAS" };
+const SHARE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
+
+function themeFor(ai) { return ALBUM_THEMES[ALBUMS[ai].name] || { base: "#888", light: "#eee", text: "#333", on: "#ffffff" }; }
+function cssGradient(colors) {
+  if (!colors.length) return "#dddddd";
+  return colors.length === 1 ? colors[0] : "linear-gradient(90deg, " + colors.join(", ") + ")";
+}
+
+/* One description of each results list, shared by the share images and the PDF.
+   rows: { title, right, ai }  (right = score for Favorites, otherwise empty) */
+function listSpec(key) {
+  const song = (ai, si) => ({ title: ALBUMS[ai].songs[si], right: "", ai });
+  if (key === "favorites") {
+    const all = rankedAlbums().map(r => ({ title: r.name, right: r.avg === null ? "–" : r.avg.toFixed(2), ai: r.ai, scored: r.avg !== null }));
+    return { key, title: "My Favorite Albums", subtitle: "Ranked by my average score, out of 5 stars", note: "avg score (out of 5)",
+      rows: all, shareRows: all.filter(r => r.scored), empty: "Score some songs to rank your albums." };
+  }
+  if (key === "eras") {
+    const sorted = [...state.eras].map(id => id.split("-").map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const rows = sorted.map(([ai, si]) => song(ai, si));
+    return { key, title: "My Eras Album", subtitle: "One song from every era, plus a bonus track", note: rows.length + " / 13 tracks",
+      rows, shareRows: rows.slice(0, 13), empty: "No songs checked yet." };
+  }
+  if (key === "ones") {
+    const rows = theOnes().filter(o => o.si !== null).map(o => song(o.ai, o.si));
+    return { key, title: "My #1s", subtitle: "My #1 ranked song from every album", note: rows.length + " of " + ALBUMS.length + " albums",
+      rows, shareRows: rows.slice(0, 13), empty: "No #1s ranked yet." };
+  }
+  if (key === "openers" || key === "fives") {
+    const def = TRACK_LISTS[key];
+    const rows = trackListOrder(key).map(ai => song(ai, def.track));
+    return { key, title: def.title, subtitle: key === "openers" ? "Every album’s track 1, ranked" : "Every album’s track 5, ranked",
+      note: key === "openers" ? "track 1s" : "track 5s", rows, shareRows: rows.slice(0, 13), empty: "" };
+  }
+  // perfect
+  const rows = state.perfect.slice(0, 13).map(id => { const [ai, si] = id.split("-").map(Number); return song(ai, si); })
+    .filter(r => r.title !== undefined);
+  return { key, title: "My Perfect Album", subtitle: "13 tracks, every one a perfect 5", note: rows.length + " / 13 tracks",
+    rows, shareRows: rows, empty: "No songs picked yet." };
+}
+
+function shareRowHtml(key, leftHtml) {
+  const has = listSpec(key).shareRows.length > 0;
+  return '<div class="share-row">' + (leftHtml || "") +
+    '<button type="button" class="btn share-btn" data-share="' + key + '"' + (has ? "" : " disabled") + '>' + SHARE_ICON + 'Share Image</button></div>';
+}
+
+function loadImage(src) {
+  return new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+}
+async function ensureShareFonts() {
+  if (!document.fonts || !document.fonts.load) return;
+  try {
+    await Promise.race([
+      Promise.all(["900 76px Cinzel", "700 32px Cinzel", "700 28px Barlow", "600 28px Barlow"].map(f => document.fonts.load(f))),
+      new Promise(r => setTimeout(r, 2500))
+    ]);
+  } catch (e) { /* fall back to system fonts */ }
+}
+function roundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function fitText(ctx, text, maxW) {
+  if (ctx.measureText(text).width <= maxW) return text;
+  let t = text;
+  while (t.length > 1 && ctx.measureText(t + "…").width > maxW) t = t.slice(0, -1);
+  return t.trimEnd() + "…";
+}
+function canvasGradient(ctx, x0, x1, colors) {
+  const g = ctx.createLinearGradient(x0, 0, x1, 0);
+  if (colors.length <= 1) { const c = colors[0] || "#cccccc"; g.addColorStop(0, c); g.addColorStop(1, c); }
+  else colors.forEach((c, i) => g.addColorStop(i / (colors.length - 1), c));
+  return g;
+}
+
+function drawShareCard(spec, covers) {
+  const W = SHARE_W, H = SHARE_H, P = SHARE_PAD;
+  const rows = spec.shareRows, n = Math.max(rows.length, 1);
+  const isFav = spec.key === "favorites";
+  const colors = rows.map(r => themeFor(r.ai).base);
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const ctx = c.getContext("2d");
+
+  ctx.fillStyle = "#faf8f4"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = canvasGradient(ctx, 0, W, colors); ctx.fillRect(0, 0, W, 26);
+
+  // Title + subtitle
+  ctx.fillStyle = "#2a2a26"; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+  let size = 76;
+  ctx.font = "900 " + size + "px Cinzel, Georgia, serif";
+  while (ctx.measureText(spec.title).width > W - 2 * P && size > 44) { size -= 2; ctx.font = "900 " + size + "px Cinzel, Georgia, serif"; }
+  const titleBase = 26 + 52 + Math.round(size * 0.8);
+  ctx.fillText(spec.title, P, titleBase);
+  ctx.font = "600 28px Barlow, Arial, sans-serif";
+  ctx.fillText(spec.subtitle, P, titleBase + 50);
+
+  // Footer
+  const footBase = H - 44;
+  ctx.font = "700 32px Cinzel, Georgia, serif";
+  ctx.fillText("Over50Swiftie.com", P, footBase);
+  ctx.font = "600 28px Barlow, Arial, sans-serif"; ctx.textAlign = "right";
+  ctx.fillText("@Over_50_Swiftie", W - P, footBase);
+  const lineY = footBase - 32 - 26;
+  ctx.fillStyle = canvasGradient(ctx, P, W - P, colors);
+  roundRectPath(ctx, P, lineY, W - 2 * P, 6, 3); ctx.fill();
+
+  // Rows
+  const top = titleBase + 50 + 34, bottom = lineY - 26, gap = isFav ? 9 : 8;
+  const rowH = Math.min(isFav ? 76 : 69, Math.floor((bottom - top - gap * (n - 1)) / n));
+  rows.forEach((r, i) => {
+    const th = themeFor(r.ai), y = top + i * (rowH + gap), mid = y + rowH / 2;
+    ctx.fillStyle = th.base; roundRectPath(ctx, P, y, W - 2 * P, rowH, 12); ctx.fill();
+    ctx.fillStyle = th.on || "#ffffff"; ctx.textBaseline = "middle";
+    // number
+    ctx.textAlign = "right"; ctx.font = "700 " + (isFav ? 32 : 28) + "px Cinzel, Georgia, serif";
+    ctx.fillText(String(i + 1), P + 12 + (isFav ? 48 : 44), mid + 2);
+    // cover
+    const cs = Math.min(isFav ? 56 : 48, rowH - 14), cx = P + 12 + (isFav ? 48 : 44) + 18, cy = mid - cs / 2;
+    const img = covers[r.ai];
+    ctx.save(); roundRectPath(ctx, cx, cy, cs, cs, 6); ctx.clip();
+    if (img) { const sz = Math.min(img.naturalWidth, img.naturalHeight); ctx.drawImage(img, (img.naturalWidth - sz) / 2, (img.naturalHeight - sz) / 2, sz, sz, cx, cy, cs, cs); }
+    else { ctx.fillStyle = th.light; ctx.fillRect(cx, cy, cs, cs); }
+    ctx.restore();
+    ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2; roundRectPath(ctx, cx, cy, cs, cs, 6); ctx.stroke();
+    // right side: score (Favorites) or album name
+    ctx.fillStyle = th.on || "#ffffff";
+    const rightX = W - P - (isFav ? 24 : 20);
+    let rightText = isFav ? r.right : ALBUMS[r.ai].name;
+    ctx.font = isFav ? "700 32px Cinzel, Georgia, serif" : "600 21px Barlow, Arial, sans-serif";
+    if (!isFav && ctx.measureText(rightText).width > 270 && SHORT_ALBUM[rightText]) rightText = SHORT_ALBUM[rightText];
+    const rightW = ctx.measureText(rightText).width;
+    ctx.fillText(rightText, rightX, mid + (isFav ? 2 : 1));
+    // title
+    const tx = cx + cs + 18;
+    ctx.textAlign = "left";
+    ctx.font = isFav ? "700 31px Cinzel, Georgia, serif" : "700 28px Barlow, Arial, sans-serif";
+    ctx.fillText(fitText(ctx, r.title, rightX - rightW - 24 - tx), tx, mid + 2);
+  });
+  return c;
+}
+function canvasToBlob(c) {
+  return new Promise(res => { try { c.toBlob(b => res(b), "image/png"); } catch (e) { res(null); } });
+}
+async function makeShareImage(key) {
+  const spec = listSpec(key);
+  await ensureShareFonts();
+  const covers = {};
+  await Promise.all([...new Set(spec.shareRows.map(r => r.ai))].map(async ai => {
+    const f = COVER_FILES[ALBUMS[ai].num];
+    if (f) covers[ai] = await loadImage(COVER_FOLDER + f);
+  }));
+  let blob = await canvasToBlob(drawShareCard(spec, covers));
+  if (!blob) blob = await canvasToBlob(drawShareCard(spec, {}));   // local file: covers can't be exported, use color squares
+  return { spec, blob };
+}
+
+let shareCurrent = null;
+async function openShare(key) {
+  const ov = document.getElementById("shareModalOverlay");
+  const preview = document.getElementById("sharePreview");
+  const shareBtn = document.getElementById("shareNowBtn");
+  const dlBtn = document.getElementById("shareDownloadBtn");
+  closeShare(true);
+  const token = {};
+  shareCurrent = token;
+  preview.textContent = "Making your image…";
+  shareBtn.hidden = true; dlBtn.disabled = true;
+  document.getElementById("shareModalTitle").textContent = "Share " + listSpec(key).title;
+  ov.classList.add("open");
+  document.getElementById("shareCloseBtn").focus();
+  const { spec, blob } = await makeShareImage(key);
+  if (shareCurrent !== token) return;            // closed or replaced meanwhile
+  if (!blob) { preview.textContent = "Sorry, this browser couldn’t make the image."; return; }
+  const name = "over50swiftie-" + spec.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".png";
+  const url = URL.createObjectURL(blob);
+  const file = (typeof File === "function") ? new File([blob], name, { type: "image/png" }) : null;
+  Object.assign(token, { url, name, file, spec });
+  preview.innerHTML = '<img alt="Preview of your ' + quizEscape(spec.title) + ' share image" src="' + url + '">';
+  dlBtn.disabled = false;
+  const touch = window.matchMedia("(pointer: coarse)").matches;
+  shareBtn.hidden = !(touch && file && navigator.canShare && navigator.canShare({ files: [file] }));
+}
+function closeShare(silent) {
+  if (shareCurrent && shareCurrent.url) URL.revokeObjectURL(shareCurrent.url);
+  shareCurrent = null;
+  if (!silent) document.getElementById("shareModalOverlay").classList.remove("open");
+}
+(function () {
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-share]");
+    if (b && !b.disabled) openShare(b.dataset.share);
+  });
+  document.getElementById("shareCloseBtn").addEventListener("click", () => closeShare());
+  const ov = document.getElementById("shareModalOverlay");
+  ov.addEventListener("click", (e) => { if (e.target === ov) closeShare(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && ov.classList.contains("open")) closeShare(); });
+  document.getElementById("shareDownloadBtn").addEventListener("click", () => {
+    if (!shareCurrent || !shareCurrent.url) return;
+    const a = document.createElement("a");
+    a.href = shareCurrent.url; a.download = shareCurrent.name;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById("shareNowBtn").addEventListener("click", () => {
+    if (!shareCurrent || !shareCurrent.file) return;
+    navigator.share({ files: [shareCurrent.file], title: shareCurrent.spec.title, text: "Made at Over50Swiftie.com" })
+      .catch(() => { /* cancelled: nothing to do */ });
+  });
+})();
+
+/* Small reusable info popup. buttons: [{ label, primary, onClick }] */
+function showInfoModal(title, html, buttons) {
+  const ov = document.getElementById("infoModalOverlay");
+  document.getElementById("infoModalTitle").textContent = title;
+  document.getElementById("infoModalBody").innerHTML = html;
+  fillContactEmails(ov);
+  const actions = document.getElementById("infoModalActions");
+  actions.innerHTML = "";
+  const close = () => ov.classList.remove("open");
+  (buttons || [{ label: "Close" }]).forEach((b, i) => {
+    const el = document.createElement("button");
+    el.type = "button"; el.className = "btn" + (b.primary ? " btn-primary" : ""); el.textContent = b.label;
+    el.addEventListener("click", () => { close(); if (b.onClick) b.onClick(); });
+    actions.appendChild(el);
+  });
+  ov.onclick = (e) => { if (e.target === ov) close(); };
+  ov.classList.add("open");
+  actions.lastChild.focus();
+}
+document.addEventListener("keydown", (e) => {
+  const ov = document.getElementById("infoModalOverlay");
+  if (e.key === "Escape" && ov.classList.contains("open")) ov.classList.remove("open");
+});
+function openSuggestionBox() {
+  const block = document.querySelector(".info-block");
+  const tab = block.querySelector('.info-tab[data-panel="bts"]');
+  tab.click();
+  const pill = block.querySelector('.sub-tab[data-subpanel="suggest"]');
+  if (pill) pill.click();
+  block.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  tab.focus({ preventScroll: true });
+}
+
+/* ============================================================
    EXPORT / IMPORT
    ============================================================ */
 function exportData() {
@@ -1516,6 +2352,8 @@ function exportData() {
     eras: state.eras,
     perfect: state.perfect,
     rankings: state.rankings,
+    openers: state.openers,
+    track5s: state.track5s,
     settings: state.settings
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -1530,6 +2368,7 @@ function exportData() {
   URL.revokeObjectURL(url);
   dirty = false;
   setStatus("Downloaded backup file");
+  showToast("Backup file downloaded");
 }
 
 function importData(file) {
@@ -1541,6 +2380,8 @@ function importData(file) {
       state.eras = parsed.eras || [];
       state.perfect = parsed.perfect || [];
       state.rankings = parsed.rankings || {};
+      state.openers = parsed.openers || [];
+      state.track5s = parsed.track5s || [];
       state.settings = Object.assign({ panelTab: "score", rankListHidden: false, erasTab: "eras" }, parsed.settings || {});
       saveState();
       dirty = false;
@@ -1549,6 +2390,7 @@ function importData(file) {
       renderResultsTabs();
       renderResultsPanel();
       setStatus("Loaded data from file");
+      showToast("Your data was loaded from the file");
     } catch (e) {
       alert("That file couldn't be read as a data file. Make sure it's a JSON file downloaded from this page's \"Save data to file\" button.");
     }
@@ -1563,39 +2405,59 @@ function importData(file) {
    add the full list of every scored song (not just Favorites/Eras/
    Perfect) to the bottom of the printed PDF. */
 function buildPrintSnapshot() {
-  const ranked = ALBUMS.map((a, ai) => ({ ai, name: a.name, avg: albumAverage(ai) }))
-    .sort((a, b) => (b.avg === null ? -1 : b.avg) - (a.avg === null ? -1 : a.avg));
+  const esc = quizEscape;
+  const coverSrc = (ai) => { const f = COVER_FILES[ALBUMS[ai].num]; return f ? COVER_FOLDER + f : ""; };
+  const coverImg = (ai, cls) => { const src = coverSrc(ai); return src ? '<img class="' + cls + '" src="' + src + '" alt="">' : '<span class="' + cls + '" style="background:' + themeFor(ai).light + '"></span>'; };
+  const card = (key) => {
+    const spec = listSpec(key);
+    const rows = key === "favorites" ? spec.rows : spec.rows;
+    const colors = rows.map(r => themeFor(r.ai).base);
+    let h = '<div class="ps-card"><div class="ps-card-head"><span>' + spec.title + '</span><span class="ps-note">' + spec.note + '</span></div>' +
+      '<div class="ps-bar" style="background:' + cssGradient(colors) + '"></div>';
+    if (!rows.length) h += '<div class="ps-empty">' + spec.empty + '</div>';
+    rows.forEach((r, i) => {
+      const th = themeFor(r.ai);
+      h += '<div class="ps-row" style="background:' + th.base + ';color:' + (th.on || "#fff") + '">' +
+        '<span class="ps-num">' + (i + 1) + '</span>' + coverImg(r.ai, "ps-cover") +
+        '<span class="ps-name">' + esc(r.title) + '</span>' +
+        (r.right ? '<span class="ps-right">' + r.right + '</span>' : '') + '</div>';
+    });
+    return h + '</div>';
+  };
+  const releaseBand = cssGradient(ALBUMS.map((a, ai) => themeFor(ai).base));
+  const today = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 
-  let html = '<div class="print-section"><div class="print-h1">Taylor Swift Song Scoring &amp; Ranking &mdash; snapshot</div>';
-  html += '<div style="font-size:12px;color:#666;">' + new Date().toLocaleString() + '</div></div>';
+  // Page 1: the 12-track lists on top, the 13-track lists underneath
+  let html = '<div class="ps-band" style="background:' + releaseBand + '"></div>' +
+    '<div class="ps-head"><div><div class="ps-title">My Taylor Swift Results</div><div class="ps-date">Snapshot from ' + today + '</div></div>' +
+    '<div class="ps-site">Over50Swiftie.com<span>@Over_50_Swiftie</span></div></div>' +
+    '<div class="ps-grid">' + card("favorites") + card("ones") + card("eras") + card("perfect") + '</div>';
 
-  html += '<div class="print-section"><div class="print-h2">My Favorite Albums</div>';
-  ranked.forEach((r, i) => {
-    html += '<div class="print-row">' + (i + 1) + '. ' + r.name + ' &mdash; ' + (r.avg === null ? "\u2013" : r.avg.toFixed(2)) + '</div>';
+  // Page 2+: Openers + The 5s, then every album with scores or rankings
+  html += '<div class="ps-break"></div><div class="ps-band" style="background:' + releaseBand + '"></div>' +
+    '<div class="ps-grid" style="margin-top:14px">' + card("openers") + card("fives") + '</div>';
+
+  const albums = ALBUMS.map((a, ai) => ai).filter(ai => rankedCount(ai) > 0 || ALBUMS[ai].songs.some((_, si) => scoreIsSet(state.scores[songId(ai, si)])));
+  html += '<div class="ps-section-title">My Songs, Album by Album</div>';
+  if (!albums.length) html += '<div class="ps-empty">No songs scored or ranked yet.</div>';
+  albums.forEach(ai => {
+    const th = themeFor(ai), album = ALBUMS[ai], avg = albumAverage(ai), r = getRanking(ai);
+    html += '<div class="ps-album"><div class="ps-album-head" style="background:' + th.base + ';color:' + (th.on || "#fff") + '">' +
+      coverImg(ai, "") + '<span class="ps-album-name">' + album.name + '</span>' +
+      '<span class="ps-album-stats">Album Score ' + (avg === null ? "–" : avg.toFixed(2)) + '<br>Ranked ' + rankedCount(ai) + ' / ' + album.songs.length + '</span></div>' +
+      '<div class="ps-songs-head"><div class="ps-song-head"><span>Track</span><span>Rank &middot; Score</span></div><div class="ps-song-head"><span>Track</span><span>Rank &middot; Score</span></div></div>' +
+      '<div class="ps-songs">';
+    album.songs.forEach((title, si) => {
+      const v = state.scores[songId(ai, si)], set = scoreIsSet(v), c = scoreColor(set ? v : null);
+      const rank = r.indexOf(si);
+      html += '<div class="ps-song"><span class="ps-song-num">' + (si + 1) + '</span>' +
+        '<span class="ps-song-title" style="background:' + (set ? c.bg : "#f2efe8") + ';color:' + (set ? c.text : "#2a2a26") + '">' + esc(title) + '</span>' +
+        '<span class="ps-song-rank">' + (rank === -1 ? "–" : "#" + (rank + 1)) + '</span>' +
+        '<span class="ps-chip" style="background:' + (set ? c.bg : "#f2efe8") + ';color:' + (set ? c.text : "#2a2a26") + '">' + (set ? v : "–") + '</span></div>';
+    });
+    html += '</div></div>';
   });
-  html += '</div>';
-
-  html += '<div class="print-section"><div class="print-h2">My Eras Album</div>';
-  if (state.eras.length === 0) html += '<div class="print-row">No songs selected yet.</div>';
-  state.eras.forEach(id => {
-    const [ai, si] = id.split("-").map(Number);
-    html += '<div class="print-row">' + ALBUMS[ai].songs[si] + ' \u2014 ' + ALBUMS[ai].name + '</div>';
-  });
-  html += '</div>';
-
-  html += '<div class="print-section"><div class="print-h2">The 1s (your #1 ranked song from each album)</div>';
-  theOnes().forEach(o => {
-    html += '<div class="print-row">' + ALBUMS[o.ai].name + ' \u2014 ' + (o.si === null ? "no #1 yet" : ALBUMS[o.ai].songs[o.si]) + '</div>';
-  });
-  html += '</div>';
-
-  html += '<div class="print-section"><div class="print-h2">My Perfect Album</div>';
-  if (state.perfect.length === 0) html += '<div class="print-row">No songs selected yet.</div>';
-  state.perfect.forEach((id, i) => {
-    const [ai, si] = id.split("-").map(Number);
-    html += '<div class="print-row">' + (i + 1) + '. ' + ALBUMS[ai].songs[si] + ' \u2014 ' + ALBUMS[ai].name + '</div>';
-  });
-  html += '</div>';
+  html += '<div class="ps-foot"><span>Over50Swiftie.com &middot; @Over_50_Swiftie</span><span>' + today + '</span></div>';
 
   document.getElementById("printSnapshot").innerHTML = html;
 }
@@ -1621,7 +2483,10 @@ document.getElementById("importFile").addEventListener("change", (e) => {
 });
 document.getElementById("btnPrint").addEventListener("click", () => {
   buildPrintSnapshot();
-  window.print();
+  // Give the album covers a moment to load so they make it onto the page
+  const imgs = [...document.querySelectorAll("#printSnapshot img")];
+  const loaded = Promise.all(imgs.map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  Promise.race([loaded, new Promise(r => setTimeout(r, 2500))]).then(() => window.print());
 });
 /* ============================================================
    RESET CONFIRMATION MODAL
@@ -1656,7 +2521,7 @@ resetModalOverlay.addEventListener("click", (e) => {
 });
 document.getElementById("resetModalConfirm").addEventListener("click", () => {
   resetModalOverlay.classList.remove("open");
-  state = { scores: {}, eras: [], perfect: [], rankings: {}, settings: state.settings };   // keeps the tab preference
+  state = { scores: {}, eras: [], perfect: [], rankings: {}, openers: [], track5s: [], settings: state.settings };   // keeps the tab preference
   saveState();
   dirty = false;
   renderAlbumGrid();
@@ -1664,6 +2529,7 @@ document.getElementById("resetModalConfirm").addEventListener("click", () => {
   renderResultsTabs();
   renderResultsPanel();
   setStatus("Everything reset");
+  showToast("Everything reset. Fresh start!");
 });
 
 /* ============================================================
@@ -1808,7 +2674,7 @@ document.querySelectorAll(".info-tab").forEach(tab => {
 });
 
 /* ============================================================
-   SUB-TABS (inside Behind the Scenes; works for any .sub-tabs group)
+   SUB-TABS (inside the Updates tab; works for any .sub-tabs group)
    ============================================================ */
 document.querySelectorAll(".sub-tabs").forEach(group => {
   const host = group.parentElement;
@@ -1973,9 +2839,51 @@ function renderQuizResult() {
   document.getElementById("quizAgainBtn").addEventListener("click", startQuiz);
 }
 document.getElementById("quizJumpBtn").addEventListener("click", () => {
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  document.getElementById("lyricsQuiz").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  showMain("quiz");
+  const nav = document.getElementById("mainNav");
+  const reduce = prefersReducedMotion();
+  document.getElementById("mainTop").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  nav.querySelector('[data-main-tab="quiz"]').focus({ preventScroll: true });
 });
+
+// Main tabs: switch sections; clicking (any tab) also brings you back to the top of the section
+document.querySelectorAll("[data-main-tab]").forEach(tab => {
+  tab.addEventListener("click", () => { showMain(tab.dataset.mainTab); scrollToMainTop(); });
+});
+
+// Keep --nav-h in sync with the sticky bar's real height (it changes on phones)
+(function () {
+  const nav = document.getElementById("mainNav");
+  const setH = () => document.documentElement.style.setProperty("--nav-h", nav.offsetHeight + "px");
+  setH();
+  if (window.ResizeObserver) new ResizeObserver(setH).observe(nav);
+  else window.addEventListener("resize", setH);
+})();
+
+// "My Data" menu (phones): open/close, close on outside click, Esc, or after picking an action
+(function () {
+  const wrap = document.getElementById("dataWrap");
+  const btn = document.getElementById("dataMenuBtn");
+  const setOpen = (open) => { wrap.classList.toggle("open", open); btn.setAttribute("aria-expanded", String(open)); };
+  btn.addEventListener("click", (e) => { e.stopPropagation(); setOpen(!wrap.classList.contains("open")); });
+  document.addEventListener("click", (e) => { if (!wrap.contains(e.target)) setOpen(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && wrap.classList.contains("open")) { setOpen(false); btn.focus(); } });
+  ["btnExport", "btnPrint", "btnReset"].forEach(id => document.getElementById(id).addEventListener("click", () => setOpen(false)));
+  document.getElementById("importFile").addEventListener("change", () => setOpen(false));
+})();
+
+// Info block Hide / Show. Not saved on purpose: Lyric of the Day shows on every visit.
+(function () {
+  const block = document.querySelector(".info-block");
+  const toggle = document.getElementById("infoToggle");
+  const setCollapsed = (c) => {
+    block.classList.toggle("collapsed", c);
+    toggle.setAttribute("aria-expanded", String(!c));
+    toggle.innerHTML = c ? "Show &#9662;" : "Hide &#9652;";
+  };
+  toggle.addEventListener("click", () => setCollapsed(!block.classList.contains("collapsed")));
+  document.querySelectorAll(".info-tab").forEach(t => t.addEventListener("click", () => setCollapsed(false)));
+})();
 startQuiz();
 
 /* ============================================================
@@ -1985,14 +2893,15 @@ startQuiz();
    spam scrapers read. Without JavaScript, visitors see the
    "info (at) over50swiftie (dot) com" fallback text instead.
    ============================================================ */
-(function () {
+function fillContactEmails(root) {
   const user = "info", domain = ["over50swiftie", "com"].join(".");
   const addr = user + String.fromCharCode(64) + domain;
-  document.querySelectorAll(".contact-email").forEach(el => {   // every contact link on the page
+  (root || document).querySelectorAll(".contact-email").forEach(el => {   // every contact link on the page
     el.href = "mail" + "to:" + addr;
     el.textContent = addr;
   });
-})();
+}
+fillContactEmails();
 
 loadState();
 renderAlbumGrid();
