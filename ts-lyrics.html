@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Lyrics Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   BASE / THEME (same palette as ts-scoring.html)
+   ============================================================ */
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#faf8f4; --bg2:#ffffff; --bg3:#f2efe8;
+  --border:rgba(20,20,20,0.10); --border2:rgba(20,20,20,0.18);
+  --text:#2a2a26; --muted:#8a8880;
+  --gold:#b8893a; --gold-light:#f7ecd3; --gold-text:#6b4f14;
+  --ok:#2e7d32; --ok-bg:#e3f6e5; --warn:#a35c1d;
+}
+html, body { background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; }
+body { min-height:100vh; padding-bottom:4rem; }
+button, input, textarea, select { font-family:inherit; }
+
+/* PAGE HEADER */
+.page-header { text-align:center; padding:2rem 1.5rem 1.25rem; border-bottom:1px solid var(--border); background:var(--bg2); }
+.page-title { font-family:'Cinzel',serif; font-size:clamp(1.6rem,4vw,2.6rem); font-weight:900; letter-spacing:0.03em; line-height:1.15; }
+.page-sub { font-size:clamp(1rem,2.2vw,1.2rem); font-weight:600; letter-spacing:0.03em; text-transform:uppercase; margin-top:0.4rem; }
+
+.wrap { max-width:1300px; margin:0 auto; padding:1.5rem 1.5rem 3rem; }
+
+/* TOOLBAR */
+.toolbar { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem; }
+.btn { font-family:'Barlow',sans-serif; font-size:16px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; padding:9px 16px; border-radius:8px; border:1.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; transition:background 0.15s, border-color 0.15s; }
+.btn:hover { background:var(--bg3); border-color:var(--muted); }
+.btn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.btn-primary { background:var(--text); color:#fff; border-color:var(--text); }
+.btn-primary:hover { background:#000; }
+.btn-gold { background:var(--gold-light); border-color:var(--gold); color:var(--gold-text); }
+.btn-gold:hover { background:#f0dfb6; border-color:var(--gold); }
+.btn-danger { border-color:#c0392b; color:#c0392b; }
+.btn-danger:hover { background:#c0392b; color:#fff; }
+.btn-sm { font-size:15px; padding:6px 12px; }
+.btn:disabled, .btn:disabled:hover { opacity:0.45; cursor:not-allowed; background:var(--bg2); border-color:var(--border2); }
+.file-label input { display:none; }
+.toolbar-status { font-size:15px; font-weight:600; margin-left:auto; }
+.toolbar-status.dirty { color:var(--warn); }
+
+/* OVERALL PROGRESS */
+.progress-card { display:flex; flex-wrap:wrap; gap:1rem 2rem; align-items:center; background:var(--bg2); border:1.5px solid var(--border2); border-radius:12px; padding:0.9rem 1.25rem; margin-bottom:1.25rem; }
+.progress-item { flex:1 1 280px; }
+.progress-label { font-size:16px; font-weight:600; display:flex; justify-content:space-between; gap:1rem; margin-bottom:6px; }
+.progress-track { height:8px; background:var(--bg3); border-radius:8px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--gold); width:0; transition:width 0.3s ease; }
+.progress-fill.snip { background:#7a3f8f; }
+
+/* ALBUM GRID (same tiles as the scoring page) */
+.album-grid { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:1.25rem; }
+.album-tile { display:flex; height:100%; cursor:pointer; border-radius:10px; overflow:hidden; border:3px solid var(--border2); background:var(--bg2); transition:transform 0.1s; text-align:left; padding:0; font:inherit; color:inherit; }
+.album-tile:hover { transform:translateY(-1px); }
+.album-tile:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.album-cover { flex-shrink:0; width:88px; align-self:flex-start; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; font-family:'Cinzel',serif; font-weight:700; }
+.album-tile-info { padding:8px 10px 9px; flex:1; min-width:0; display:flex; flex-direction:column; }
+.album-tile-name { font-size:17px; font-weight:700; line-height:1.2; font-family:'Cinzel',serif; }
+.album-tile-status { font-size:13px; margin-top:4px; font-weight:600; }
+.album-tile-status.incomplete { color:var(--warn); }
+.album-tile-status.complete { color:var(--ok); }
+.album-tile-status.snips { color:inherit; opacity:0.9; }
+.album-tile.active .album-tile-status.incomplete { color:#ffd9a8; }
+.album-tile.active .album-tile-status.complete { color:#c7f0c2; }
+
+/* WORK PANEL */
+.panel { border:2px solid var(--border2); border-radius:12px; overflow:hidden; background:var(--bg2); scroll-margin-top:1rem; }
+.panel-placeholder { padding:2.5rem 1.25rem; text-align:center; font-size:17px; }
+.panel-header { padding:0.9rem 1.25rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; font-family:'Cinzel',serif; font-weight:700; font-size:1.1rem; letter-spacing:0.02em; cursor:pointer; }
+.panel-header .close-note { font-family:'Barlow',sans-serif; font-size:15px; font-weight:500; font-style:italic; letter-spacing:0; }
+.panel-body { display:grid; grid-template-columns:minmax(300px, 380px) minmax(0, 1fr); }
+.song-col { border-right:1.5px solid var(--border); padding:1rem; }
+.song-col-top { display:flex; gap:12px; align-items:center; margin-bottom:0.9rem; }
+.panel-cover { width:92px; height:92px; flex-shrink:0; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; }
+.album-progress-text { font-size:15px; font-weight:600; line-height:1.5; }
+.song-list { display:flex; flex-direction:column; gap:4px; }
+.song-row-wrap { display:flex; align-items:flex-start; gap:4px; }
+.copy-btn { flex-shrink:0; width:34px; height:34px; margin-top:4px; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--border2); border-radius:6px; background:var(--bg2); color:var(--text); cursor:pointer; }
+.copy-btn svg { width:16px; height:16px; }
+.copy-btn:hover { background:var(--gold-light); border-color:var(--gold); }
+.copy-btn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+.copy-btn.copied { background:var(--ok-bg); border-color:var(--ok); color:var(--ok); }
+a.btn { text-decoration:none; display:inline-flex; align-items:center; }
+.song-btn { display:flex; align-items:flex-start; gap:8px; width:100%; text-align:left; padding:7px 8px; border:1.5px solid transparent; border-radius:8px; background:transparent; cursor:pointer; color:var(--text); font:inherit; }
+.song-btn:hover { background:var(--bg3); }
+.song-btn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+.song-btn.active { background:var(--sel-bg); border-color:var(--sel); }
+.track-num { width:24px; flex-shrink:0; text-align:right; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; padding-top:1px; }
+.song-btn-main { flex:1; min-width:0; }
+.song-btn-title { font-size:16px; font-weight:600; line-height:1.3; display:block; }
+.song-badges { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.badge { font-size:15px; font-weight:600; padding:1px 8px; border-radius:6px; background:var(--bg3); white-space:nowrap; }
+.badge.yes { background:var(--ok-bg); color:var(--ok); }
+.badge.snip { background:#ecdcf2; color:#4a2258; }
+
+/* EDITOR */
+.editor { padding:1.25rem 1.5rem 1.75rem; min-width:0; }
+.editor-placeholder { font-size:17px; padding:2rem 0; text-align:center; }
+.editor-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; padding-bottom:0.9rem; border-bottom:2px solid var(--border2); margin-bottom:1.25rem; scroll-margin-top:1rem; }
+.editor-title { font-family:'Cinzel',serif; font-size:clamp(1.3rem,2.5vw,1.7rem); font-weight:700; line-height:1.2; }
+.editor-sub { font-size:16px; font-weight:600; margin-top:4px; }
+.editor-nav { display:flex; gap:6px; flex-wrap:wrap; }
+.quick-bar { display:flex; gap:10px 14px; flex-wrap:wrap; align-items:center; background:var(--sel-bg); border:1.5px solid var(--sel); border-radius:10px; padding:0.75rem 0.9rem; margin:-0.25rem 0 1.5rem; }
+.section { margin-bottom:1.75rem; }
+.section-head { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+.section-title { font-family:'Cinzel',serif; font-size:19px; font-weight:700; }
+.section-tools { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.hint { font-size:15px; line-height:1.55; margin-bottom:0.6rem; }
+textarea, input[type="text"] { width:100%; font-size:17px; line-height:1.55; color:var(--text); background:#fff; border:1.5px solid var(--border2); border-radius:8px; padding:10px 12px; }
+textarea:focus, input[type="text"]:focus { outline:2px solid var(--gold); outline-offset:0; border-color:var(--gold); }
+.lyrics-box { min-height:520px; resize:vertical; }
+.add-big { width:100%; padding:1.4rem; font-size:17px; border:2px dashed var(--border2); background:var(--bg); }
+.add-big:hover { border-color:var(--gold); background:var(--gold-light); }
+.check { display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:600; cursor:pointer; }
+.check input { width:16px; height:16px; cursor:pointer; }
+
+/* Credits */
+.credits { display:grid; grid-template-columns:130px minmax(0,1fr); gap:10px 12px; align-items:start; margin-top:1rem; background:var(--bg3); border-radius:10px; padding:1rem; }
+.credits label { font-size:16px; font-weight:700; padding-top:10px; }
+.credits textarea { min-height:70px; resize:vertical; }
+.credits-head { grid-column:1 / -1; display:flex; justify-content:space-between; align-items:center; }
+.credits-head span { font-family:'Cinzel',serif; font-weight:700; font-size:17px; }
+.writer-chips { grid-column:2; display:flex; gap:6px; flex-wrap:wrap; margin-top:-2px; }
+.writer-chip { font-size:15px; font-weight:600; background:var(--bg2); border:1px solid var(--border2); border-radius:999px; padding:2px 10px; }
+
+/* Snippets */
+.snip-card { border:1.5px solid var(--border2); border-left:5px solid var(--sel); border-radius:10px; padding:0.8rem 0.9rem; margin-bottom:10px; background:var(--bg2); }
+.snip-card.flash { animation:flash 1.2s ease; }
+@keyframes flash { from { background:var(--sel-bg); } to { background:var(--bg2); } }
+.snip-top { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+.snip-num { font-family:'Cinzel',serif; font-weight:700; font-size:16px; }
+.snip-left { display:flex; align-items:center; gap:6px; }
+.drag-handle { width:22px; height:30px; display:inline-flex; align-items:center; justify-content:center; color:var(--muted); cursor:grab; touch-action:none; border-radius:4px; flex-shrink:0; }
+.drag-handle:hover { color:var(--text); background:var(--bg3); }
+.drag-handle svg { width:10px; height:16px; }
+.snip-card.dragging { position:relative; z-index:20; box-shadow:0 10px 28px rgba(0,0,0,0.22); border-color:var(--sel); }
+.snip-card.dragging .drag-handle { cursor:grabbing; }
+body.is-dragging { user-select:none; -webkit-user-select:none; cursor:grabbing; }
+.snip-actions { display:flex; gap:4px; }
+.icon-btn { width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; font-size:15px; border:1.5px solid var(--border2); border-radius:6px; background:var(--bg2); color:var(--text); cursor:pointer; }
+.icon-btn:hover:not(:disabled) { background:var(--bg3); border-color:var(--muted); }
+.icon-btn:disabled { opacity:0.3; cursor:default; }
+.icon-btn.del { color:#c0392b; }
+.snip-text { resize:none; overflow:hidden; min-height:56px; font-style:italic; }
+.snip-flags { display:flex; gap:10px 18px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+.snip-note { display:flex; align-items:center; gap:6px; font-size:15px; font-weight:600; }
+.snip-note input { width:170px; font-size:15px; padding:5px 8px; }
+.empty-note { font-size:16px; font-style:italic; padding:0.25rem 0 0.75rem; }
+
+/* Modals + toast */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(20,18,14,0.55); z-index:100; align-items:center; justify-content:center; padding:1.5rem; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--bg2); border-radius:14px; max-width:440px; width:100%; padding:1.6rem; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.3); max-height:85vh; overflow:auto; }
+.modal-box.wide { max-width:620px; text-align:left; }
+.modal-title { font-family:'Cinzel',serif; font-weight:900; font-size:1.5rem; margin-bottom:0.6rem; }
+.modal-box p { font-size:17px; line-height:1.6; margin-bottom:1.25rem; }
+.modal-actions { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; }
+.writer-table { width:100%; border-collapse:collapse; margin-bottom:1.25rem; }
+.writer-table td { font-size:16px; padding:6px 4px; border-bottom:1px solid var(--border); vertical-align:top; }
+.writer-table td.n { text-align:right; font-weight:700; width:60px; }
+.writer-table tr.suspect td { background:#fff4e0; }
+.writer-songs { font-size:15px; display:block; margin-top:2px; }
+.toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%, 20px); background:var(--text); color:#fff; font-size:16px; font-weight:600; padding:10px 18px; border-radius:10px; opacity:0; pointer-events:none; transition:opacity 0.2s, transform 0.2s; z-index:200; max-width:calc(100vw - 32px); text-align:center; }
+.toast.show { opacity:1; transform:translate(-50%, 0); }
+
+@media (max-width: 1000px) {
+  .album-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  .panel-body { grid-template-columns:1fr; }
+  .song-col { border-right:none; border-bottom:1.5px solid var(--border); }
+  .song-list { max-height:360px; overflow-y:auto; }
+}
+@media (max-width: 640px) {
+  .wrap { padding:1rem 1rem 2rem; }
+  .album-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+  .album-cover { width:56px; }
+  .album-tile-name { font-size:15px; }
+  .editor { padding:1rem; }
+  .credits { grid-template-columns:1fr; }
+  .credits label { padding-top:0; }
+  .writer-chips { grid-column:1; }
+  .lyrics-box { min-height:380px; }
+  .toolbar-status { margin-left:0; width:100%; }
+}
+@media (prefers-reduced-motion: reduce) { .progress-fill, .toast { transition:none; } .snip-card.flash { animation:none; } }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1 class="page-title">Lyrics Library</h1>
+  <p class="page-sub">Private workbench · lyrics, credits &amp; snippets</p>
+</header>
+
+<main class="wrap">
+  <div class="toolbar">
+    <button type="button" class="btn btn-primary" id="btnSave">Save JSON</button>
+    <label class="btn file-label">Load JSON<input type="file" id="fileLoad" accept=".json,application/json"></label>
+    <button type="button" class="btn btn-gold" id="btnSnippets">Save Snippet JSON</button>
+    <button type="button" class="btn" id="btnWriters">Songwriters List</button>
+    <span class="toolbar-status" id="status"></span>
+  </div>
+
+  <div class="progress-card" id="progress"></div>
+
+  <div class="album-grid" id="albumGrid"></div>
+  <section class="panel" id="panel"></section>
+</main>
+
+<div class="modal-overlay" id="confirmOverlay">
+  <div class="modal-box">
+    <div class="modal-title" id="confirmTitle">Are you sure?</div>
+    <p id="confirmText"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="confirmCancel">Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirmOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="writersOverlay">
+  <div class="modal-box wide">
+    <div class="modal-title">Songwriters</div>
+    <div id="writersBody"></div>
+    <div class="modal-actions"><button type="button" class="btn btn-primary" id="writersClose">Close</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   ALBUMS, THEMES, COVERS: copied from ts-scoring.html.
+   When the scoring page gets a new album or track, copy the
+   same change here.
+   ============================================================ */
+const ALBUMS = [
+  { num: 1, name: "Taylor Swift", songs: ["Tim McGraw", "Picture to Burn", "Teardrops on My Guitar", "A Place in This World", "Cold as You", "The Outside", "Tied Together with a Smile", "Stay Beautiful", "Should've Said No", "Mary's Song (Oh My My My)", "Our Song", "I'm Only Me When I'm with You", "Invisible", "A Perfectly Good Heart"] },
+  { num: 2, name: "Fearless (TV)", songs: ["Fearless", "Fifteen", "Love Story", "Hey Stephen", "White Horse", "You Belong with Me", "Breathe (feat. Colbie Caillat)", "Tell Me Why", "You're Not Sorry", "The Way I Loved You", "Forever & Always", "The Best Day", "Change", "Jump Then Fall", "Untouchable", "Forever & Always (Piano Version)", "Come In with the Rain", "Superstar", "The Other Side of the Door", "Today Was a Fairytale", "You All Over Me (feat. Maren Morris) [From the Vault]", "Mr. Perfectly Fine [From the Vault]", "We Were Happy [From the Vault]", "That's When (feat. Keith Urban) [From the Vault]", "Don't You [From the Vault]", "Bye Bye Baby [From the Vault]"] },
+  { num: 3, name: "Speak Now (TV)", songs: ["Mine", "Sparks Fly", "Back to December", "Speak Now", "Dear John", "Mean", "The Story of Us", "Never Grow Up", "Enchanted", "Better than Revenge", "Innocent", "Haunted", "Last Kiss", "Long Live", "Ours", "Superman", "Electric Touch (feat. Fall Out Boy) [From the Vault]", "When Emma Falls in Love [From the Vault]", "I Can See You [From the Vault]", "Castles Crumbling (feat. Hayley Williams) [From the Vault]", "Foolish One [From the Vault]", "Timeless [From the Vault]"] },
+  { num: 4, name: "Red (TV)", songs: ["State of Grace", "Red", "Treacherous", "I Knew You Were Trouble", "All Too Well", "22", "I Almost Do", "We Are Never Ever Getting Back Together", "Stay Stay Stay", "The Last Time (feat. Gary Lightbody of Snow Patrol)", "Holy Ground", "Sad Beautiful Tragic", "The Lucky One", "Everything Has Changed (feat. Ed Sheeran)", "Starlight", "Begin Again", "The Moment I Knew", "Come Back... Be Here", "Girl at Home", "State of Grace (acoustic version)", "Ronan", "Better Man [From the Vault]", "Nothing New (feat. Phoebe Bridgers) [From the Vault]", "Babe [From the Vault]", "Message in a Bottle [From the Vault]", "I Bet You Think About Me (feat. Chris Stapleton) [From the Vault]", "Forever Winter [From the Vault]", "Run (feat. Ed Sheeran) [From the Vault]", "The Very First Night [From the Vault]", "All Too Well (10 Minute Version) [From the Vault]"] },
+  { num: 5, name: "1989 (TV)", songs: ["Welcome to New York", "Blank Space", "Style", "Out of the Woods", "All You Had to Do Was Stay", "Shake It Off", "I Wish You Would", "Bad Blood", "Wildest Dreams", "How You Get the Girl", "This Love", "I Know Places", "Clean", "Wonderland", "You Are in Love", "New Romantics", "'Slut!' [From the Vault]", "Say Don't Go [From the Vault]", "Now That We Don't Talk [From the Vault]", "Suburban Legends [From the Vault]", "Is It Over Now? [From the Vault]", "Sweeter than Fiction", "Bad Blood (feat. Kendrick Lamar)"] },
+  { num: 6, name: "reputation", songs: ["\u2026Ready for It?", "End Game (feat. Ed Sheeran and Future)", "I Did Something Bad", "Don't Blame Me", "Delicate", "Look What You Made Me Do", "So It Goes...", "Gorgeous", "Getaway Car", "King of My Heart", "Dancing with Our Hands Tied", "Dress", "This Is Why We Can't Have Nice Things", "Call It What You Want", "New Year's Day"] },
+  { num: 7, name: "Lover", songs: ["I Forgot That You Existed", "Cruel Summer", "Lover", "The Man", "The Archer", "I Think He Knows", "Miss Americana & the Heartbreak Prince", "Paper Rings", "Cornelia Street", "Death by a Thousand Cuts", "London Boy", "Soon You'll Get Better (feat. the Chicks)", "False God", "You Need to Calm Down", "Afterglow", "Me! (feat. Brendon Urie of Panic! at the Disco)", "It's Nice to Have a Friend", "Daylight", "I Forgot That You Existed (Piano/Vocal)", "Lover (Piano/Vocal)"] },
+  { num: 8, name: "folklore", songs: ["The 1", "Cardigan", "The Last Great American Dynasty", "Exile (feat. Bon Iver)", "My Tears Ricochet", "Mirrorball", "Seven", "August", "This Is Me Trying", "Illicit Affairs", "Invisible String", "Mad Woman", "Epiphany", "Betty", "Peace", "Hoax", "The Lakes"] },
+  { num: 9, name: "Evermore", songs: ["Willow", "Champagne Problems", "Gold Rush", "'Tis the Damn Season", "Tolerate It", "No Body, No Crime (feat. Haim)", "Happiness", "Dorothea", "Coney Island (feat. the National)", "Ivy", "Cowboy like Me", "Long Story Short", "Marjorie", "Closure", "Evermore (feat. Bon Iver)", "Right Where You Left Me", "It's Time to Go"] },
+  { num: 10, name: "Midnights", songs: ["Lavender Haze", "Maroon", "Anti-Hero", "Snow on the Beach (feat. Lana Del Rey)", "You're on Your Own, Kid", "Midnight Rain", "Question...?", "Vigilante Shit", "Bejeweled", "Labyrinth", "Karma", "Sweet Nothing", "Mastermind", "The Great War", "Bigger Than the Whole Sky", "Paris", "High Infidelity", "Glitch", "Would've, Could've, Should've", "Dear Reader", "Hits Different", "Snow on the Beach (feat. More Lana Del Rey)", "Karma (feat. Ice Spice)", "You're Losing Me [From the Vault]", "You're On Your Own Kid (strings remix)", "Sweet Nothing (Piano remix)"] },
+  { num: 11, name: "The Tortured Poets Department", songs: ["Fortnight (feat. Post Malone)", "The Tortured Poets Department", "My Boy Only Breaks His Favorite Toys", "Down Bad", "So Long, London", "But Daddy I Love Him", "Fresh Out the Slammer", "Florida!!! (feat. Florence and the Machine)", "Guilty as Sin?", "Who's Afraid of Little Old Me?", "I Can Fix Him (No Really I Can)", "Loml", "I Can Do It with a Broken Heart", "The Smallest Man Who Ever Lived", "The Alchemy", "Clara Bow", "The Black Dog", "Imgonnagetyouback", "The Albatross", "Chloe or Sam or Sophia or Marcus", "How Did It End?", "So High School", "I Hate It Here", "Thank You Aimee", "I Look in People's Windows", "The Prophecy", "Cassandra", "Peter", "The Bolter", "Robin", "The Manuscript"] },
+  { num: 12, name: "The Life Of A Showgirl", songs: ["The Fate of Ophelia", "Elizabeth Taylor", "Opalite", "Father Figure", "Eldest Daughter", "Ruin the Friendship", "Actually Romantic", "Wi$h Li$t", "Wood", "CANCELLED!", "Honey", "The Life of a Showgirl (feat. Sabrina Carpenter)", "Patient Zero (The Encore)", "Cleveland! (The Encore)", "Pink Clouding (The Encore)", "Babylon (The Encore)"] }
+];
+
+/* ============================================================
+   ALBUM THEME COLORS  <-- REPLACE THESE WITH YOUR OWN HEX CODES
+   base = tab/header color, light = cover/background tint,
+   text = dark readable text color for use on the light tint.
+   on   = text color that stays readable ON the solid base color
+          (white for dark bases, #1a1a1a for light ones like Fearless/Lover).
+   Keyed by album name so you can swap them freely.
+   ============================================================ */
+const ALBUM_THEMES = {
+  "Taylor Swift":                     { base: "#3f6b4a", light: "#e3ecdf", text: "#274430", on: "#ffffff" },
+  "Fearless (TV)":                    { base: "#c9a24a", light: "#f7ecd3", text: "#6b4f14", on: "#1a1a1a" },
+  "Speak Now (TV)":                   { base: "#7a3f8f", light: "#ecdcf2", text: "#4a2258", on: "#ffffff" },
+  "Red (TV)":                         { base: "#8f2a2a", light: "#f5dcdc", text: "#5c1a1a", on: "#ffffff" },
+  "1989 (TV)":                        { base: "#4a90c9", light: "#dceefa", text: "#1e4d70", on: "#1a1a1a" },
+  "reputation":                       { base: "#2b2b2b", light: "#dcdcdc", text: "#1a1a1a", on: "#ffffff" },
+  "Lover":                            { base: "#e78bb0", light: "#fce6ef", text: "#8a3a5a", on: "#1a1a1a" },
+  "folklore":                         { base: "#8a8a80", light: "#e8e7e2", text: "#4d4d46", on: "#1a1a1a" },
+  "Evermore":                         { base: "#7a5a3a", light: "#ecdfc9", text: "#4a3418", on: "#ffffff" },
+  "Midnights":                        { base: "#2f3a63", light: "#dbe0f0", text: "#1c2440", on: "#ffffff" },
+  "The Tortured Poets Department":    { base: "#5a5a52", light: "#e6e5df", text: "#333330", on: "#ffffff" },
+  "The Life Of A Showgirl":           { base: "#D73F00", light: "#fbe0d1", text: "#7a2400", on: "#ffffff" }
+};
+
+/* ============================================================
+   COVER ART
+   Drop cover images in a folder next to this HTML file (adjust
+   COVER_FOLDER below to match your actual folder name/path).
+   Filenames just need to START with the two-digit album number,
+   e.g. "01-Debut.webp", "02-Fearless.webp" -- anything after the
+   dash is up to you. If a file is missing or fails to load, the
+   tile falls back to the plain "TS#" placeholder automatically.
+   ============================================================ */
+const COVER_FOLDER = "Images/";
+const COVER_FILES = {
+  1: "01-Debut.webp",
+  2: "02-Fearless.webp",
+  3: "03-Speak_Now.webp",
+  4: "04-Red.webp",
+  5: "05-1989.webp",
+  6: "06-Reputation.webp",
+  7: "07-Lover.webp",
+  8: "08-folklore.webp",
+  9: "09-Evermore.webp",
+  10: "10-Midnights.webp",
+  11: "11-The_Tortured_Poets_Department.webp",
+  12: "12-The_Life_of_a_Showgirl.webp"
+};
+
+/* Starting snippets: copied from the LYRICS list in ts-scoring.html.
+   Only used the very first time the page opens (or after the
+   browser copy is cleared). After that, your JSON files rule. */
+const SEED_SNIPPETS = [
+  {"album":"Taylor Swift","song":"Mary's Song (Oh My My My)","snippets":[{"text":"And I'll be eighty-seven,\nyou'll be eighty-nine."},{"text":"Take me back when our world was one block wide,\nI dared you to kiss me and ran when you tried"}]},
+  {"album":"Fearless (TV)","song":"Fearless","snippets":[{"text":"And I don't know why, but with you, I'd dance\nIn a storm, in my best dress"},{"text":"It's the first kiss, it's flawless, really somethin'"}]},
+  {"album":"Fearless (TV)","song":"Fifteen","snippets":[{"text":"But in your life, you'll do things greater than dating the boy on the football team"},{"text":"You sit in class next to a redhead named Abigail,\nand soon enough, you're best friends"}]},
+  {"album":"Fearless (TV)","song":"Love Story","snippets":[{"text":"You'll be the prince and I'll be the princess"},{"text":"Baby, just say ‘Yes'’"}]},
+  {"album":"Fearless (TV)","song":"Tell Me Why","snippets":[{"text":"And you might think I'm bulletproof, but I'm not"}]},
+  {"album":"Fearless (TV)","song":"Forever & Always","snippets":[{"text":"Oh, and it rains in your bedroom,\nEverything is wrong,"}]},
+  {"album":"Fearless (TV)","song":"Change","snippets":[{"text":"But I believe in whatever you do,\nAnd I'll do anything to see it through"},{"text":"These walls that they put up to hold us back will fall down,\nThis revolution, the time will come\nFor us to finally win"}]},
+  {"album":"Speak Now (TV)","song":"Mine","snippets":[{"text":"You made a rebel of a careless man's careful daughter"}]},
+  {"album":"Speak Now (TV)","song":"Sparks Fly","snippets":[{"text":"My mind forgets to remind me you're a bad idea"},{"text":"Drop everything now,\nmeet me in the pouring rain"}]},
+  {"album":"Speak Now (TV)","song":"Back to December","snippets":[{"text":"You gave me roses\nand I left them there to die"},{"text":"It turns out freedom ain't nothing but missin' you,\nWishin' I'd realized what I had when you were mine"}]},
+  {"album":"Speak Now (TV)","song":"Enchanted","snippets":[{"text":"Please, don't be in love with someone else,\nPlease, don't have somebody waitin' on you"},{"text":"Your eyes whispered, ‘Have we met?’\nAcross the room, your silhouette\nStarts to make its way to me"}]},
+  {"album":"Speak Now (TV)","song":"Better than Revenge","snippets":[{"text":"She thinks I'm psycho\n'cause I like to rhyme her name with things"}]},
+  {"album":"Speak Now (TV)","song":"Long Live","snippets":[{"text":"I had the time of my life fighting dragons with you."},{"text":"If you have children some day,\nWhen they point to the pictures\nPlease, tell 'em my name"}]},
+  {"album":"Speak Now (TV)","song":"Ours","snippets":[{"text":"So don't you worry your pretty little mind\nPeople throw rocks at things that shine"}]},
+  {"album":"Speak Now (TV)","song":"Electric Touch (feat. Fall Out Boy) [From the Vault]","snippets":[{"text":"I've got my money on things goin' badly,\nGot a history of stories ending sadly"},{"text":"All I know\nis this could either break my heart\nor bring it back to life"}]},
+  {"album":"Speak Now (TV)","song":"When Emma Falls in Love [From the Vault]","snippets":[{"text":"Cause she's the kind of book that you can't put down\nLike if Cleopatra grew up in a small town"}]},
+  {"album":"Speak Now (TV)","song":"I Can See You [From the Vault]","snippets":[{"text":"You won't believe half the things I see inside my head\nWait 'til you see half the things that haven’t happened yet"}]},
+  {"album":"Speak Now (TV)","song":"Timeless [From the Vault]","snippets":[{"text":"Cause I believe that we were supposed to find this"},{"text":"Time breaks down your mind and body\nDon't you let it touch your soul"}]},
+  {"album":"Red (TV)","song":"State of Grace","snippets":[{"text":"This is the worthwhile fight\nLove is a ruthless game\nUnless you play it good and right"},{"text":"We fall in love 'til it hurts or bleeds or fades in time"},{"text":"So you were never a saint and I loved in shades of wrong\nWe learn to live with the pain, mosaic broken hearts\nBut this love is brave and wild"}]},
+  {"album":"Red (TV)","song":"Red","snippets":[{"text":"Loving him is like driving a new Maserati down a dead-end street\nFaster than the wind, passionate as sin, ending so suddenly"}]},
+  {"album":"Red (TV)","song":"Treacherous","snippets":[{"text":"Put your lips close to mine\nAs long as they don't touch\nOut of focus, eye to eye\n'Til the gravity's too much"}]},
+  {"album":"Red (TV)","song":"I Knew You Were Trouble","snippets":[{"text":"Once upon a time, a few mistakes ago"}]},
+  {"album":"Red (TV)","song":"22","snippets":[{"text":"We're happy, free, confused, and lonely at the same time,\nIt's miserable and magical, oh yeah"}]},
+  {"album":"Red (TV)","song":"Holy Ground","snippets":[{"text":"Tonight, I'm gonna dance\nFor all that we've been through,\nBut I don't wanna dance If I'm not dancin' with you"}]},
+  {"album":"Red (TV)","song":"Begin Again","snippets":[{"text":"I've been spendin' the last eight months\nThinkin' all love ever does is break and burn and end"}]},
+  {"album":"Red (TV)","song":"The Moment I Knew","snippets":[{"text":"You should've been there"}]},
+  {"album":"Red (TV)","song":"Nothing New (feat. Phoebe Bridgers) [From the Vault]","snippets":[{"text":"How long will it be cute,\nall this cryin' in my room?"},{"text":"And I wake up in the middle of the night\nIt's like I can feel time moving"}]},
+  {"album":"Red (TV)","song":"Forever Winter [From the Vault]","snippets":[{"text":"If I was standing there in your apartment\nI'd take that bomb in your head and disarm it"},{"text":"His laugh is a symphony,\nwhen the lights go out,\nit's hard to breathe"}]},
+  {"album":"Red (TV)","song":"All Too Well (10 Minute Version) [From the Vault]","snippets":[{"text":"You kept me like a secret,\nbut I kept you like an oath."},{"text":"Check the pulse and come back swearin' it's the same,\nafter three months in the grave."},{"text":"Fuck the patriarchy."},{"text":"You who charmed my dad with self-effacing jokes\nSippin' coffee like you're on a late-night show\nBut then he watched me watch the front door all night, willin' you to come\nAnd he said, ‘It's supposed to be fun turning twenty-one’"}]},
+  {"album":"1989 (TV)","song":"Welcome to New York","snippets":[{"text":"The lights are so bright, but they never blind me"},{"text":"And you can want who you want,\nBoys and boys and girls and girls"},{"text":"It's a new soundtrack, I could dance to this beat"}]},
+  {"album":"1989 (TV)","song":"Blank Space","snippets":[{"text":"You look like my next mistake"},{"text":"I can make the bad guys good for a weekend"},{"text":"Cause, darling, I'm a nightmare dressed like a daydream"}]},
+  {"album":"1989 (TV)","song":"Style","snippets":[{"text":"And I got that red lip classic thing that you like"},{"text":"And I got that good girl faith and a tight little skirt"}]},
+  {"album":"1989 (TV)","song":"Out of the Woods","snippets":[{"text":"We were built to fall apart\nAnd fall back together"}]},
+  {"album":"1989 (TV)","song":"All You Had to Do Was Stay","snippets":[{"text":"People like you always want back The love they pushed aside, But people like me are gone forever When you say goodbye"}]},
+  {"album":"1989 (TV)","song":"Shake It Off","snippets":[{"text":"I go on too many dates\nBut I can't make them stay\nAt least, that's what people say"},{"text":"Just think, while you've been gettin' down and out about the liars\nAnd the dirty, dirty cheats of the world\nYou could've been gettin' down to this sick beat"}]},
+  {"album":"1989 (TV)","song":"Wildest Dreams","snippets":[{"text":"Say you'll remember me\nStandin' in a nice dress\nStarin' at the sunset, babe"},{"text":"Someday, when you leave me I bet these memories\nFollow you around"}]},
+  {"album":"1989 (TV)","song":"This Love","snippets":[{"text":"In silent screams, in wildest dreams I never dreamed of this"}]},
+  {"album":"1989 (TV)","song":"I Know Places","snippets":[{"text":"Loose lips sink ships all the damn time"}]},
+  {"album":"1989 (TV)","song":"Clean","snippets":[{"text":"The rain came pouring down\nWhen I was drownin', that's when I could finally breathe"}]},
+  {"album":"1989 (TV)","song":"You Are in Love","snippets":[{"text":"You can hear it in the silence\nYou can feel it on the way home\nYou can see it with the lights out"}]},
+  {"album":"1989 (TV)","song":"New Romantics","snippets":[{"text":"Cause, baby, I could build a castle\nOut of all the bricks they threw at me"}]},
+  {"album":"1989 (TV)","song":"Is It Over Now? [From the Vault]","snippets":[{"text":"You dream of my mouth before it called you a lying traitor"}]},
+  {"album":"reputation","song":"…Ready for It?","snippets":[{"text":"And he can be my jailer,\nBurton to this Taylor\nEvery love I've known in comparison is a failure"}]},
+  {"album":"reputation","song":"End Game (feat. Ed Sheeran and Future)","snippets":[{"text":"And I bury hatchets, but I keep maps of where I put 'em"},{"text":"I swear I don't love the drama,\nit loves me"}]},
+  {"album":"reputation","song":"I Did Something Bad","snippets":[{"text":"I never trust a playboy, but they love me\nSo I fly 'em all around the world And I let them think they saved me"},{"text":"This is how the world works\nYou gotta leave before you get left"},{"text":"They're burning all the witches, even if you aren't one"}]},
+  {"album":"reputation","song":"Don't Blame Me","snippets":[{"text":"Lord, save me, my drug is my baby\nI'll be usin' for the rest of my life"}]},
+  {"album":"reputation","song":"Look What You Made Me Do","snippets":[{"text":"Honey, I rose up from the dead, I do it all the time,\nI've got a list of names and yours is in red, underlined"}]},
+  {"album":"reputation","song":"Gorgeous","snippets":[{"text":"Whisky on ice,\nSunset and Vine,\nYou've ruined my life by not bein' mine"},{"text":"You make me so happy it turns back to sad,\nThere's nothin' I hate more than what I can't have"}]},
+  {"album":"reputation","song":"King of My Heart","snippets":[{"text":"Salute to me, I'm your American queen\nAnd you move to me like I'm a Motown beat\nAnd we rule the kingdom inside my room"},{"text":"The taste of your lips is my idea of luxury"}]},
+  {"album":"reputation","song":"Dress","snippets":[{"text":"Say my name and everything just stops\nI don’t want you like a best friend"}]},
+  {"album":"reputation","song":"This Is Why We Can't Have Nice Things","snippets":[{"text":"And there are no rules when you show up here\nBass beat rattling the chandelier\nFeelin' so Gatsby for that whole year"},{"text":"And here's to you\nCause forgiveness is a nice thing to do ...\nHaha, I can't even say it with a straight face"}]},
+  {"album":"reputation","song":"New Year's Day","snippets":[{"text":"Hold on to the memories,\nthey will hold on to you"},{"text":"Please, don't ever become a stranger\nWhose laugh I could recognize anywhere"},{"text":"Don't read the last page"}]},
+  {"album":"Lover","song":"I Forgot That You Existed","snippets":[{"text":"Got out some popcorn As soon as my rep started going down, down, down"},{"text":"It isn't love,\nit isn't hate,\nit's just indifference"}]},
+  {"album":"Lover","song":"Cruel Summer","snippets":[{"text":"And if I bleed, you'll be the last to know"},{"text":"And I scream, ‘For whatever it's worth\nI love you, ain't that the worst thing you ever heard?’"}]},
+  {"album":"Lover","song":"Lover","snippets":[{"text":"And you'll save all your dirtiest jokes for me,\nAnd at every table, I'll save you a seat"},{"text":"Have I known you twenty seconds or twenty years?"}]},
+  {"album":"Lover","song":"The Man","snippets":[{"text":"They’d say I hustled, put in the work,\nThey wouldn't shake their heads and question how much of this I deserve"}]},
+  {"album":"Lover","song":"The Archer","snippets":[{"text":"I've got a hundred thrown-out speeches I almost said to you"}]},
+  {"album":"Lover","song":"I Think He Knows","snippets":[{"text":"Lyrical smile, indigo eyes, hand on my thigh\nWe could follow the sparks, I'll drive"}]},
+  {"album":"Lover","song":"Miss Americana & the Heartbreak Prince","snippets":[{"text":"The whole school is rolling fake dice\nYou play stupid games, you win stupid prizes"}]},
+  {"album":"Lover","song":"Paper Rings","snippets":[{"text":"I hate accidents, except when we went from friends to this"}]},
+  {"album":"Lover","song":"Death by a Thousand Cuts","snippets":[{"text":"I get drunk, but it's not enough\n’Cause the morning comes and you're not my baby"},{"text":"You said it was a great love, one for the ages\nBut if the story’s over, why am I still writing pages?"}]},
+  {"album":"folklore","song":"The 1","snippets":[{"text":"In my defense, I have none"}]},
+  {"album":"Midnights","song":"Bejeweled","snippets":[{"text":"Nice!"}]},
+  {"album":"The Tortured Poets Department","song":"Guilty as Sin?","snippets":[{"text":"What if I roll the stone away?\nThey're gonna crucify me anyway"}]},
+  {"album":"The Tortured Poets Department","song":"The Smallest Man Who Ever Lived","snippets":[{"text":"WYSBSWWMDDYSWAGUOBWYWABWYASCSIFYWATBDAYCWYDIAISGRCIWSOIWFIWDFYSIIJDIAYDPBYWGTYSIIASTTBYCMPAYRCYSNGWBBYWGBTMYKOTSLBYSPAIPSYHBYAWYDAIFYBINFTSMWEL","note":"(iykyk)","noQuiz":true,"breakAll":true}]}
+];
+
+/* ============================================================
+   STATE
+   Songs are keyed by album name + song title (not track number),
+   so reordering or adding tracks later never mixes up lyrics.
+   state.songs[key] = { lyrics, source, songwriters[], copyright,
+                        snippets: [{ text, note, noQuiz, breakAll }] }
+   ============================================================ */
+const STORE_KEY = "tsLyricsLibrary.v1";
+const keyFor = (ai, si) => ALBUMS[ai].name + " :: " + ALBUMS[ai].songs[si];
+let state = { songs: {}, orphans: [] };
+let activeAlbum = null, activeSong = null;
+let dirty = false;
+let lyricsOpen = false;            // "Add Main Lyrics" clicked for a song that has none yet
+let cleanupUndo = null;            // { key, text } for the Undo Clean Up button
+
+function blankSong() { return { lyrics:"", source:"", songwriters:[], copyright:"", snippets:[] }; }
+function getSong(ai, si) { return state.songs[keyFor(ai, si)] || null; }
+function ensureSong(ai, si) {
+  const k = keyFor(ai, si);
+  if (!state.songs[k]) state.songs[k] = blankSong();
+  return state.songs[k];
+}
+function hasLyrics(s) { return !!(s && s.lyrics && s.lyrics.trim()); }
+function snipCount(s) { return s ? s.snippets.filter(x => x.text.trim()).length : 0; }
+
+function seedState() {
+  state = { songs: {}, orphans: [] };
+  SEED_SNIPPETS.forEach(e => {
+    state.songs[e.album + " :: " + e.song] = Object.assign(blankSong(), {
+      snippets: e.snippets.map(s => ({ text:s.text, note:s.note || "", noQuiz:!!s.noQuiz, breakAll:!!s.breakAll }))
+    });
+  });
+}
+
+let saveTimer = null;
+function touch() {
+  dirty = true;
+  updateStatus();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveLocal, 400);
+}
+function saveLocal() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ state, dirty })); } catch (e) {}
+}
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return false;
+    const d = JSON.parse(raw);
+    if (!d || !d.state || !d.state.songs) return false;
+    state = d.state; state.orphans = state.orphans || [];
+    dirty = !!d.dirty;
+    return true;
+  } catch (e) { return false; }
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const themeOf = ai => ALBUM_THEMES[ALBUMS[ai].name] || { base:"#888", light:"#eee", text:"#333", on:"#fff" };
+const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); };
+const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
+
+function coverHtml(ai) {
+  const album = ALBUMS[ai], th = themeOf(ai), file = COVER_FILES[album.num];
+  const fb = '<span style="color:' + th.text + '">TS' + album.num + '</span>';
+  if (!file) return fb;
+  return '<img src="' + COVER_FOLDER + file + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.outerHTML=\'' + fb.replace(/'/g, "\\'").replace(/"/g, "&quot;") + '\'">';
+}
+
+let toastTimer = null;
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+function askConfirm(title, text, okLabel, onOk) {
+  const ov = $("confirmOverlay");
+  $("confirmTitle").textContent = title; $("confirmText").textContent = text; $("confirmOk").textContent = okLabel;
+  const close = () => { ov.classList.remove("open"); $("confirmOk").onclick = $("confirmCancel").onclick = ov.onclick = null; };
+  $("confirmOk").onclick = () => { close(); onOk(); };
+  $("confirmCancel").onclick = close;
+  ov.onclick = e => { if (e.target === ov) close(); };
+  ov.classList.add("open"); $("confirmCancel").focus();
+}
+function updateStatus() {
+  const el = $("status");
+  el.textContent = dirty ? "Changes not yet saved to a JSON file (browser copy is safe)" : "All changes saved to JSON";
+  el.classList.toggle("dirty", dirty);
+}
+
+/* ============================================================
+   TEXT PROCESSING
+   ============================================================ */
+const BLOCK = new Set(["DIV","P","LI","UL","OL","SECTION","ARTICLE","H1","H2","H3","H4","H5","H6","BLOCKQUOTE","PRE","TR","TABLE","TBODY"]);
+
+/* Clipboard HTML -> text with stanza breaks. Each block on the source page is a
+   possible stanza; <br> is a plain line break. If every block holds one line, the
+   page tells us nothing about verses, so lines come back as a single block. */
+function htmlToStanzas(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("script,style,meta,link,title").forEach(n => n.remove());
+  const lines = [];
+  let cur = "", curBlock = null, blockId = 0;
+  const ids = new WeakMap();
+  const idFor = el => { if (!ids.has(el)) ids.set(el, ++blockId); return ids.get(el); };
+  const nearestBlock = node => { let n = node.parentElement; while (n && !BLOCK.has(n.tagName) && n.tagName !== "BODY") n = n.parentElement; return n; };
+  const flush = () => { const t = cur.replace(/\s+/g, " ").trim(); if (t) lines.push({ text:t, block:curBlock }); cur = ""; };
+  const walk = node => {
+    for (const c of node.childNodes) {
+      if (c.nodeType === 3) {
+        const b = idFor(nearestBlock(c) || doc.body);
+        if (curBlock !== null && b !== curBlock && cur.trim()) flush();
+        curBlock = b; cur += c.nodeValue;
+      } else if (c.nodeType === 1) {
+        if (c.tagName === "BR") { flush(); continue; }
+        const isBlock = BLOCK.has(c.tagName);
+        if (isBlock) flush();
+        walk(c);
+        if (isBlock) flush();
+      }
+    }
+  };
+  walk(doc.body); flush();
+  if (!lines.length) return "";
+  const stanzas = []; let prev = null;
+  for (const l of lines) { if (l.block !== prev) stanzas.push([]); stanzas[stanzas.length-1].push(l.text); prev = l.block; }
+  const singles = stanzas.filter(s => s.length === 1).length;
+  if (stanzas.length > 3 && singles / stanzas.length > 0.8) return lines.map(l => l.text).join("\n");
+  return stanzas.map(s => s.join("\n")).join("\n\n");
+}
+
+const LABEL_RE = /^\s*[\[(]\s*(verse|chorus|pre-?chorus|post-?chorus|bridge|outro|intro|refrain|hook|interlude|breakdown|instrumental)[^\])]*[\])]\s*$/i;
+const JUNK_RE = /^\s*(\d+\s+contributors?.*|you might also like|embed|\d*embed|see .* live|get tickets as low as.*|translations?)\s*$/i;
+
+/* Clean Up: trims spaces, removes junk lines, optional section labels,
+   collapses "blank line after every line" spacing, max one blank line in a row. */
+function tidy(text, stripLabels) {
+  let t = text.replace(/\r\n?/g, "\n").replace(/\u00a0/g, " ").replace(/[ \t]+$/gm, "").replace(/^[ \t]+/gm, "");
+  t = t.split("\n").filter(l => !JUNK_RE.test(l) && !(stripLabels && LABEL_RE.test(l))).join("\n");
+  const parts = t.split("\n"), nonEmpty = parts.filter(x => x.trim()).length, blanks = parts.length - nonEmpty;
+  if (nonEmpty > 4 && blanks >= nonEmpty - 1 && !/\n\n\n/.test(t)) t = t.replace(/\n\n/g, "\n");
+  return t.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+/* Credits: only lines at the very bottom are checked, so a lyric that
+   says "source" or "written" is never pulled out by mistake. */
+const isCreditLine = l => /^\s*source\s*:/i.test(l) || /^\s*(song)?writ(ers?|ten by)\s*:/i.test(l) || /©|\(c\)\s/i.test(l);
+function extractCredits(text) {
+  const lines = text.split("\n");
+  const res = { lyrics:"", source:"", songwriters:null, copyright:"", found:false };
+  let cut = lines.length;
+  for (let i = lines.length - 1; i >= 0 && i >= lines.length - 10; i--) {
+    if (!lines[i].trim() || isCreditLine(lines[i])) cut = i; else break;
+  }
+  for (const l of lines.slice(cut)) {
+    const t = l.trim(); if (!t) continue;
+    res.found = true;
+    if (/^source\s*:/i.test(t)) res.source = t.replace(/^source\s*:\s*/i, "");
+    else if (/^(song)?writ(ers?|ten by)\s*:/i.test(t)) res.songwriters = splitWriters(t.replace(/^[^:]+:\s*/, ""));
+    else res.copyright = res.copyright ? res.copyright + " " + t : t;
+  }
+  res.lyrics = lines.slice(0, cut).join("\n").replace(/\s+$/, "");
+  return res;
+}
+function splitWriters(s) { return s.split(/\s*\/\s*|\s*,\s*|\s+&\s+|\s+and\s+/i).map(x => x.trim()).filter(Boolean); }
+
+/* Snippet text: " / " becomes a line break, blank lines and edge spaces removed */
+function cleanSnippet(t) {
+  return t.replace(/\r\n?/g, "\n").replace(/\s+\/\s+/g, "\n").split("\n").map(l => l.trim()).filter(Boolean).join("\n");
+}
+
+/* Insert text at the cursor in a way the browser's own Undo (Cmd+Z) understands */
+function insertAtCursor(ta, text) {
+  ta.focus();
+  if (!document.execCommand("insertText", false, text)) {
+    ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, "end");
+    ta.dispatchEvent(new Event("input", { bubbles:true }));
+  }
+}
+
+/* ============================================================
+   PROGRESS + ALBUM GRID
+   ============================================================ */
+function albumStats(ai) {
+  let lyr = 0, snips = 0, snipSongs = 0;
+  ALBUMS[ai].songs.forEach((_, si) => { const s = getSong(ai, si); if (hasLyrics(s)) lyr++; const n = snipCount(s); snips += n; if (n) snipSongs++; });
+  return { lyr, snips, snipSongs, total: ALBUMS[ai].songs.length };
+}
+function renderProgress() {
+  let lyr = 0, total = 0, snips = 0, snipSongs = 0;
+  ALBUMS.forEach((_, ai) => { const s = albumStats(ai); lyr += s.lyr; total += s.total; snips += s.snips; snipSongs += s.snipSongs; });
+  const pL = total ? Math.round(lyr / total * 100) : 0, pS = total ? Math.round(snipSongs / total * 100) : 0;
+  $("progress").innerHTML =
+    '<div class="progress-item"><div class="progress-label"><span>Main Lyrics</span><span>' + lyr + ' / ' + total + ' songs (' + pL + '%)</span></div><div class="progress-track"><div class="progress-fill" style="width:' + pL + '%"></div></div></div>' +
+    '<div class="progress-item"><div class="progress-label"><span>Snippets: ' + snips + '</span><span>' + snipSongs + ' / ' + total + ' songs (' + pS + '%)</span></div><div class="progress-track"><div class="progress-fill snip" style="width:' + pS + '%"></div></div></div>';
+}
+function tileStatusHtml(ai) {
+  const s = albumStats(ai), done = s.lyr === s.total;
+  return '<div class="album-tile-status ' + (done ? "complete" : "incomplete") + '">' + (done ? "Lyrics Complete" : "Lyrics " + s.lyr + " / " + s.total) + '</div>' +
+         '<div class="album-tile-status snips">' + plural(s.snips, "Snippet") + ' · ' + s.snipSongs + ' / ' + s.total + ' songs</div>';
+}
+function renderAlbumGrid() {
+  const grid = $("albumGrid"); grid.innerHTML = "";
+  ALBUMS.forEach((album, ai) => {
+    const th = themeOf(ai), on = ai === activeAlbum;
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = "album-tile" + (on ? " active" : "");
+    tile.style.borderColor = th.base;
+    tile.innerHTML = '<div class="album-cover" style="background:' + th.light + '">' + coverHtml(ai) + '</div>' +
+      '<div class="album-tile-info" style="background:' + (on ? th.base : "var(--bg2)") + ';color:' + (on ? (th.on || "#fff") : th.text) + '">' +
+        '<div class="album-tile-name">' + esc(album.name) + '</div><div data-tile-status="' + ai + '">' + tileStatusHtml(ai) + '</div></div>';
+    tile.addEventListener("click", () => {
+      if (activeAlbum === ai) { activeAlbum = null; activeSong = null; }
+      else { activeAlbum = ai; activeSong = firstMissing(ai); lyricsOpen = false; }
+      renderAlbumGrid(); renderPanel();
+      if (activeAlbum !== null) $("panel").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start" });
+    });
+    grid.appendChild(tile);
+  });
+}
+function firstMissing(ai) {
+  const i = ALBUMS[ai].songs.findIndex((_, si) => !hasLyrics(getSong(ai, si)));
+  return i === -1 ? 0 : i;
+}
+
+/* Light refresh after an edit: counts and badges only, never the textareas */
+function refreshCounts() {
+  renderProgress();
+  if (activeAlbum === null) return;
+  const t = document.querySelector('[data-tile-status="' + activeAlbum + '"]');
+  if (t) t.innerHTML = tileStatusHtml(activeAlbum);
+  const ap = $("albumProgress"); if (ap) ap.innerHTML = albumProgressHtml(activeAlbum);
+  if (activeSong !== null) { const b = document.querySelector('[data-badges="' + activeSong + '"]'); if (b) b.innerHTML = badgesHtml(activeAlbum, activeSong); }
+  const sc = $("snipCount"); if (sc) sc.textContent = snipHeading();
+}
+
+/* ============================================================
+   PANEL: SONG LIST + EDITOR
+   ============================================================ */
+function badgesHtml(ai, si) {
+  const s = getSong(ai, si), n = snipCount(s);
+  return (hasLyrics(s) ? '<span class="badge yes">Lyrics ✓</span>' : '<span class="badge">No lyrics</span>') +
+         (n ? '<span class="badge snip">' + plural(n, "snippet") + '</span>' : '');
+}
+function albumProgressHtml(ai) {
+  const s = albumStats(ai);
+  return "Lyrics: " + s.lyr + " / " + s.total + "<br>Snippets: " + s.snips + " (" + s.snipSongs + " songs)";
+}
+
+function renderPanel() {
+  const panel = $("panel");
+  if (activeAlbum === null) {
+    panel.style.borderColor = "var(--border2)";
+    panel.innerHTML = '<div class="panel-placeholder">Pick an album above to start adding lyrics and snippets.</div>';
+    return;
+  }
+  const ai = activeAlbum, album = ALBUMS[ai], th = themeOf(ai);
+  panel.style.borderColor = th.base;
+  panel.style.setProperty("--sel", th.base);
+  panel.style.setProperty("--sel-bg", th.light);
+
+  let list = "";
+  album.songs.forEach((title, si) => {
+    list += '<div class="song-row-wrap"><button type="button" class="song-btn' + (si === activeSong ? " active" : "") + '" data-si="' + si + '">' +
+      '<span class="track-num">' + (si + 1) + '</span>' +
+      '<span class="song-btn-main"><span class="song-btn-title">' + esc(title) + '</span><span class="song-badges" data-badges="' + si + '">' + badgesHtml(ai, si) + '</span></span></button>' +
+      '<button type="button" class="copy-btn" data-copy-si="' + si + '" title="Copy &quot;' + esc(searchText(title)) + '&quot;" aria-label="Copy Google search for ' + esc(title) + '">' + COPY_ICON + '</button></div>';
+  });
+
+  panel.innerHTML =
+    '<div class="panel-header" id="panelClose" title="Click to close" style="background:' + th.base + ';color:' + (th.on || "#fff") + '">' +
+      '<span>' + esc(album.name) + '</span><span class="close-note">Click here to close this album.</span></div>' +
+    '<div class="panel-body">' +
+      '<div class="song-col">' +
+        '<div class="song-col-top"><div class="panel-cover" style="background:' + th.light + '">' + coverHtml(ai) + '</div>' +
+        '<div class="album-progress-text" id="albumProgress">' + albumProgressHtml(ai) + '</div></div>' +
+        '<div class="song-list" id="songList">' + list + '</div>' +
+      '</div>' +
+      '<div class="editor" id="editor"></div>' +
+    '</div>';
+
+  $("panelClose").addEventListener("click", () => { activeAlbum = null; activeSong = null; renderAlbumGrid(); renderPanel(); $("albumGrid").scrollIntoView({ block:"start" }); });
+  panel.querySelectorAll("[data-si]").forEach(b => b.addEventListener("click", () => selectSong(Number(b.dataset.si), true)));
+  panel.querySelectorAll("[data-copy-si]").forEach(b => b.addEventListener("click", () => copySearch(ALBUMS[ai].songs[Number(b.dataset.copySi)], b)));
+  renderEditor();
+  const act = panel.querySelector(".song-btn.active");
+  if (act) { const l = $("songList"); if (l.scrollHeight > l.clientHeight) l.scrollTop = act.offsetTop - l.offsetTop - 60; }
+}
+
+function selectSong(si, scroll) {
+  activeSong = si; lyricsOpen = false; cleanupUndo = null;
+  document.querySelectorAll(".song-btn").forEach(b => b.classList.toggle("active", Number(b.dataset.si) === si));
+  renderEditor();
+  if (scroll && window.matchMedia("(max-width: 1000px)").matches) $("editorHead").scrollIntoView({ block:"start" });
+}
+function gotoSong(ai, si) {
+  if (ai !== activeAlbum) { activeAlbum = ai; renderAlbumGrid(); activeSong = si; lyricsOpen = false; renderPanel(); }
+  else selectSong(si, false);
+  const act = document.querySelector(".song-btn.active");
+  if (act) act.scrollIntoView({ block:"nearest" });
+  $("editorHead").scrollIntoView({ block:"start", behavior:"smooth" });
+}
+function nextSong(dir) {
+  let ai = activeAlbum, si = activeSong + dir;
+  if (si >= ALBUMS[ai].songs.length) { ai = (ai + 1) % ALBUMS.length; si = 0; }
+  if (si < 0) { ai = (ai - 1 + ALBUMS.length) % ALBUMS.length; si = ALBUMS[ai].songs.length - 1; }
+  gotoSong(ai, si);
+}
+function findNextMissing() {
+  let ai = activeAlbum, si = activeSong;
+  for (let n = 0; n < 2000; n++) {
+    si++;
+    if (si >= ALBUMS[ai].songs.length) { ai = (ai + 1) % ALBUMS.length; si = 0; }
+    if (!hasLyrics(getSong(ai, si))) return { ai, si };
+    if (ai === activeAlbum && si === activeSong) break;
+  }
+  return null;
+}
+function nextMissing() {
+  const t = findNextMissing();
+  if (t) gotoSong(t.ai, t.si); else toast("Every song has main lyrics. Nice!");
+}
+
+/* ============================================================
+   PASTE & NEXT
+   Reads the clipboard (with formatting, so stanzas and credits
+   still sort themselves out), saves it to the current song, jumps
+   to the next song missing lyrics, and opens its Google search in
+   one reusable tab. Chrome asks once for clipboard permission.
+   ============================================================ */
+const SEARCH_TAB = "tsLyricsSearch";
+const PREF_KEY = "tsLyricsLibrary.autoSearch";
+let autoSearch = true;
+try { autoSearch = localStorage.getItem(PREF_KEY) !== "off"; } catch (e) {}
+let lastPasted = null;   // { key, text } guards against pasting the same lyrics twice
+
+async function readClipboard() {
+  try {
+    const items = await navigator.clipboard.read();
+    for (const it of items) {
+      if (it.types.includes("text/html")) {
+        const t = htmlToStanzas(await (await it.getType("text/html")).text());
+        if (t) return t;
+      }
+    }
+    for (const it of items) if (it.types.includes("text/plain")) return tidy(await (await it.getType("text/plain")).text(), false);
+  } catch (e) {
+    try { return tidy(await navigator.clipboard.readText(), false); } catch (e2) { return null; }
+  }
+  return "";
+}
+function openSearch(title) {
+  const w = window.open(searchUrl(title), SEARCH_TAB);
+  if (w) { try { w.focus(); } catch (e) {} }
+  return !!w;
+}
+async function pasteFromClipboard(goNext) {
+  const ai = activeAlbum, si = activeSong, title = ALBUMS[ai].songs[si];
+  const raw = await readClipboard();
+  if (raw === null) { toast("Chrome blocked the clipboard. Click the clipboard icon in the address bar and choose Allow."); return; }
+  const c = extractCredits(raw);
+  const lines = c.lyrics.split("\n").filter(l => l.trim()).length;
+  if (lines < 4 || /^https?:\/\//i.test(c.lyrics.trim())) { toast("The clipboard doesn't look like lyrics. Copy them from Google and try again."); return; }
+  if (lastPasted && lastPasted.text === c.lyrics && lastPasted.key !== keyFor(ai, si)) {
+    toast("That's the same text you pasted for “" + lastPasted.key.split(" :: ")[1] + "”. Copy the new song first."); return;
+  }
+  const doSave = () => {
+    const s = ensureSong(ai, si);
+    s.lyrics = c.lyrics;
+    if (c.source) s.source = c.source;
+    if (c.songwriters) s.songwriters = c.songwriters;
+    if (c.copyright) s.copyright = c.copyright;
+    lastPasted = { key:keyFor(ai, si), text:c.lyrics };
+    touch(); refreshCounts();
+    if (!goNext) { lyricsOpen = true; renderEditor(); toast("Lyrics saved for “" + title + "”" + (c.found ? " with credits" : "")); return; }
+    const t = findNextMissing();
+    if (!t) { renderEditor(); toast("Saved “" + title + "”. That was the last song missing lyrics!"); return; }
+    gotoSong(t.ai, t.si);
+    let opened = true;
+    if (autoSearch) opened = openSearch(ALBUMS[t.ai].songs[t.si]);
+    toast("Saved “" + title + "” · now on “" + ALBUMS[t.ai].songs[t.si] + "”" + (opened ? "" : " (pop-up blocked: use Google It)"));
+  };
+  const s = getSong(ai, si);
+  if (hasLyrics(s) && s.lyrics.trim() !== c.lyrics.trim()) askConfirm("Replace lyrics?", "“" + title + "” already has lyrics. Replace them with what's on the clipboard?", "Replace", doSave);
+  else doSave();
+}
+
+function snipHeading() {
+  const n = snipCount(getSong(activeAlbum, activeSong));
+  return "Lyric Snippets (" + n + ")";
+}
+
+function renderEditor() {
+  const ed = $("editor");
+  if (activeSong === null) { ed.innerHTML = '<div class="editor-placeholder">Pick a song from the list.</div>'; return; }
+  const ai = activeAlbum, si = activeSong, album = ALBUMS[ai];
+  const s = getSong(ai, si) || blankSong();
+  const showLyrics = hasLyrics(s) || lyricsOpen;
+
+  let html =
+    '<div class="editor-head" id="editorHead">' +
+      '<div><div class="editor-title">' + esc(album.songs[si]) + '</div><div class="editor-sub">' + esc(album.name) + ' · Track ' + (si + 1) + '</div></div>' +
+      '<div class="editor-nav">' +
+        '<button type="button" class="btn btn-sm btn-gold" id="copySearch">Copy Search</button>' +
+        '<a class="btn btn-sm btn-gold" id="openSearch" href="' + searchUrl(album.songs[si]) + '" target="' + SEARCH_TAB + '">Google It ↗</a>' +
+        '<button type="button" class="btn btn-sm" id="prevSong">← Prev</button>' +
+        '<button type="button" class="btn btn-sm" id="nextSong">Next →</button>' +
+        '<button type="button" class="btn btn-sm" id="nextMissing" title="Jump to the next song that has no main lyrics yet">Next Missing Lyrics</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="quick-bar">' +
+      '<button type="button" class="btn btn-primary" id="pasteNext" title="Save the copied lyrics to this song, then go to the next song missing lyrics">Paste &amp; Next</button>' +
+      '<button type="button" class="btn" id="pasteHere" title="Save the copied lyrics to this song and stay here">Paste Only</button>' +
+      '<label class="check"><input type="checkbox" id="autoSearch"' + (autoSearch ? " checked" : "") + '> Open the next Google search automatically</label>' +
+    '</div>';
+
+  // MAIN LYRICS
+  html += '<div class="section"><div class="section-head"><span class="section-title">Main Lyrics</span>';
+  if (showLyrics) {
+    html += '<span class="section-tools">' +
+      '<label class="check"><input type="checkbox" id="stripLabels" checked> Remove [Verse]/[Chorus] labels</label>' +
+      '<button type="button" class="btn btn-sm" id="btnCleanup">Clean Up</button>' +
+      (cleanupUndo && cleanupUndo.key === keyFor(ai, si) ? '<button type="button" class="btn btn-sm" id="btnUndoCleanup">Undo Clean Up</button>' : '') +
+      '<button type="button" class="btn btn-sm btn-gold" id="btnMakeSnip">Make Snippet from Selection</button>' +
+      '<button type="button" class="btn btn-sm btn-danger" id="btnClearLyrics">Clear</button>' +
+    '</span></div>' +
+    '<p class="hint">Paste straight from Google: verse spacing is rebuilt and the Source / Songwriters / © lines at the bottom move into Credits automatically. To make a snippet, highlight lines below and click <strong>Make Snippet from Selection</strong>.</p>' +
+    '<textarea class="lyrics-box" id="lyricsBox" spellcheck="false" placeholder="Paste the full lyrics here (Cmd+V)">' + esc(s.lyrics) + '</textarea>' +
+    '<div class="credits">' +
+      '<div class="credits-head"><span>Credits</span></div>' +
+      '<label for="credSource">Source</label><input type="text" id="credSource" value="' + esc(s.source) + '" placeholder="e.g. LyricFind">' +
+      '<label for="credWriters">Songwriters</label><input type="text" id="credWriters" list="writerOptions" value="' + esc(s.songwriters.join(" / ")) + '" placeholder="Name / Name / Name">' +
+      '<div class="writer-chips" id="writerChips">' + writerChips(s.songwriters) + '</div>' +
+      '<label for="credCopy">Copyright</label><textarea id="credCopy" placeholder="… lyrics © Publisher, Publisher">' + esc(s.copyright) + '</textarea>' +
+    '</div>';
+  } else {
+    html += '</div><button type="button" class="btn add-big" id="btnAddLyrics">+ Add Main Lyrics</button>';
+  }
+  html += '</div>';
+
+  // SNIPPETS
+  html += '<div class="section"><div class="section-head"><span class="section-title" id="snipCount">' + snipHeading() + '</span>' +
+    '<span class="section-tools"><button type="button" class="btn btn-sm btn-primary" id="btnAddSnip">+ Add Lyric Snippet</button></span></div>' +
+    '<p class="hint">Type " / " to mark a line break (it turns into a real one when you click away), or just press Return.</p>' +
+    '<div id="snipList"></div></div>';
+
+  html += '<datalist id="writerOptions">' + allWriters().map(w => '<option value="' + esc(w.name) + '">').join("") + '</datalist>';
+  ed.innerHTML = html;
+
+  $("copySearch").onclick = e => copySearch(album.songs[si], e.currentTarget);
+  $("pasteNext").onclick = () => pasteFromClipboard(true);
+  $("pasteHere").onclick = () => pasteFromClipboard(false);
+  $("autoSearch").onchange = e => { autoSearch = e.target.checked; try { localStorage.setItem(PREF_KEY, autoSearch ? "on" : "off"); } catch (x) {} };
+  $("prevSong").onclick = () => nextSong(-1);
+  $("nextSong").onclick = () => nextSong(1);
+  $("nextMissing").onclick = nextMissing;
+  $("btnAddSnip").onclick = () => addSnippet("", true);
+  if (showLyrics) wireLyrics(); else $("btnAddLyrics").onclick = () => { lyricsOpen = true; renderEditor(); $("lyricsBox").focus(); };
+  renderSnippets();
+}
+
+function writerChips(list) {
+  return list.length ? list.map((w, i) => '<span class="writer-chip">' + (i + 1) + '. ' + esc(w) + '</span>').join("") : "";
+}
+
+function wireLyrics() {
+  const ai = activeAlbum, si = activeSong, box = $("lyricsBox");
+  box.addEventListener("input", () => { ensureSong(ai, si).lyrics = box.value; touch(); refreshCounts(); });
+  box.addEventListener("paste", e => {
+    const html = e.clipboardData.getData("text/html"), plain = e.clipboardData.getData("text/plain");
+    let text = html ? htmlToStanzas(html) : "";
+    if (!text) text = tidy(plain, false);
+    if (!text) return;
+    e.preventDefault();
+    const c = extractCredits(text);
+    insertAtCursor(box, c.lyrics);
+    if (c.found) {
+      const s = ensureSong(ai, si);
+      if (c.source) { s.source = c.source; $("credSource").value = c.source; }
+      if (c.songwriters) { s.songwriters = c.songwriters; $("credWriters").value = c.songwriters.join(" / "); $("writerChips").innerHTML = writerChips(c.songwriters); }
+      if (c.copyright) { s.copyright = c.copyright; $("credCopy").value = c.copyright; }
+      touch();
+      toast("Lyrics pasted · credits moved to the Credits box");
+    }
+  });
+  $("btnCleanup").onclick = () => {
+    const before = box.value, after = tidy(before, $("stripLabels").checked);
+    if (after === before) { toast("Already clean. Nothing to change."); return; }
+    cleanupUndo = { key:keyFor(ai, si), text:before };
+    ensureSong(ai, si).lyrics = after; touch(); refreshCounts();
+    renderEditor(); toast("Cleaned up. Undo Clean Up is there if it guessed wrong.");
+  };
+  if ($("btnUndoCleanup")) $("btnUndoCleanup").onclick = () => {
+    ensureSong(ai, si).lyrics = cleanupUndo.text; cleanupUndo = null; touch(); refreshCounts(); renderEditor(); toast("Clean Up undone");
+  };
+  const mk = $("btnMakeSnip");
+  mk.addEventListener("mousedown", e => e.preventDefault());   // keep the highlight in the lyrics box
+  mk.onclick = () => {
+    const sel = box.value.slice(box.selectionStart, box.selectionEnd);
+    const t = cleanSnippet(sel);
+    if (!t) { toast("Highlight some lyrics first, then click Make Snippet."); return; }
+    const s = getSong(ai, si);
+    if (s && s.snippets.some(x => x.text === t)) { toast("That one's already a snippet."); return; }
+    addSnippet(t, false);
+    toast("Snippet added");
+  };
+  $("btnClearLyrics").onclick = () => askConfirm("Clear lyrics?", "This removes the main lyrics and credits for “" + ALBUMS[ai].songs[si] + "”. Snippets stay.", "Clear Lyrics", () => {
+    Object.assign(ensureSong(ai, si), { lyrics:"", source:"", songwriters:[], copyright:"" });
+    lyricsOpen = false; touch(); refreshCounts(); renderEditor();
+  });
+  $("credSource").addEventListener("input", e => { ensureSong(ai, si).source = e.target.value.trim(); touch(); });
+  $("credCopy").addEventListener("input", e => { ensureSong(ai, si).copyright = e.target.value.trim(); touch(); });
+  $("credWriters").addEventListener("input", e => {
+    const list = splitWriters(e.target.value);
+    ensureSong(ai, si).songwriters = list; $("writerChips").innerHTML = writerChips(list); touch();
+  });
+}
+
+/* ============================================================
+   SNIPPETS
+   ============================================================ */
+function addSnippet(text, focus) {
+  const s = ensureSong(activeAlbum, activeSong);
+  s.snippets.push({ text, note:"", noQuiz:false, breakAll:false });
+  touch(); renderSnippets(); refreshCounts();
+  const cards = document.querySelectorAll(".snip-card"), last = cards[cards.length - 1];
+  if (last) {
+    last.classList.add("flash");
+    if (focus) { last.querySelector(".snip-text").focus(); }
+    last.scrollIntoView({ block:"nearest", behavior:"smooth" });
+  }
+}
+function autosize(ta) { ta.style.height = "auto"; ta.style.height = (ta.scrollHeight + 3) + "px"; }
+
+function renderSnippets() {
+  const ai = activeAlbum, si = activeSong, wrap = $("snipList");
+  const s = getSong(ai, si), list = s ? s.snippets : [];
+  if (!list.length) { wrap.innerHTML = '<p class="empty-note">No snippets yet for this song.</p>'; return; }
+  wrap.innerHTML = list.map((sn, i) =>
+    '<div class="snip-card" data-i="' + i + '">' +
+      '<div class="snip-top"><span class="snip-left">' + (list.length > 1 ? DRAG_GRIP : '') + '<span class="snip-num">Snippet ' + (i + 1) + '</span></span><span class="snip-actions">' +
+        '<button type="button" class="icon-btn" data-act="up" aria-label="Move snippet ' + (i+1) + ' up"' + (i === 0 ? " disabled" : "") + '>▲</button>' +
+        '<button type="button" class="icon-btn" data-act="down" aria-label="Move snippet ' + (i+1) + ' down"' + (i === list.length - 1 ? " disabled" : "") + '>▼</button>' +
+        '<button type="button" class="icon-btn del" data-act="del" aria-label="Delete snippet ' + (i+1) + '" title="Delete">✕</button>' +
+      '</span></div>' +
+      '<textarea class="snip-text" rows="2" placeholder="Paste or type a lyric snippet">' + esc(sn.text) + '</textarea>' +
+      '<div class="snip-flags">' +
+        '<label class="snip-note">Note <input type="text" data-f="note" value="' + esc(sn.note || "") + '" placeholder="e.g. (iykyk)"></label>' +
+        '<label class="check"><input type="checkbox" data-f="noQuiz"' + (sn.noQuiz ? " checked" : "") + '> Leave out of quizzes</label>' +
+        '<label class="check"><input type="checkbox" data-f="breakAll"' + (sn.breakAll ? " checked" : "") + '> Break anywhere (long acronyms)</label>' +
+      '</div>' +
+    '</div>').join("");
+
+  wrap.querySelectorAll(".drag-handle").forEach(h => h.addEventListener("pointerdown", e => startDrag(e, h.closest(".snip-card"))));
+  wrap.querySelectorAll(".snip-card").forEach(card => {
+    const i = Number(card.dataset.i), sn = () => getSong(ai, si).snippets[i];
+    const ta = card.querySelector(".snip-text");
+    autosize(ta);
+    ta.addEventListener("input", () => { sn().text = ta.value; autosize(ta); touch(); refreshCounts(); });
+    ta.addEventListener("blur", () => {
+      const c = cleanSnippet(ta.value);
+      if (c !== ta.value) { ta.value = c; sn().text = c; autosize(ta); touch(); refreshCounts(); }
+    });
+    card.querySelector('[data-f="note"]').addEventListener("input", e => { sn().note = e.target.value.trim(); touch(); });
+    card.querySelector('[data-f="noQuiz"]').addEventListener("change", e => { sn().noQuiz = e.target.checked; touch(); });
+    card.querySelector('[data-f="breakAll"]').addEventListener("change", e => { sn().breakAll = e.target.checked; touch(); });
+    card.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => {
+      const arr = getSong(ai, si).snippets, act = b.dataset.act;
+      if (act === "del") {
+        const go = () => { arr.splice(i, 1); touch(); renderSnippets(); refreshCounts(); };
+        if (arr[i].text.trim()) askConfirm("Delete snippet?", "“" + arr[i].text.split("\n")[0].slice(0, 80) + "…”", "Delete", go); else go();
+        return;
+      }
+      const j = act === "up" ? i - 1 : i + 1;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      touch(); renderSnippets();
+      const moved = document.querySelector('.snip-card[data-i="' + j + '"]');
+      if (moved) { moved.classList.add("flash"); moved.querySelector('[data-act="' + act + '"]:not(:disabled)')?.focus(); }
+    }));
+  });
+}
+
+/* ============================================================
+   GOOGLE SEARCH HELPERS
+   Copies "taylor swift [song title] lyrics" so it can be pasted
+   into Google. "Google It" opens that search in a new tab.
+   ============================================================ */
+const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const searchText = title => "taylor swift " + title + " lyrics";
+const searchUrl = title => "https://www.google.com/search?q=" + encodeURIComponent(searchText(title));
+async function copySearch(title, btn) {
+  const text = searchText(title);
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {}
+  if (!ok) {                                   // fallback for browsers that block the clipboard on local files
+    const t = document.createElement("textarea");
+    t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+    document.body.appendChild(t); t.select();
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    t.remove();
+  }
+  toast(ok ? "Copied: " + text : "Couldn't copy. Try Google It instead.");
+  if (ok && btn) { btn.classList.add("copied"); setTimeout(() => btn.classList.remove("copied"), 1200); }
+}
+
+/* ============================================================
+   DRAG & DROP (snippets)
+   Grab a card by its dotted grip (mouse, touch or pen). The other
+   cards slide out of the way live; letting go saves the new order.
+   The ▲▼ arrows still work for small nudges and keyboard use.
+   ============================================================ */
+const DRAG_GRIP = '<span class="drag-handle" title="Drag to move" aria-hidden="true"><svg viewBox="0 0 12 18" fill="currentColor"><circle cx="3" cy="3" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="3" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="3" cy="15" r="1.6"/><circle cx="9" cy="15" r="1.6"/></svg></span>';
+let drag = null;
+
+function startDrag(e, card) {
+  if (e.button !== undefined && e.button !== 0) return;
+  e.preventDefault();
+  if (document.activeElement) document.activeElement.blur();   // saves any snippet being edited first
+  const rect = card.getBoundingClientRect();
+  drag = { card, wrap:card.parentElement, grabY:e.clientY - rect.top, from:Number(card.dataset.i), lastY:e.clientY, raf:null };
+  card.classList.add("dragging");
+  document.body.classList.add("is-dragging");
+  e.target.setPointerCapture?.(e.pointerId);
+  window.addEventListener("pointermove", onDragMove);
+  window.addEventListener("pointerup", endDrag);
+  window.addEventListener("pointercancel", endDrag);
+  autoScroll();
+}
+function positionDrag() {
+  const { card, wrap, lastY, grabY } = drag;
+  const want = lastY - grabY;                    // where the card's top should be on screen
+  card.style.transform = "none";
+  // Move the card past any neighbor whose middle it has crossed
+  let moved = true;
+  while (moved) {
+    moved = false;
+    const prev = card.previousElementSibling, next = card.nextElementSibling;
+    const h = card.offsetHeight;
+    if (prev && want < prev.getBoundingClientRect().top + prev.offsetHeight / 2) { wrap.insertBefore(card, prev); moved = true; }
+    else if (next && want + h > next.getBoundingClientRect().top + next.offsetHeight / 2) { wrap.insertBefore(next, card); moved = true; }
+  }
+  const natural = card.getBoundingClientRect().top;
+  card.style.transform = "translateY(" + (want - natural) + "px)";
+}
+function onDragMove(e) { if (!drag) return; drag.lastY = e.clientY; positionDrag(); }
+function autoScroll() {                          // keeps scrolling while you hold near the top or bottom edge
+  if (!drag) return;
+  const edge = 70, y = drag.lastY;
+  let dy = 0;
+  if (y < edge) dy = -Math.ceil((edge - y) / 5);
+  else if (y > innerHeight - edge) dy = Math.ceil((y - (innerHeight - edge)) / 5);
+  if (dy) { window.scrollBy(0, dy); positionDrag(); }
+  drag.raf = requestAnimationFrame(autoScroll);
+}
+function endDrag() {
+  if (!drag) return;
+  const { card, wrap, from, raf } = drag;
+  cancelAnimationFrame(raf);
+  window.removeEventListener("pointermove", onDragMove);
+  window.removeEventListener("pointerup", endDrag);
+  window.removeEventListener("pointercancel", endDrag);
+  card.classList.remove("dragging"); card.style.transform = "";
+  document.body.classList.remove("is-dragging");
+  const order = [...wrap.querySelectorAll(".snip-card")].map(c => Number(c.dataset.i));
+  const to = order.indexOf(from);
+  drag = null;
+  if (to === from) return;
+  const s = getSong(activeAlbum, activeSong);
+  s.snippets = order.map(i => s.snippets[i]);
+  touch(); renderSnippets();
+  const landed = document.querySelector('.snip-card[data-i="' + to + '"]');
+  if (landed) landed.classList.add("flash");
+}
+
+/* ============================================================
+   SONGWRITERS LIST
+   Names that match once case, spaces and punctuation are ignored
+   (e.g. "Jack Antonoff" vs "Jack  Antonoff.") are highlighted.
+   ============================================================ */
+function allWriters() {
+  const map = new Map();
+  ALBUMS.forEach((a, ai) => a.songs.forEach((t, si) => {
+    const s = getSong(ai, si); if (!s) return;
+    s.songwriters.forEach(w => { if (!map.has(w)) map.set(w, []); map.get(w).push(t); });
+  }));
+  return [...map.entries()].map(([name, songs]) => ({ name, songs })).sort((a, b) => a.name.localeCompare(b.name));
+}
+function showWriters() {
+  const list = allWriters();
+  const norm = n => n.toLowerCase().normalize("NFD").replace(/[^a-z]/g, "");
+  const counts = {}; list.forEach(w => { counts[norm(w.name)] = (counts[norm(w.name)] || 0) + 1; });
+  const suspects = list.filter(w => counts[norm(w.name)] > 1).length;
+  $("writersBody").innerHTML = !list.length ? '<p>No songwriters saved yet. They fill in as you paste lyrics with credits.</p>' :
+    '<p>' + plural(list.length, "name") + ' so far.' + (suspects ? ' <strong>Highlighted rows look like the same person spelled differently.</strong>' : ' No spelling mismatches spotted.') + '</p>' +
+    '<table class="writer-table">' + list.map(w =>
+      '<tr class="' + (counts[norm(w.name)] > 1 ? "suspect" : "") + '"><td><strong>' + esc(w.name) + '</strong><span class="writer-songs">' + esc(w.songs.join(", ")) + '</span></td><td class="n">' + w.songs.length + '</td></tr>').join("") + '</table>';
+  $("writersOverlay").classList.add("open");
+}
+$("btnWriters").onclick = showWriters;
+$("writersClose").onclick = () => $("writersOverlay").classList.remove("open");
+$("writersOverlay").onclick = e => { if (e.target === $("writersOverlay")) $("writersOverlay").classList.remove("open"); };
+
+/* ============================================================
+   SAVE / LOAD
+   Full library JSON: everything, songs in album/track order.
+   Snippet JSON: album, song, songwriters, snippets (songs with at
+   least one snippet only). Line breaks are saved as \n.
+   ============================================================ */
+function download(obj, name) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type:"application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function orderedSongs() {
+  const out = [];
+  ALBUMS.forEach((a, ai) => a.songs.forEach((t, si) => { const s = getSong(ai, si); if (s) out.push({ album:a.name, song:t, s }); }));
+  return out;
+}
+function saveJSON() {
+  const songs = orderedSongs().filter(x => hasLyrics(x.s) || x.s.snippets.length || x.s.source || x.s.songwriters.length || x.s.copyright)
+    .map(x => ({ album:x.album, song:x.song, lyrics:x.s.lyrics, source:x.s.source, songwriters:x.s.songwriters, copyright:x.s.copyright,
+                 snippets:x.s.snippets.filter(n => n.text.trim()).map(n => ({ text:n.text, note:n.note || "", noQuiz:!!n.noQuiz, breakAll:!!n.breakAll })) }));
+  download({ app:"ts-lyrics-library", version:1, saved:new Date().toISOString(), songs:songs.concat(state.orphans || []) }, "ts-lyrics-library-" + today() + ".json");
+  dirty = false; saveLocal(); updateStatus(); toast("Library saved");
+}
+function saveSnippetJSON() {
+  const songs = orderedSongs().filter(x => snipCount(x.s)).map(x => {
+    const o = { album:x.album, song:x.song };
+    if (x.s.songwriters.length) o.songwriters = x.s.songwriters;
+    o.snippets = x.s.snippets.filter(n => n.text.trim()).map(n => {
+      const q = { text:n.text };
+      if (n.note) q.note = n.note; if (n.noQuiz) q.noQuiz = true; if (n.breakAll) q.breakAll = true;
+      return q;
+    });
+    return o;
+  });
+  const total = songs.reduce((n, s) => n + s.snippets.length, 0);
+  download({ app:"ts-lyric-snippets", version:1, saved:new Date().toISOString(), songCount:songs.length, snippetCount:total, songs }, "ts-lyric-snippets-" + today() + ".json");
+  toast("Snippet library saved: " + plural(total, "snippet") + " from " + plural(songs.length, "song"));
+}
+function loadJSON(file) {
+  const r = new FileReader();
+  r.onload = () => {
+    let d;
+    try { d = JSON.parse(r.result); } catch (e) { toast("That file isn't valid JSON."); return; }
+    if (!d || !Array.isArray(d.songs) || d.app !== "ts-lyrics-library") {
+      toast(d && d.app === "ts-lyric-snippets" ? "That's a Snippet JSON. Load the full library JSON instead." : "That doesn't look like a Lyrics Library file.");
+      return;
+    }
+    askConfirm("Load this file?", "This replaces everything on this page with the file’s " + plural(d.songs.length, "song") + ". Save JSON first if you have unsaved work.", "Load", () => {
+      const valid = new Set(); ALBUMS.forEach(a => a.songs.forEach(t => valid.add(a.name + " :: " + t)));
+      state = { songs:{}, orphans:[] };
+      d.songs.forEach(e => {
+        const k = e.album + " :: " + e.song;
+        const s = { lyrics:e.lyrics || "", source:e.source || "", songwriters:Array.isArray(e.songwriters) ? e.songwriters : [], copyright:e.copyright || "",
+                    snippets:(e.snippets || []).map(n => ({ text:n.text || "", note:n.note || "", noQuiz:!!n.noQuiz, breakAll:!!n.breakAll })) };
+        if (valid.has(k)) state.songs[k] = s; else state.orphans.push(e);
+      });
+      dirty = false; saveLocal(); updateStatus();
+      activeSong = activeAlbum !== null ? (activeSong ?? 0) : null;
+      renderAll();
+      toast(state.orphans.length ? "Loaded. " + plural(state.orphans.length, "song") + " didn't match a track and were kept aside." : "Library loaded");
+    });
+  };
+  r.readAsText(file);
+}
+$("btnSave").onclick = saveJSON;
+$("btnSnippets").onclick = saveSnippetJSON;
+$("fileLoad").addEventListener("change", e => { if (e.target.files[0]) loadJSON(e.target.files[0]); e.target.value = ""; });
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") { e.preventDefault(); saveJSON(); }
+  if (e.key === "Escape") { $("confirmOverlay").classList.remove("open"); $("writersOverlay").classList.remove("open"); }
+});
+window.addEventListener("beforeunload", e => { saveLocal(); if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+/* ============================================================
+   START
+   ============================================================ */
+function renderAll() { renderProgress(); renderAlbumGrid(); renderPanel(); }
+if (!loadLocal()) { seedState(); dirty = true; saveLocal(); }
+updateStatus();
+renderAll();
+</script>
+</body>
+</html>
