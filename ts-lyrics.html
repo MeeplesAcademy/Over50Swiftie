@@ -965,7 +965,13 @@ function renderSnippets() {
    into Google. "Google It" opens that search in a new tab.
    ============================================================ */
 const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-const searchText = title => "taylor swift " + title + " lyrics";
+// Search uses a simplified title: featured artists, [From the Vault] and (The Encore) tags are left out
+const searchTitle = title => title
+  .replace(/\s*[\(\[]\s*(feat\.?|featuring|ft\.)[^\)\]]*[\)\]]/gi, "")
+  .replace(/\s*\[\s*from the vault\s*\]/gi, "")
+  .replace(/\s*\(\s*the encore\s*\)/gi, "")
+  .replace(/\s{2,}/g, " ").trim();
+const searchText = title => "taylor swift " + searchTitle(title) + " lyrics";
 const searchUrl = title => "https://www.google.com/search?q=" + encodeURIComponent(searchText(title));
 async function copySearch(title, btn) {
   const text = searchText(title);
